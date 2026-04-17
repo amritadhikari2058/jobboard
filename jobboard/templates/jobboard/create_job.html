@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Job{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4">
+    <h3>Create Job</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" class="form-control">
+        </div>
+
+        <button class="btn btn-success">Create</button>
+        <a href="{% url 'job_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

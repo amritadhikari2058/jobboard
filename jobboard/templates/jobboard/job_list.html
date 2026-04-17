@@ -1,0 +1,118 @@
+{% extends 'base.html' %} {% block title %}Jobs{% endblock %} 
+{% block content %}
+
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Job Listings</h2>
+    {% if not user.is_authenticated %}
+    <p>Login to create a job.</p>
+    {% elif user.userrole.role == 'recruiter' %}
+    <a href="{% url 'create_job' %}" class="btn btn-primary shadow-sm">
+      + Create Job
+    </a>
+    {% else %}
+    <p>Only recruiters can create a job.</p>
+    {% endif %}
+  </div>
+
+  <!-- Dashboard Cards -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="text-muted">Total Applications</h6>
+          <h4 class="fw-bold">{{ total_application_count }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-0 bg-warning-subtle">
+        <div class="card-body">
+          <h6>Pending</h6>
+          <h4 class="fw-bold">{{ pending_application_count }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-0 bg-success-subtle">
+        <div class="card-body">
+          <h6>Accepted</h6>
+          <h4 class="fw-bold text-success">{{ accepted_application_count }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-0 bg-danger-subtle">
+        <div class="card-body">
+          <h6>Rejected</h6>
+          <h4 class="fw-bold text-danger">{{ rejected_application_count }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Job Cards -->
+  <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-md-6">
+      <div class="card h-100 shadow-sm border-0 position-relative job-card">
+        <!-- Clickable -->
+        <a href="{% url 'job_detail' job.id %}" class="stretched-link"></a>
+
+        <div class="card-body">
+          <!-- Title + Badge -->
+          <div class="d-flex justify-content-between align-items-start">
+            <h5 class="card-title fw-semibold mb-1">{{ job.title }}</h5>
+
+            {% if job.id in applied_jobs %}
+            <span class="badge bg-success">Applied</span>
+            {% endif %}
+          </div>
+
+          <p class="text-muted mb-3">{{ job.location }}</p>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 position-relative" style="z-index: 2">
+            <a
+              href="{% url 'update_job' job.id %}"
+              class="btn btn-sm btn-outline-warning"
+            >
+              Edit
+            </a>
+            <a
+              href="{% url 'delete_job' job.id %}"
+              class="btn btn-sm btn-outline-danger"
+            >
+              Delete
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center mt-5">
+      <h5 class="text-muted">No jobs available</h5>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Small CSS for hover -->
+<style>
+  .job-card {
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .job-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+</style>
+
+{% endblock %}
