@@ -33,3 +33,14 @@ class UserRole(models.Model):
 
     def __str__(self):
         return f"{self.user}'s role"
+
+class SavedJob(models.Model):
+    user = models.ForeignKey(User, on_delete= models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'job')
+    
+    def __str__(self):
+        return f'{self.user} saved job {self.job}'

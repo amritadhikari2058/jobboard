@@ -1,5 +1,7 @@
+from urllib import request
+
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Job, User
+from .models import Job, User, SavedJob
 from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -8,6 +10,7 @@ from django.contrib import messages
 def job_list(request):
     jobs = Job.objects.all()
     applied_jobs = []
+    saved_jobs = []
     total_application_count = 0
     pending_application_count = 0
     accepted_application_count = 0
@@ -20,6 +23,8 @@ def job_list(request):
         accepted_application_count = applications.filter(status="accepted").count()
         rejected_application_count = applications.filter(status="rejected").count()
         applied_jobs = [app.job.id for app in applications]
+        saved = SavedJob.objects.filter(user=request.user)
+        saved_jobs = [s.job.id for s in saved]
     return render(
         request,
         "jobboard/job_list.html",
@@ -30,6 +35,7 @@ def job_list(request):
             "accepted_application_count": accepted_application_count,
             "rejected_application_count": rejected_application_count,
             "pending_application_count": pending_application_count,
+            'saved_jobs': saved_jobs
         },
     )
 
@@ -108,3 +114,21 @@ def view_applicants(request, slug):
     return render(
         request, "jobboard/view_applicants.html", {"applications": applications}
     )
+
+@login_required
+def toggle_save_job(request, job_id):
+    print("TOGGLE VIEW HIT")
+    print(request.method)
+    if request.method != 'POST':
+        return redirect('job_list')
+    userrole = getattr(request.user, 'userrole', None)
+    if not userrole or userrole.role != 'normal_user':
+        messages.error(request, 'Only normal users can save jobs.')
+        return redirect('job_list')
+    job = get_object_or_404(Job, id=job_id)
+    saved_job = SavedJob.objects.filter(user=request.user, job=job).first()
+    if saved_job:
+        saved_job.delete()
+    else:
+        SavedJob.objects.create(user=request.user, job=job)
+    return redirect('job_list')

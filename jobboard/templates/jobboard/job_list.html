@@ -61,6 +61,66 @@
     <div class="col-md-6">
       <div class="card h-100 shadow-sm border-0 position-relative job-card">
         <!-- Clickable -->
+        <div class="card-body">
+          <!-- Title + Badge -->
+          <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title fw-semibold mb-1">
+  <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
+    {{ job.title }}
+  </a>
+</h5>
+
+            {% if job.id in applied_jobs %}
+            <span class="badge bg-success">Applied</span>
+            {% endif %}
+          </div>
+
+          <p class="text-muted mb-3">{{ job.location }}</p>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 position-relative" style="z-index: 2">
+            <a
+              href="{% url 'update_job' job.id %}"
+              class="btn btn-sm btn-outline-warning"
+            >
+              Edit
+            </a>
+            <a
+              href="{% url 'delete_job' job.id %}"
+              class="btn btn-sm btn-outline-danger"
+            >
+              Delete
+            </a>
+          </div>
+<form method="POST" action="{% url 'toggle_save_job' job.id %}">
+  {% csrf_token %}
+  
+  {% if job.id in saved_jobs %}
+    <button class="btn btn-sm btn-outline-info">Unsave</button>
+  {% else %}
+    <button class="btn btn-sm btn-outline-info">Save</button>
+  {% endif %}
+</form>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center mt-5">
+      <h5 class="text-muted">No jobs available</h5>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Saved Jobs -->
+<div>
+  {% for job in saved_jobs %}
+    <h2>Saved Jobs</h2>
+    <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-md-6">
+      <div class="card h-100 shadow-sm border-0 position-relative job-card">
+        <!-- Clickable -->
         <a href="{% url 'job_detail' job.id %}" class="stretched-link"></a>
 
         <div class="card-body">
@@ -93,12 +153,10 @@
         </div>
       </div>
     </div>
-    {% empty %}
-    <div class="text-center mt-5">
-      <h5 class="text-muted">No jobs available</h5>
-    </div>
     {% endfor %}
-  </div>
+  {% empty %}
+  <p>No saved jobs to show.</p>
+  {% endfor %}
 </div>
 
 <!-- Small CSS for hover -->

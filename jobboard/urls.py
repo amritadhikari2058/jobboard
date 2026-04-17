@@ -8,4 +8,5 @@ urlpatterns = [
     path("<int:id>/update/", views.update_job, name="update_job"),
     path("<int:id>/delete/", views.delete_job, name="delete_job"),
     path("recruiter_dashboard/", views.recruiter_dashboard, name="recruiter_dashboard"),
+    path("toggle_save_job/<int:job_id>/", views.toggle_save_job, name="toggle_save_job"),
 ]
