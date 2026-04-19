@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Saved Jobs{% endblock %}
+{% block content %}
+<h2>Saved Jobs</h2>
+
+{%for saved in saved_jobs%}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ saved.job.title }}</h5>
+        <p>{{ saved.job.location }}</p>
+
+        <form method='POST' action="{%url 'toggle_save_job' saved.job.id%}">
+            {% csrf_token %}
+            <button class="btn btn-danger">Unsave</button>
+        </form>
+    </div>
+</div>
+{%empty%}
+<p>You have no saved jobs.</p>
+{%endfor%}
+{% endblock %}
