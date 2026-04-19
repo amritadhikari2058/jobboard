@@ -15,6 +15,7 @@ def job_list(request):
     pending_application_count = 0
     accepted_application_count = 0
     rejected_application_count = 0
+    saved_job_ids = []
 
     if request.user.is_authenticated:
         applications = Application.objects.filter(user=request.user)
@@ -23,8 +24,7 @@ def job_list(request):
         accepted_application_count = applications.filter(status="accepted").count()
         rejected_application_count = applications.filter(status="rejected").count()
         applied_jobs = [app.job.id for app in applications]
-        saved = SavedJob.objects.filter(user=request.user)
-        saved_jobs = [s.job.id for s in saved]
+        saved_jobs = SavedJob.objects.filter(user=request.user).select_related("job")
     return render(
         request,
         "jobboard/job_list.html",
@@ -35,7 +35,7 @@ def job_list(request):
             "accepted_application_count": accepted_application_count,
             "rejected_application_count": rejected_application_count,
             "pending_application_count": pending_application_count,
-            'saved_jobs': saved_jobs
+            "saved_jobs": saved_jobs,
         },
     )
 
@@ -115,20 +115,28 @@ def view_applicants(request, slug):
         request, "jobboard/view_applicants.html", {"applications": applications}
     )
 
+
 @login_required
 def toggle_save_job(request, job_id):
     print("TOGGLE VIEW HIT")
     print(request.method)
-    if request.method != 'POST':
-        return redirect('job_list')
-    userrole = getattr(request.user, 'userrole', None)
-    if not userrole or userrole.role != 'normal_user':
-        messages.error(request, 'Only normal users can save jobs.')
-        return redirect('job_list')
+    if request.method != "POST":
+        return redirect("job_list")
+    userrole = getattr(request.user, "userrole", None)
+    if not userrole or userrole.role != "normal_user":
+        messages.error(request, "Only normal users can save jobs.")
+        return redirect("job_list")
     job = get_object_or_404(Job, id=job_id)
     saved_job = SavedJob.objects.filter(user=request.user, job=job).first()
     if saved_job:
         saved_job.delete()
     else:
         SavedJob.objects.create(user=request.user, job=job)
-    return redirect('job_list')
+    return redirect(request.META.get('HTTP_REFERRER', "job_list"))
+
+
+# Handling saved jobs with separate page
+@login_required
+def saved_jobs_view(request):
+    saved_jobs = SavedJob.objects.filter(user=request.user).select_related("job")
+    return render(request, "jobboard/saved_jobs.html", {"saved_jobs": saved_jobs})
