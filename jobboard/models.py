@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
-
 class Job(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, null=False)
@@ -44,3 +43,20 @@ class SavedJob(models.Model):
     
     def __str__(self):
         return f'{self.user} saved job {self.job}'
+    
+class Notification(models.Model):
+    STATUS_CHOICES = [
+        ('application_created', 'Application Created'),
+        ('application_accepted', 'Application Accepted'),
+        ('application_rejected', 'Application Rejected')
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, null=True, blank=True)
+    application = models.ForeignKey('applications.Application', on_delete=models.CASCADE, null=True, blank=True)
+    message = models.TextField()
+    type = models.CharField(choices=STATUS_CHOICES, default='application_created', max_length=30)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} - {self.message}'
