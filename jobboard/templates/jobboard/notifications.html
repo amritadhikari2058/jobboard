@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{%block content%}
+
+<h2>Notifications</h2>
+{% for n in notifications %}
+<div class="card mb-2 {% if not n.is_read %} border-primary {%endif%} ">
+    <div class="card-body">
+        <p>{{n.message}}</p>
+        <small>{{n.created_at}}</small>
+    </div>
+</div>
+{%empty%}
+<p>No notifications yet</p>
+{% endfor %}
+
+{%endblock%}

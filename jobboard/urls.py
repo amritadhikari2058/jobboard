@@ -13,4 +13,5 @@ urlpatterns = [
         "toggle_save_job/<int:job_id>/", views.toggle_save_job, name="toggle_save_job"
     ),
     path("saved-jobs/", views.saved_jobs_view, name="saved_jobs"),
+    path("notifications/", views.notifications_view, name="notifications"),
 ]

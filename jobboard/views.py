@@ -1,7 +1,5 @@
-from urllib import request
-
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Job, User, SavedJob
+from .models import Job, User, SavedJob, Notification
 from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -132,7 +130,7 @@ def toggle_save_job(request, job_id):
         saved_job.delete()
     else:
         SavedJob.objects.create(user=request.user, job=job)
-    return redirect(request.META.get('HTTP_REFERRER', "job_list"))
+    return redirect(request.META.get("HTTP_REFERRER", "job_list"))
 
 
 # Handling saved jobs with separate page
@@ -140,3 +138,14 @@ def toggle_save_job(request, job_id):
 def saved_jobs_view(request):
     saved_jobs = SavedJob.objects.filter(user=request.user).select_related("job")
     return render(request, "jobboard/saved_jobs.html", {"saved_jobs": saved_jobs})
+
+
+# Notifications View
+@login_required
+def notifications_view(request):
+    notifications = Notification.objects.filter(user=request.user).order_by(
+        "-created_at"
+    )
+    return render(
+        request, "jobboard/notifications.html", {"notifications": notifications}
+    )

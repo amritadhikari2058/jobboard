@@ -13,6 +13,9 @@
     <div class="container">
         <a class="navbar-brand" href="{% url 'job_list' %}">Job Board</a>
     </div>
+    <a href="{% url 'notifications' %}">
+        Notifications ({{unread_notification_count}})
+    </a>
 </nav>
 
 <div class="container">
