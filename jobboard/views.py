@@ -6,7 +6,11 @@ from django.contrib import messages
 
 
 def job_list(request):
-    jobs = Job.objects.all()
+    search_query = request.GET.get('q')
+    if search_query:
+        jobs = Job.objects.filter(title__icontains=search_query)
+    else:
+        jobs=Job.objects.all()
     applied_jobs = []
     saved_jobs = []
     total_application_count = 0
@@ -149,3 +153,11 @@ def notifications_view(request):
     return render(
         request, "jobboard/notifications.html", {"notifications": notifications}
     )
+
+# Mark as read + Redirect View
+@login_required
+def notifications_mark_as_read(request, id):
+    notification = get_object_or_404(Notification, id=id, user=request.user)
+    notification.is_read = True
+    notification.save()
+    return redirect('job_detail', id=notification.job.id)

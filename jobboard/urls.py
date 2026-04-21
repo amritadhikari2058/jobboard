@@ -14,4 +14,5 @@ urlpatterns = [
     ),
     path("saved-jobs/", views.saved_jobs_view, name="saved_jobs"),
     path("notifications/", views.notifications_view, name="notifications"),
+    path("notifications/read/<int:id>/", views.notifications_mark_as_read, name='notifications_mark_as_read'),
 ]
