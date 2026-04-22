@@ -1,27 +1,33 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Job, User, SavedJob, Notification
+from .models import Job, SavedJob, Notification, Category
 from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from .forms import JobForm
+
 
 def job_list(request):
     search_query = request.GET.get("q")
     location = request.GET.get("location")
     sort = request.GET.get("sort")
+    category = request.GET.get("category")
     jobs = Job.objects.all()
     if search_query:
         jobs = jobs.filter(title__icontains=search_query)
     if location:
         jobs = jobs.filter(location__icontains=location)
+    if category:
+        jobs = jobs.filter(categories__name__icontains=category)
+    jobs = jobs.distinct()
     if sort == "latest":
         jobs = jobs.order_by("-created_at")
     elif sort == "oldest":
         jobs = jobs.order_by("created_at")
-
     paginator = Paginator(jobs, 4)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     jobs = paginator.get_page(page_number)
+    categories = Category.objects.all()
 
     applied_jobs = []
     saved_jobs = []
@@ -50,18 +56,23 @@ def job_list(request):
             "rejected_application_count": rejected_application_count,
             "pending_application_count": pending_application_count,
             "saved_jobs": saved_jobs,
-        },
+            "categories": categories,
+        }
     )
 
 
 def job_detail(request, id):
     applied_jobs = []
     job = Job.objects.get(id=id)
+    application = Application.objects.filter(
+        user=request.user,
+        job=job
+    ).first()
     if request.user.is_authenticated:
         applications = Application.objects.filter(user=request.user)
         applied_jobs = [app.job.id for app in applications]
     return render(
-        request, "jobboard/job_detail.html", {"job": job, "applied_jobs": applied_jobs}
+        request, "jobboard/job_detail.html", {"job": job, "applied_jobs": applied_jobs, 'application': application}
     )
 
 
@@ -71,33 +82,31 @@ def create_job(request):
     if userrole.role != "recruiter":
         messages.error(request, "Only recruiters can create a job.")
         return redirect("job_list")
+    form = JobForm(request.POST)
     if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        location = request.POST.get("location")
-        print(request.user)
-        job = Job(
-            title=title, description=description, location=location, user=request.user
-        )
-        job.save()
-        messages.success(request, "Job has successfully created.")
-        return redirect("job_list")
-    return render(request, "jobboard/create_job.html")
+        if form.is_valid():
+            job = form.save(commit=False)
+            job.user = request.user
+            job.save()
+            form.save_m2m()
+            messages.success(request, "Job has successfully created.")
+            return redirect("job_list")
+        else:
+            form = JobForm()
+    return render(request, "jobboard/create_job.html", {"form": form})
 
 
 @login_required
 def update_job(request, id):
     job = Job.objects.get(id=id)
     if request.method == "POST":
-        job.title = request.POST.get("title")
-        job.description = request.POST.get("description")
-        job.location = request.POST.get("location")
-
-        job.save()
-
-        return redirect("job_list")
-
-    return render(request, "jobboard/update_job.html", {"job": job})
+        form = JobForm(request.POST, instance=job)
+        if form.is_valid():
+            form.save()
+            return redirect("job_list")
+    else:
+        form = JobForm(instance=job)
+    return render(request, "jobboard/update_job.html", {"form": form})
 
 
 @login_required

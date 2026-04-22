@@ -1,31 +1,11 @@
-{% extends 'base.html' %}
-
-{% block title %}Update Job{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Update Job{% endblock %} {% block content %}
 <div class="card shadow p-4">
-    <h3>Update Job</h3>
+  <h3>Update Job</h3>
 
-    <form method="POST">
-        {% csrf_token %}
-
-        <div class="mb-3">
-            <label class="form-label">Title</label>
-            <input type="text" name="title" value="{{ job.title }}" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-control">{{ job.description }}</textarea>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Location</label>
-            <input type="text" name="location" value="{{ job.location }}" class="form-control">
-        </div>
-
-        <button class="btn btn-warning">Update</button>
-        <a href="{% url 'job_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
+  <form method="POST">
+    {%csrf_token%} {{form.as_p}}
+    <button class="btn btn-primary">Update</button>
+    <a href="{% url 'job_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
 </div>
 {% endblock %}

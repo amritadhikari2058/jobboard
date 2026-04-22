@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block title %}Jobs{% endblock %}
-
 {% block content %}
 
 <div class="container mt-4">
@@ -10,9 +9,9 @@
     <h2 class="fw-bold mb-0">Job Listings</h2>
 
     {% if user.is_authenticated and user.userrole.role == 'recruiter' %}
-      <a href="{% url 'create_job' %}" class="btn btn-primary shadow-sm">
-        + Create Job
-      </a>
+    <a href="{% url 'create_job' %}" class="btn btn-primary shadow-sm">
+      + Create Job
+    </a>
     {% endif %}
   </div>
 
@@ -20,30 +19,51 @@
   <form method="GET" class="row g-2 mb-4">
 
     <div class="col-md-4">
-      <input 
-        type="text" 
-        name="q" 
-        placeholder="Search jobs..." 
+      <input
+        type="text"
+        name="q"
+        placeholder="Search jobs..."
         class="form-control"
         value="{{ request.GET.q }}"
-      >
+      />
     </div>
 
     <div class="col-md-3">
-      <input 
-        type="text" 
-        name="location" 
-        placeholder="Location..." 
+      <input
+        type="text"
+        name="location"
+        placeholder="Location..."
         class="form-control"
         value="{{ request.GET.location }}"
-      >
+      />
     </div>
 
     <div class="col-md-3">
       <select name="sort" class="form-select">
         <option value="">Sort</option>
-        <option value="latest" {% if request.GET.sort == 'latest' %}selected{% endif %}>Latest</option>
-        <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+
+        <option value="latest"
+          {% if request.GET.sort == "latest" %}selected{% endif %}>
+          Latest
+        </option>
+
+        <option value="oldest"
+          {% if request.GET.sort == "oldest" %}selected{% endif %}>
+          Oldest
+        </option>
+
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="category" class='form-select'>
+        <option value="">All Categories</option>
+
+        {%for cat in categories%}
+        <option value="{{cat.name}}"
+          {%if request.GET.category == cat.name %}selected{%endif%}>
+          {{cat.name}}
+        </option>
+        {%endfor%}
       </select>
     </div>
 
@@ -55,6 +75,7 @@
 
   <!-- Dashboard Cards -->
   <div class="row mb-4 g-3">
+
     <div class="col-md-3">
       <div class="card text-center shadow-sm border-0">
         <div class="card-body">
@@ -90,10 +111,12 @@
         </div>
       </div>
     </div>
+
   </div>
 
   <!-- Job Cards -->
   <div class="row g-4">
+
     {% for job in jobs %}
     <div class="col-md-6">
       <div class="card h-100 shadow-sm border-0 job-card">
@@ -108,19 +131,47 @@
 
           <p class="text-muted mb-2">{{ job.location }}</p>
 
-          <!-- Applied Badge -->
-          {% if job.id in applied_jobs %}
-            <span class="badge bg-success mb-2 align-self-start">Applied</span>
-          {% endif %}
+          <!-- Categories -->
+          <div class="mb-2">
+            {% for category in job.categories.all %}
+              <span class="badge bg-secondary me-1">
+                {{ category.name }}
+              </span>
+            {% empty %}
+              <small class="text-muted">No categories</small>
+            {% endfor %}
+          </div>
 
-          <!-- Push buttons down -->
+<div class="my-2">
+  {% for app in user.applications.all %}
+    {% if application%}
+
+      <span class="
+        badge rounded-pill px-3 py-2 fw-semibold
+        {% if app.status == 'pending' %}
+          bg-warning-subtle text-dark border
+        {% elif app.status == 'accepted' %}
+          bg-success-subtle text-success border
+        {% elif app.status == 'rejected' %}
+          bg-danger-subtle text-danger border
+        {% endif %}
+      ">
+        {{ application.status|title }}
+      </span>
+
+    {% endif %}
+  {% endfor %}
+</div>
+
+          <!-- Bottom actions -->
           <div class="mt-auto">
 
             <div class="d-flex justify-content-between align-items-center">
 
-              <!-- Save Button -->
+              <!-- Save -->
               <form method="POST" action="{% url 'toggle_save_job' job.id %}">
                 {% csrf_token %}
+
                 {% if job in saved_jobs %}
                   <button class="btn btn-sm btn-outline-info">Unsave</button>
                 {% else %}
@@ -128,11 +179,15 @@
                 {% endif %}
               </form>
 
-              <!-- Recruiter Actions -->
+              <!-- Recruiter actions -->
               {% if user.is_authenticated and user.userrole.role == 'recruiter' %}
               <div class="d-flex gap-1">
-                <a href="{% url 'update_job' job.id %}" class="btn btn-sm btn-outline-warning">Edit</a>
-                <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                <a href="{% url 'update_job' job.id %}" class="btn btn-sm btn-outline-warning">
+                  Edit
+                </a>
+                <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger">
+                  Delete
+                </a>
               </div>
               {% endif %}
 
@@ -149,43 +204,52 @@
       <h5 class="text-muted">No jobs available</h5>
     </div>
     {% endfor %}
+
   </div>
 
+  <!-- Pagination -->
   <nav class="mt-4">
-  <ul class="pagination justify-content-center">
+    <ul class="pagination justify-content-center">
 
-    {% if jobs.has_previous %}
+      {% if jobs.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="?q={{ request.GET.q }}&location={{ request.GET.location }}&sort={{ request.GET.sort }}&page={{ jobs.previous_page_number }}">Previous</a>
+        <a class="page-link"
+           href="?q={{ request.GET.q }}&location={{ request.GET.location }}&category={{request.GET.category}}&sort={{ request.GET.sort }}&page={{ jobs.previous_page_number }}">
+          Previous
+        </a>
       </li>
-    {% endif %}
+      {% endif %}
 
-    <li class="page-item active">
-      <span class="page-link">
-        Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}
-      </span>
-    </li>
+      <li class="page-item active">
+        <span class="page-link">
+          Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}
+        </span>
+      </li>
 
-    {% if jobs.has_next %}
+      {% if jobs.has_next %}
       <li class="page-item">
-        <a class="page-link" href="?q={{ request.GET.q }}&location={{ request.GET.location }}&sort={{ request.GET.sort }}&page={{ jobs.next_page_number }}">Next</a>
+        <a class="page-link"
+           href="?q={{ request.GET.q }}&location={{ request.GET.location }}&sort={{ request.GET.sort }}&category={{request.GET.category}}&page={{ jobs.next_page_number }}">
+          Next
+        </a>
       </li>
-    {% endif %}
+      {% endif %}
 
-  </ul>
-</nav>
+    </ul>
+  </nav>
+
 </div>
 
-<!-- Hover Effect -->
+<!-- Hover effect -->
 <style>
-  .job-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
+.job-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-  .job-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  }
+.job-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
 </style>
 
 {% endblock %}
