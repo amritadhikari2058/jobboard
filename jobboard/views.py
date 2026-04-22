@@ -3,14 +3,26 @@ from .models import Job, User, SavedJob, Notification
 from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
+from django.core.paginator import Paginator
 
 def job_list(request):
-    search_query = request.GET.get('q')
+    search_query = request.GET.get("q")
+    location = request.GET.get("location")
+    sort = request.GET.get("sort")
+    jobs = Job.objects.all()
     if search_query:
-        jobs = Job.objects.filter(title__icontains=search_query)
-    else:
-        jobs=Job.objects.all()
+        jobs = jobs.filter(title__icontains=search_query)
+    if location:
+        jobs = jobs.filter(location__icontains=location)
+    if sort == "latest":
+        jobs = jobs.order_by("-created_at")
+    elif sort == "oldest":
+        jobs = jobs.order_by("created_at")
+
+    paginator = Paginator(jobs, 4)
+    page_number = request.GET.get('page')
+    jobs = paginator.get_page(page_number)
+
     applied_jobs = []
     saved_jobs = []
     total_application_count = 0
@@ -43,8 +55,14 @@ def job_list(request):
 
 
 def job_detail(request, id):
+    applied_jobs = []
     job = Job.objects.get(id=id)
-    return render(request, "jobboard/job_detail.html", {"job": job})
+    if request.user.is_authenticated:
+        applications = Application.objects.filter(user=request.user)
+        applied_jobs = [app.job.id for app in applications]
+    return render(
+        request, "jobboard/job_detail.html", {"job": job, "applied_jobs": applied_jobs}
+    )
 
 
 @login_required
@@ -154,10 +172,11 @@ def notifications_view(request):
         request, "jobboard/notifications.html", {"notifications": notifications}
     )
 
+
 # Mark as read + Redirect View
 @login_required
 def notifications_mark_as_read(request, id):
     notification = get_object_or_404(Notification, id=id, user=request.user)
     notification.is_read = True
     notification.save()
-    return redirect('job_detail', id=notification.job.id)
+    return redirect("job_detail", id=notification.job.id)

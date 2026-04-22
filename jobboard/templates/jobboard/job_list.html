@@ -1,27 +1,57 @@
-{% extends 'base.html' %} {% block title %}Jobs{% endblock %} {% block content%}
+{% extends 'base.html' %}
+{% block title %}Jobs{% endblock %}
+
+{% block content %}
 
 <div class="container mt-4">
+
   <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Job Listings</h2>
-    <form method="GET" class="mb-4">
-      <input
-        type="text"
-        name="q"
-        placeholder="Search jobs..."
-        class="form-control"
-      />
-    </form>
-    {% if not user.is_authenticated %}
-    <p>Login to create a job.</p>
-    {% elif user.userrole.role == 'recruiter' %}
-    <a href="{% url 'create_job' %}" class="btn btn-primary shadow-sm">
-      + Create Job
-    </a>
-    {% else %}
-    <p>Only recruiters can create a job.</p>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold mb-0">Job Listings</h2>
+
+    {% if user.is_authenticated and user.userrole.role == 'recruiter' %}
+      <a href="{% url 'create_job' %}" class="btn btn-primary shadow-sm">
+        + Create Job
+      </a>
     {% endif %}
   </div>
+
+  <!-- Search + Filter -->
+  <form method="GET" class="row g-2 mb-4">
+
+    <div class="col-md-4">
+      <input 
+        type="text" 
+        name="q" 
+        placeholder="Search jobs..." 
+        class="form-control"
+        value="{{ request.GET.q }}"
+      >
+    </div>
+
+    <div class="col-md-3">
+      <input 
+        type="text" 
+        name="location" 
+        placeholder="Location..." 
+        class="form-control"
+        value="{{ request.GET.location }}"
+      >
+    </div>
+
+    <div class="col-md-3">
+      <select name="sort" class="form-select">
+        <option value="">Sort</option>
+        <option value="latest" {% if request.GET.sort == 'latest' %}selected{% endif %}>Latest</option>
+        <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+      </select>
+    </div>
+
+    <div class="col-md-2 d-grid">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+
+  </form>
 
   <!-- Dashboard Cards -->
   <div class="row mb-4 g-3">
@@ -66,66 +96,90 @@
   <div class="row g-4">
     {% for job in jobs %}
     <div class="col-md-6">
-      <div class="card h-100 shadow-sm border-0 position-relative job-card">
-        <!-- Clickable -->
-        <div class="card-body">
-          <!-- Title + Badge -->
-          <div class="d-flex justify-content-between align-items-start">
-            <h5 class="card-title fw-semibold mb-1">
-              <a
-                href="{% url 'job_detail' job.id %}"
-                class="text-decoration-none text-dark"
-              >
-                {{ job.title }}
-              </a>
-            </h5>
+      <div class="card h-100 shadow-sm border-0 job-card">
+        <div class="card-body d-flex flex-column">
 
-            {% if job.id in applied_jobs %}
-            <span class="badge bg-success">Applied</span>
-            {% endif %}
+          <!-- Title -->
+          <h5 class="fw-semibold mb-1">
+            <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
+              {{ job.title }}
+            </a>
+          </h5>
+
+          <p class="text-muted mb-2">{{ job.location }}</p>
+
+          <!-- Applied Badge -->
+          {% if job.id in applied_jobs %}
+            <span class="badge bg-success mb-2 align-self-start">Applied</span>
+          {% endif %}
+
+          <!-- Push buttons down -->
+          <div class="mt-auto">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+              <!-- Save Button -->
+              <form method="POST" action="{% url 'toggle_save_job' job.id %}">
+                {% csrf_token %}
+                {% if job in saved_jobs %}
+                  <button class="btn btn-sm btn-outline-info">Unsave</button>
+                {% else %}
+                  <button class="btn btn-sm btn-outline-info">Save</button>
+                {% endif %}
+              </form>
+
+              <!-- Recruiter Actions -->
+              {% if user.is_authenticated and user.userrole.role == 'recruiter' %}
+              <div class="d-flex gap-1">
+                <a href="{% url 'update_job' job.id %}" class="btn btn-sm btn-outline-warning">Edit</a>
+                <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+              </div>
+              {% endif %}
+
+            </div>
+
           </div>
 
-          <p class="text-muted mb-3">{{ job.location }}</p>
-
-          <!-- Action Buttons -->
-          <div class="d-flex gap-2 position-relative" style="z-index: 2">
-            <a
-              href="{% url 'update_job' job.id %}"
-              class="btn btn-sm btn-outline-warning"
-            >
-              Edit
-            </a>
-            <a
-              href="{% url 'delete_job' job.id %}"
-              class="btn btn-sm btn-outline-danger"
-            >
-              Delete
-            </a>
-          </div>
-          <form method="POST" action="{% url 'toggle_save_job' job.id %}">
-            {% csrf_token %} {% if job in saved_jobs %}
-            <button class="btn btn-sm btn-outline-info">Unsave</button>
-            {% else %}
-            <button class="btn btn-sm btn-outline-info">Save</button>
-            {% endif %}
-          </form>
         </div>
       </div>
     </div>
+
     {% empty %}
     <div class="text-center mt-5">
       <h5 class="text-muted">No jobs available</h5>
     </div>
     {% endfor %}
   </div>
+
+  <nav class="mt-4">
+  <ul class="pagination justify-content-center">
+
+    {% if jobs.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ request.GET.q }}&location={{ request.GET.location }}&sort={{ request.GET.sort }}&page={{ jobs.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link">
+        Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}
+      </span>
+    </li>
+
+    {% if jobs.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ request.GET.q }}&location={{ request.GET.location }}&sort={{ request.GET.sort }}&page={{ jobs.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
 </div>
 
-<!-- Small CSS for hover -->
+<!-- Hover Effect -->
 <style>
   .job-card {
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .job-card:hover {
