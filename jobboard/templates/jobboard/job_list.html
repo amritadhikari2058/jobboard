@@ -142,9 +142,8 @@
             {% endfor %}
           </div>
 
+          {% if application%}
 <div class="my-2">
-  {% for app in user.applications.all %}
-    {% if application%}
 
       <span class="
         badge rounded-pill px-3 py-2 fw-semibold
@@ -159,9 +158,8 @@
         {{ application.status|title }}
       </span>
 
+    </div>
     {% endif %}
-  {% endfor %}
-</div>
 
           <!-- Bottom actions -->
           <div class="mt-auto">

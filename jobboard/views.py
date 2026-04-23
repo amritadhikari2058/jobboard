@@ -57,22 +57,21 @@ def job_list(request):
             "pending_application_count": pending_application_count,
             "saved_jobs": saved_jobs,
             "categories": categories,
-        }
+        },
     )
 
 
 def job_detail(request, id):
     applied_jobs = []
     job = Job.objects.get(id=id)
-    application = Application.objects.filter(
-        user=request.user,
-        job=job
-    ).first()
+    application = Application.objects.filter(user=request.user, job=job).first()
     if request.user.is_authenticated:
         applications = Application.objects.filter(user=request.user)
         applied_jobs = [app.job.id for app in applications]
     return render(
-        request, "jobboard/job_detail.html", {"job": job, "applied_jobs": applied_jobs, 'application': application}
+        request,
+        "jobboard/job_detail.html",
+        {"job": job, "applied_jobs": applied_jobs, "application": application},
     )
 
 
@@ -189,3 +188,21 @@ def notifications_mark_as_read(request, id):
     notification.is_read = True
     notification.save()
     return redirect("job_detail", id=notification.job.id)
+
+
+# Recruiter Dashboard
+@login_required
+def recruiter_dashboard(request):
+    if request.user.userrole.role != "recruiter":
+        return redirect("job_list")
+    job_applications = []
+    jobs = Job.objects.filter(user=request.user)
+    for job in jobs:
+        job_applications.append(
+            {"job": job, "applications": Application.objects.filter(job=job)}
+        )
+    return render(
+        request,
+        "jobboard/recruiter_dashboard.html",
+        {"job_applications": job_applications},
+    )

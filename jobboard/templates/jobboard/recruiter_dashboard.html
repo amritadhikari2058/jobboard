@@ -1,8 +1,74 @@
-{% extends "base.html" %} {%block content%} {%include 'navbar.html'%} {%for job
-in jobs%}
-<h3>{{job.title}}</h3>
-<p>{{job.description}}</p>
-<p>{{job.location}}</p>
-{%empty%}
-<p>No jobs to show.</p>
-{%endfor%} {%endblock%}
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2 class="mb-4 fw-bold">Recruiter Dashboard</h2>
+
+  {% for item in job_applications %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+
+      <!-- Job Info -->
+      <h5 class="fw-semibold mb-1">{{ item.job.title }}</h5>
+      <p class="text-muted mb-3">{{ item.job.location }}</p>
+
+      <!-- Applications -->
+      {% if item.applications %}
+        {% for app in item.applications %}
+        <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+
+          <!-- Applicant Info -->
+          <div>
+            <strong>{{ app.user.username }}</strong><br>
+            <small class="text-muted">{{ app.created_at }}</small>
+          </div>
+
+          <!-- Status + Actions -->
+          <div class="d-flex align-items-center gap-2">
+
+            <!-- Status Badge -->
+            <span class="
+              badge rounded-pill px-3 py-2
+              {% if app.status == 'pending' %}
+                bg-warning-subtle text-dark border
+              {% elif app.status == 'accepted' %}
+                bg-success-subtle text-success border
+              {% elif app.status == 'rejected' %}
+                bg-danger-subtle text-danger border
+              {% endif %}
+            ">
+              {{ app.status|title }}
+            </span>
+
+            <!-- Actions -->
+            {% if app.status == 'pending' %}
+              <form method="POST" action="{% url 'update_application_status' app.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="accepted">
+                <button class="btn btn-sm btn-success">Accept</button>
+              </form>
+
+              <form method="POST" action="{% url 'update_application_status' app.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="rejected">
+                <button class="btn btn-sm btn-danger">Reject</button>
+              </form>
+            {% endif %}
+
+          </div>
+        </div>
+        {% endfor %}
+
+      {% else %}
+        <p class="text-muted">No applications for this job.</p>
+      {% endif %}
+
+    </div>
+  </div>
+  {% empty %}
+    <p>No jobs created yet.</p>
+  {% endfor %}
+
+</div>
+
+{% endblock %}
