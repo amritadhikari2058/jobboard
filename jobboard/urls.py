@@ -14,6 +14,11 @@ urlpatterns = [
     ),
     path("saved-jobs/", views.saved_jobs_view, name="saved_jobs"),
     path("notifications/", views.notifications_view, name="notifications"),
-    path("notifications/read/<int:id>/", views.notifications_mark_as_read, name='notifications_mark_as_read'),
-    path('recruiter_dashboard/', views.recruiter_dashboard, name='recruiter_dashboard'),
+    path(
+        "notifications/read/<int:id>/",
+        views.notifications_mark_as_read,
+        name="notifications_mark_as_read",
+    ),
+    path("recruiter_dashboard/", views.recruiter_dashboard, name="recruiter_dashboard"),
+    path("user_dashboard/", views.user_dashboard, name="user_dashboard"),
 ]

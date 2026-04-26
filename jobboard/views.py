@@ -206,3 +206,16 @@ def recruiter_dashboard(request):
         "jobboard/recruiter_dashboard.html",
         {"job_applications": job_applications},
     )
+
+@login_required
+def user_dashboard(request):
+    if request.user.userrole.role != 'normal_user':
+        return redirect('job_list')
+    applications = Application.objects.filter(user=request.user)
+    return render(
+        request,
+        'jobboard/user_dashboard.html',
+        {
+            'applications': applications
+        }
+    )
