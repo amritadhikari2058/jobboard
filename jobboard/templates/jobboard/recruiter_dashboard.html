@@ -4,17 +4,17 @@
 <div class="container mt-4">
   <h2 class="mb-4 fw-bold">Recruiter Dashboard</h2>
 
-  {% for item in job_applications %}
+  {% for job in jobs %}
   <div class="card mb-4 shadow-sm">
     <div class="card-body">
 
       <!-- Job Info -->
-      <h5 class="fw-semibold mb-1">{{ item.job.title }}</h5>
-      <p class="text-muted mb-3">{{ item.job.location }}</p>
+      <h5 class="fw-semibold mb-1">{{ job.title }}</h5>
+      <p class="text-muted mb-3">{{ job.location }}</p>
 
       <!-- Applications -->
       {% if item.applications %}
-        {% for app in item.applications %}
+        {% for app in job.application_set.all %}
         <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
 
           <!-- Applicant Info -->

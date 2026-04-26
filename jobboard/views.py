@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .forms import JobForm
+from django.db import connection, reset_queries
+from .utils import log_activity
 
 
 def job_list(request):
@@ -88,6 +90,13 @@ def create_job(request):
             job.user = request.user
             job.save()
             form.save_m2m()
+
+            log_activity(
+                user=request.user,
+                action_type="job_created",
+                message=f"Created job '{job.title}'",
+                job=job,
+            )
             messages.success(request, "Job has successfully created.")
             return redirect("job_list")
         else:
@@ -102,6 +111,12 @@ def update_job(request, id):
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
             form.save()
+            log_activity(
+                user=request.user,
+                action_type="job_updated",
+                message=f"Updated job '{job.title}'",
+                job=job,
+            )
             return redirect("job_list")
     else:
         form = JobForm(instance=job)
@@ -112,6 +127,11 @@ def update_job(request, id):
 def delete_job(request, id):
     job = Job.objects.get(id=id)
     if request.method == "POST":
+        log_activity(
+            user=request.user,
+            action_type="job_deleted",
+            message=f"Deleted job '{job.title}'",
+        )
         job.delete()
         return redirect("job_list")
 
@@ -195,27 +215,21 @@ def notifications_mark_as_read(request, id):
 def recruiter_dashboard(request):
     if request.user.userrole.role != "recruiter":
         return redirect("job_list")
-    job_applications = []
-    jobs = Job.objects.filter(user=request.user)
-    for job in jobs:
-        job_applications.append(
-            {"job": job, "applications": Application.objects.filter(job=job)}
-        )
+    jobs = Job.objects.filter(user=request.user).prefetch_related("application_set")
     return render(
         request,
         "jobboard/recruiter_dashboard.html",
-        {"job_applications": job_applications},
+        {"jobs": jobs},
     )
+
 
 @login_required
 def user_dashboard(request):
-    if request.user.userrole.role != 'normal_user':
-        return redirect('job_list')
-    applications = Application.objects.filter(user=request.user)
-    return render(
-        request,
-        'jobboard/user_dashboard.html',
-        {
-            'applications': applications
-        }
+    reset_queries()
+    if request.user.userrole.role != "normal_user":
+        return redirect("job_list")
+    applications = Application.objects.filter(user=request.user).select_related("job")
+    response = render(
+        request, "jobboard/user_dashboard.html", {"applications": applications}
     )
+    return response

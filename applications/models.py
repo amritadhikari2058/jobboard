@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from jobboard.models import Job
 
 
 class Application(models.Model):
@@ -10,7 +9,7 @@ class Application(models.Model):
         ("rejected", "Rejected"),
     ]
 
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="applications")
+    job = models.ForeignKey('jobboard.Job', on_delete=models.CASCADE, related_name="applications")
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="applications"
     )
