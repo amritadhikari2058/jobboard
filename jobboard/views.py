@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Job, SavedJob, Notification, Category
+from .models import Job, SavedJob, Notification, Category, ActivityLog
 from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from .forms import JobForm
 from django.db import connection, reset_queries
 from .utils import log_activity
+from django.db.models import Q
 
 
 def job_list(request):
@@ -233,3 +234,27 @@ def user_dashboard(request):
         request, "jobboard/user_dashboard.html", {"applications": applications}
     )
     return response
+
+
+@login_required
+def activity_logs(request):
+    user = request.user
+    role = user.userrole.role
+
+    if role == "normal_user":
+        logs = ActivityLog.objects.filter(Q(user=user) | Q(application__user=user))
+
+    elif role == "recruiter":
+        logs = ActivityLog.objects.filter(Q(user=user) | Q(job__user=user))
+
+    else:
+        logs = ActivityLog.objects.none()
+
+    logs.select_related("job", "application", "user")
+    logs = logs.order_by("-created_at")[:20]
+
+    paginator = Paginator(logs, 10)
+    page = request.GET.get("page")
+    logs = paginator.get_page(page)
+
+    return render(request, "jobboard/activity_logs.html", {"logs": logs})
