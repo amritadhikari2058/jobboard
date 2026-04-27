@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import Notification
 from applications.models import Application
-from .models import UserRole
+from .models import UserRole, UserProfile
 
 
 @receiver(post_save, sender=User)
@@ -47,4 +47,11 @@ def create_notification(sender, instance, created, **kwargs):
             application=instance,
             message=f'New Application received for "{instance.job.title}"',
             type="application_created",
+        )
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(
+            user = instance
         )

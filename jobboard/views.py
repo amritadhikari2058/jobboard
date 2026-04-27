@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Job, SavedJob, Notification, Category, ActivityLog
+from .models import Job, SavedJob, Notification, Category, ActivityLog, UserProfile
 from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .forms import JobForm
+from .forms import JobForm, UserProfileForm
 from django.db import connection, reset_queries
 from .utils import log_activity
 from django.db.models import Q
@@ -258,3 +258,16 @@ def activity_logs(request):
     logs = paginator.get_page(page)
 
     return render(request, "jobboard/activity_logs.html", {"logs": logs})
+
+
+@login_required
+def edit_user_profile(request):
+    profile = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('job_list')
+    else:
+        form = UserProfileForm(instance=profile)
+    return render(request, 'jobboard/user_profile.html', {'form':form})

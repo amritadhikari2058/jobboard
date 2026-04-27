@@ -1,5 +1,5 @@
 from django import forms
-from .models import Job
+from .models import Job, UserProfile
 
 class JobForm(forms.ModelForm):
     class Meta:
@@ -8,3 +8,8 @@ class JobForm(forms.ModelForm):
         widgets = {
             'categories': forms.CheckboxSelectMultiple()
         }
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['bio', 'profile_pic', 'skills', 'phone', 'location', 'resume']
