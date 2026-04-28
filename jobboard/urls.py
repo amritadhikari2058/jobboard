@@ -22,4 +22,6 @@ urlpatterns = [
     path("recruiter_dashboard/", views.recruiter_dashboard, name="recruiter_dashboard"),
     path("user_dashboard/", views.user_dashboard, name="user_dashboard"),
     path('activity_logs', views.activity_logs, name='activity_logs'),
+    path('profile_detail/<str:username>/', views.view_user_profile, name='view_user_profile'),
+    path('profile_edit/', views.edit_user_profile, name='edit_user_profile'),
 ]

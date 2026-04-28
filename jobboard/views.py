@@ -8,6 +8,7 @@ from .forms import JobForm, UserProfileForm
 from django.db import connection, reset_queries
 from .utils import log_activity
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 
 def job_list(request):
@@ -216,7 +217,7 @@ def notifications_mark_as_read(request, id):
 def recruiter_dashboard(request):
     if request.user.userrole.role != "recruiter":
         return redirect("job_list")
-    jobs = Job.objects.filter(user=request.user).prefetch_related("application_set")
+    jobs = Job.objects.filter(user=request.user).prefetch_related("applications")
     return render(
         request,
         "jobboard/recruiter_dashboard.html",
@@ -267,7 +268,20 @@ def edit_user_profile(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('job_list')
+            return redirect("job_list")
     else:
         form = UserProfileForm(instance=profile)
-    return render(request, 'jobboard/user_profile.html', {'form':form})
+    return render(request, "jobboard/user_profile.html", {"form": form})
+
+
+@login_required
+def view_user_profile(request, username):
+    if request.user.userrole.role != "recruiter":
+        messages.warning(request, "Only Recruiter can view other user's profiles.")
+        return redirect("job_list")
+    target_user = get_object_or_404(User, username=username)
+    if Application.objects.filter(user=target_user, job__user=request.user).exists():
+        profile = get_object_or_404(UserProfile, user=target_user)
+        return render(request, "jobboard/profile_detail.html", {"profile": profile})
+    messages.warning(request, "You are not eligible to view this user's profile.")
+    return redirect("job_list")

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+
+      <div class="row">
+
+        <!-- Profile Picture -->
+        <div class="col-md-3 text-center">
+          {% if profile.profile_pic %}
+            <img src="{{ profile.profile_pic.url }}" class="img-fluid rounded-circle mb-3" style="max-height: 150px;">
+          {% else %}
+            <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle mb-3">
+          {% endif %}
+        </div>
+
+        <!-- Basic Info -->
+        <div class="col-md-9">
+          <h4 class="fw-bold mb-1">{{ profile.user.username }}</h4>
+          <p class="text-muted mb-2">{{ profile.user.email }}</p>
+
+          <p><strong>Location:</strong> {{ profile.location|default:"Not provided" }}</p>
+          <p><strong>Phone:</strong> {{ profile.phone|default:"Not provided" }}</p>
+        </div>
+
+      </div>
+
+      <hr>
+
+      <!-- Bio -->
+      <div class="mb-3">
+        <h5 class="fw-semibold">Bio</h5>
+        <p class="text-muted">{{ profile.bio|default:"No bio added." }}</p>
+      </div>
+
+      <!-- Skills -->
+      <div class="mb-3">
+        <h5 class="fw-semibold">Skills</h5>
+        <p class="text-muted">{{ profile.skills|default:"No skills listed." }}</p>
+      </div>
+
+      <!-- Resume -->
+      <div class="mb-3">
+        <h5 class="fw-semibold">Resume</h5>
+        {% if profile.resume %}
+          <a href="{{ profile.resume.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+            View Resume
+          </a>
+        {% else %}
+          <p class="text-muted">No resume uploaded.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
