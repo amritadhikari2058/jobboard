@@ -263,25 +263,37 @@ def activity_logs(request):
 
 @login_required
 def edit_user_profile(request):
-    profile = UserProfile.objects.get_or_create(user=request.user)
+    print("METHOD:", request.method)
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
     if request.method == "POST":
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect("job_list")
+            return redirect("view_user_profile", profile.user.username)
     else:
         form = UserProfileForm(instance=profile)
-    return render(request, "jobboard/user_profile.html", {"form": form})
+
+    return render(request, "jobboard/profile_detail.html", {"form": form})
 
 
 @login_required
 def view_user_profile(request, username):
-    if request.user.userrole.role != "recruiter":
-        messages.warning(request, "Only Recruiter can view other user's profiles.")
-        return redirect("job_list")
+    print("METHOD:", request.method)
     target_user = get_object_or_404(User, username=username)
-    if Application.objects.filter(user=target_user, job__user=request.user).exists():
-        profile = get_object_or_404(UserProfile, user=target_user)
+    profile = get_object_or_404(UserProfile, user=target_user)
+
+    # SELF VIEW
+    if request.user == target_user:
         return render(request, "jobboard/profile_detail.html", {"profile": profile})
+
+    # RECRUITER VIEW
+    if request.user.userrole.role == "recruiter":
+        if Application.objects.filter(
+            user=target_user, job__user=request.user
+        ).exists():
+            return render(request, "jobboard/profile_detail.html", {"profile": profile})
+        return redirect("job_list")
+
     messages.warning(request, "You are not eligible to view this user's profile.")
     return redirect("job_list")
