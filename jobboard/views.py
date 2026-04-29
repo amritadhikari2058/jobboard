@@ -264,6 +264,7 @@ def activity_logs(request):
 @login_required
 def edit_user_profile(request):
     print("METHOD:", request.method)
+    print("Edit View Hit")
     profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
@@ -274,12 +275,13 @@ def edit_user_profile(request):
     else:
         form = UserProfileForm(instance=profile)
 
-    return render(request, "jobboard/profile_detail.html", {"form": form})
+    return render(request, "jobboard/profile_edit.html", {"form": form})
 
 
 @login_required
 def view_user_profile(request, username):
     print("METHOD:", request.method)
+    print("View View Hit")
     target_user = get_object_or_404(User, username=username)
     profile = get_object_or_404(UserProfile, user=target_user)
 
