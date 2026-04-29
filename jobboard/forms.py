@@ -1,5 +1,6 @@
 from django import forms
-from .models import Job, UserProfile
+from .models import Job
+from users.models import UserProfile
 
 
 class JobForm(forms.ModelForm):

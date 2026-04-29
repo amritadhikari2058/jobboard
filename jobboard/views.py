@@ -1,14 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Job, SavedJob, Notification, Category, ActivityLog, UserProfile
+from .models import Job, SavedJob, Category
 from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .forms import JobForm, UserProfileForm
-from django.db import connection, reset_queries
+from .forms import JobForm
 from .utils import log_activity
-from django.db.models import Q
-from django.contrib.auth.models import User
 
 
 def job_list(request):
@@ -141,32 +138,6 @@ def delete_job(request, id):
 
 
 @login_required
-def recruiter_dashboard(request):
-    user = request.user
-    if user.userrole.role != "recruiter":
-        messages.info(request, "Only recruiters have the recruiters dashboard.")
-        return redirect("job_list")
-    jobs = Job.objects.filter(user=user)
-    return render(request, "jobboard/recruiter_dashboard.html", {"jobs": jobs})
-
-
-@login_required
-def view_applicants(request, slug):
-    user = request.user
-
-    if user.userrole.role != "recruiter":
-        messages.info(request, "Only recruiters have access to the applicant's list")
-        return redirect("job_list")
-
-    job = get_object_or_404(Job, slug=slug, user=user)
-    applications = Application.objects.filter(job=job)
-
-    return render(
-        request, "jobboard/view_applicants.html", {"applications": applications}
-    )
-
-
-@login_required
 def toggle_save_job(request, job_id):
     print("TOGGLE VIEW HIT")
     print(request.method)
@@ -190,112 +161,3 @@ def toggle_save_job(request, job_id):
 def saved_jobs_view(request):
     saved_jobs = SavedJob.objects.filter(user=request.user).select_related("job")
     return render(request, "jobboard/saved_jobs.html", {"saved_jobs": saved_jobs})
-
-
-# Notifications View
-@login_required
-def notifications_view(request):
-    notifications = Notification.objects.filter(user=request.user).order_by(
-        "-created_at"
-    )
-    return render(
-        request, "jobboard/notifications.html", {"notifications": notifications}
-    )
-
-
-# Mark as read + Redirect View
-@login_required
-def notifications_mark_as_read(request, id):
-    notification = get_object_or_404(Notification, id=id, user=request.user)
-    notification.is_read = True
-    notification.save()
-    return redirect("job_detail", id=notification.job.id)
-
-
-# Recruiter Dashboard
-@login_required
-def recruiter_dashboard(request):
-    if request.user.userrole.role != "recruiter":
-        return redirect("job_list")
-    jobs = Job.objects.filter(user=request.user).prefetch_related("applications")
-    return render(
-        request,
-        "jobboard/recruiter_dashboard.html",
-        {"jobs": jobs},
-    )
-
-
-@login_required
-def user_dashboard(request):
-    reset_queries()
-    if request.user.userrole.role != "normal_user":
-        return redirect("job_list")
-    applications = Application.objects.filter(user=request.user).select_related("job")
-    response = render(
-        request, "jobboard/user_dashboard.html", {"applications": applications}
-    )
-    return response
-
-
-@login_required
-def activity_logs(request):
-    user = request.user
-    role = user.userrole.role
-
-    if role == "normal_user":
-        logs = ActivityLog.objects.filter(Q(user=user) | Q(application__user=user))
-
-    elif role == "recruiter":
-        logs = ActivityLog.objects.filter(Q(user=user) | Q(job__user=user))
-
-    else:
-        logs = ActivityLog.objects.none()
-
-    logs.select_related("job", "application", "user")
-    logs = logs.order_by("-created_at")[:20]
-
-    paginator = Paginator(logs, 10)
-    page = request.GET.get("page")
-    logs = paginator.get_page(page)
-
-    return render(request, "jobboard/activity_logs.html", {"logs": logs})
-
-
-@login_required
-def edit_user_profile(request):
-    print("METHOD:", request.method)
-    print("Edit View Hit")
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
-
-    if request.method == "POST":
-        form = UserProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            return redirect("view_user_profile", profile.user.username)
-    else:
-        form = UserProfileForm(instance=profile)
-
-    return render(request, "jobboard/profile_edit.html", {"form": form})
-
-
-@login_required
-def view_user_profile(request, username):
-    print("METHOD:", request.method)
-    print("View View Hit")
-    target_user = get_object_or_404(User, username=username)
-    profile = get_object_or_404(UserProfile, user=target_user)
-
-    # SELF VIEW
-    if request.user == target_user:
-        return render(request, "jobboard/profile_detail.html", {"profile": profile})
-
-    # RECRUITER VIEW
-    if request.user.userrole.role == "recruiter":
-        if Application.objects.filter(
-            user=target_user, job__user=request.user
-        ).exists():
-            return render(request, "jobboard/profile_detail.html", {"profile": profile})
-        return redirect("job_list")
-
-    messages.warning(request, "You are not eligible to view this user's profile.")
-    return redirect("job_list")

@@ -54,7 +54,9 @@
       </div>
 
     </div>
+    {%if request.user == profile.user %}
       <a href='{% url 'edit_user_profile' %}' class="btn btn-primary">Edit Profile</a>
+    {%endif%}
   </div>
 </div>
 

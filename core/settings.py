@@ -37,9 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'jobboard.apps.JobboardConfig',
+
+    'jobboard',
     'applications',
-    'rest_framework',
+    'users',
+    'notifications',
+
     'debug_toolbar',
 ]
 

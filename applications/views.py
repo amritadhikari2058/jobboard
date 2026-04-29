@@ -144,3 +144,19 @@ def reject_application(request, app_id):
 
     # 5. Redirect back
     return redirect("view_applicants", slug=application.job.slug)
+
+
+@login_required
+def view_applicants(request, slug):
+    user = request.user
+
+    if user.userrole.role != "recruiter":
+        messages.info(request, "Only recruiters have access to the applicant's list")
+        return redirect("job_list")
+
+    job = get_object_or_404(Job, slug=slug, user=user)
+    applications = Application.objects.filter(job=job)
+
+    return render(
+        request, "jobboard/view_applicants.html", {"applications": applications}
+    )
