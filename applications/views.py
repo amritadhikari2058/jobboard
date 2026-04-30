@@ -4,6 +4,7 @@ from .models import Application
 from jobboard.models import Job
 from django.contrib.auth.decorators import login_required
 from jobboard.utils import log_activity
+from .services import ApplicationService
 
 
 @login_required
@@ -49,26 +50,18 @@ def delete(request, app_id):
 @login_required
 def create(request, job_id):
     job = get_object_or_404(Job, id=job_id)
-    existing = Application.objects.filter(job=job, user=request.user).first()
-
-    if existing:
-        messages.warning(request, "You have already applied for this job.")
-        return redirect("application_list")
 
     if request.method == "POST":
         resume = request.FILES.get("resume")
 
-        application = Application.objects.create(
-            job=job, user=request.user, resume=resume
+        success, result = ApplicationService.apply(
+            user=request.user, job=job, resume=resume
         )
 
-        log_activity(
-            user=request.user,
-            action_type="application_created",
-            message=f"Applied to '{job.title}'",
-            job=job,
-            application=application,
-        )
+        if not success:
+            messages.warning(request, result)
+            return redirect("application_list")
+
         messages.success(request, "Application applied successfully!")
         return redirect("application_list")
 
