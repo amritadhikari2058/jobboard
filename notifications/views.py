@@ -12,7 +12,7 @@ def notifications_view(request):
         "-created_at"
     )
     return render(
-        request, "jobboard/notifications.html", {"notifications": notifications}
+        request, "notifications/notifications.html", {"notifications": notifications}
     )
 
 
@@ -46,4 +46,4 @@ def activity_logs(request):
     page = request.GET.get("page")
     logs = paginator.get_page(page)
 
-    return render(request, "jobboard/activity_logs.html", {"logs": logs})
+    return render(request, "notifications/activity_logs.html", {"logs": logs})

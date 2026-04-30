@@ -1,4 +1,4 @@
-from .models import ActivityLog
+from notifications.models import ActivityLog
 
 def log_activity(user, action_type, message, job=None, application=None):
     if action_type == 'job_created':
