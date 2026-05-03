@@ -8,7 +8,7 @@ class ApplicationService:
 
         # Check if already applied
         if Application.objects.filter(user=user, job=job).exists():
-            return False, "You have already applied for this job."
+            return "You have already applied for this job."
 
         # Create Application
         application = Application.objects.create(user=user, job=job, resume=resume)
@@ -22,24 +22,13 @@ class ApplicationService:
             application=application,
         )
 
-        return True, application
+        return application
 
     @staticmethod
     def update_application_status(application, user, status):
-        # 1. Role Check
-        userrole = getattr(user, 'userrole', None)
-        if not userrole or userrole.role != 'recruiter':
-            return False, 'Only recruiters can update applications.'
-        
-        # 2. Ownership Check
-        if application.job.user != user:
-            return False, 'You can only update applications for your own jobs.'
-        
-        # 3. Update Status
         application.status = status
-        application.save(update_Fields = ['status'])
+        application.save(update_fields=['status'])
 
-        # 4. Log activity
         action = 'application_accepted' if status == 'accepted' else 'applicaton_rejected'
 
         activity_logs(

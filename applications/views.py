@@ -4,7 +4,13 @@ from .models import Application
 from jobboard.models import Job
 from django.contrib.auth.decorators import login_required
 from .services import ApplicationService
-from users.decorators import normal_user_required, recruiter_required, job_owner_required, recruiter_owns_application
+from users.decorators import (
+    normal_user_required,
+    recruiter_required,
+    job_owner_required,
+    recruiter_owns_application,
+)
+
 
 @login_required
 def application_list(request):
@@ -30,7 +36,7 @@ def update(request, app_id):
         status = request.POST.get("status")
         application = ApplicationService.update_application(application, resume)
 
-        messages.success(request, 'Application updated successfully')
+        messages.success(request, "Application updated successfully")
         return redirect("application_list")
     return render(
         request, "applications/update_application.html", {"application": application}
@@ -70,39 +76,23 @@ def create(request, job_id):
 
 
 @login_required
-def accept_application(request, app_id):
-    application = get_object_or_404(Application, id=app_id)
-
-    # 3. Method check
+@recruiter_owns_application
+def accept_application(request, app_id, application):
     if request.method != "POST":
         return redirect("view_applicants", slug=application.job.slug)
 
-    success, result = ApplicationService.update_application_status(
-        application, request.user, "accepted"
-    )
-
-    if not success:
-        messages.error(request, result)
+    ApplicationService.update_application_status(application, request.user, "accepted")
 
     messages.success(request, "Application accepted.")
     return redirect("view_applicants", slug=application.job.slug)
 
 
 @login_required
-def reject_application(request, app_id):
-    application = get_object_or_404(Application, id=app_id)
-
-    # 3. Method check
+def reject_application(request, app_id, application):
     if request.method != "POST":
         return redirect("view_applicants", slug=application.job.slug)
 
-    success, result = ApplicationService.update_application_status(
-        application, request.user, "rejected"
-    )
-
-    if not success:
-        messages.error(request, result)
-        return redirect("job_list")
+    ApplicationService.update_application_status(application, request.user, "rejected")
 
     messages.success(request, "Application rejected.")
     return redirect("view_applicants", slug=application.job.slug)
