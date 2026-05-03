@@ -5,7 +5,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .forms import JobForm
-from .utils import log_activity
+from .services import (
+    get_filtered_jobs,
+    get_user_jobs_data,
+    update_job_service,
+    delete_job_service,
+)
+from .services import create_job_service
+from users.decorators import (
+    recruiter_required,
+    normal_user_required,
+    job_owner_required,
+)
 
 
 def job_list(request):
@@ -13,50 +24,28 @@ def job_list(request):
     location = request.GET.get("location")
     sort = request.GET.get("sort")
     category = request.GET.get("category")
-    jobs = Job.objects.all()
-    if search_query:
-        jobs = jobs.filter(title__icontains=search_query)
-    if location:
-        jobs = jobs.filter(location__icontains=location)
-    if category:
-        jobs = jobs.filter(categories__name__icontains=category)
-    jobs = jobs.distinct()
-    if sort == "latest":
-        jobs = jobs.order_by("-created_at")
-    elif sort == "oldest":
-        jobs = jobs.order_by("created_at")
+
+    jobs = get_filtered_jobs(search_query, location, category, sort)
+
     paginator = Paginator(jobs, 4)
     page_number = request.GET.get("page")
     jobs = paginator.get_page(page_number)
+
     categories = Category.objects.all()
 
-    applied_jobs = []
-    saved_jobs = []
-    total_application_count = 0
-    pending_application_count = 0
-    accepted_application_count = 0
-    rejected_application_count = 0
-    saved_job_ids = []
+    user_data = get_user_jobs_data(request.user)
 
-    if request.user.is_authenticated:
-        applications = Application.objects.filter(user=request.user)
-        total_application_count = applications.count()
-        pending_application_count = applications.filter(status="pending").count()
-        accepted_application_count = applications.filter(status="accepted").count()
-        rejected_application_count = applications.filter(status="rejected").count()
-        applied_jobs = [app.job.id for app in applications]
-        saved_jobs = SavedJob.objects.filter(user=request.user).select_related("job")
     return render(
         request,
         "jobboard/job_list.html",
         {
             "jobs": jobs,
-            "applied_jobs": applied_jobs,
-            "total_application_count": total_application_count,
-            "accepted_application_count": accepted_application_count,
-            "rejected_application_count": rejected_application_count,
-            "pending_application_count": pending_application_count,
-            "saved_jobs": saved_jobs,
+            "applied_jobs": user_data.applied_jobs,
+            "total_application_count": user_data.counts.get("total", 0),
+            "accepted_application_count": user_data.counts.get("accepted", 0),
+            "rejected_application_count": user_data.counts.get("rejected", 0),
+            "pending_application_count": user_data.counts.get("pending", 0),
+            "saved_jobs": user_data.saved_jobs,
             "categories": categories,
         },
     )
@@ -77,45 +66,31 @@ def job_detail(request, id):
 
 
 @login_required
+@recruiter_required
 def create_job(request):
     userrole = request.user.userrole
-    if userrole.role != "recruiter":
-        messages.error(request, "Only recruiters can create a job.")
-        return redirect("job_list")
-    form = JobForm(request.POST)
-    if request.method == "POST":
-        if form.is_valid():
-            job = form.save(commit=False)
-            job.user = request.user
-            job.save()
-            form.save_m2m()
 
-            log_activity(
-                user=request.user,
-                action_type="job_created",
-                message=f"Created job '{job.title}'",
-                job=job,
-            )
+    if request.method == "POST":
+        form = JobForm(request.POST)
+
+        if form.is_valid():
+            create_job_service(form, request.user)
             messages.success(request, "Job has successfully created.")
             return redirect("job_list")
-        else:
-            form = JobForm()
+    else:
+        form = JobForm()
     return render(request, "jobboard/create_job.html", {"form": form})
 
 
 @login_required
+@job_owner_required
 def update_job(request, id):
     job = Job.objects.get(id=id)
+
     if request.method == "POST":
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
-            form.save()
-            log_activity(
-                user=request.user,
-                action_type="job_updated",
-                message=f"Updated job '{job.title}'",
-                job=job,
-            )
+            update_job_service(form, request.user)
             return redirect("job_list")
     else:
         form = JobForm(instance=job)
@@ -123,36 +98,31 @@ def update_job(request, id):
 
 
 @login_required
+@job_owner_required
 def delete_job(request, id):
     job = Job.objects.get(id=id)
+
     if request.method == "POST":
-        log_activity(
-            user=request.user,
-            action_type="job_deleted",
-            message=f"Deleted job '{job.title}'",
-        )
-        job.delete()
+        delete_job_service(request.user, job)
+        messages.success(request, "Job deleted successfully")
         return redirect("job_list")
 
-    return render(request, "jobboard/delete_job.html")
+    return render(request, "jobboard/delete_job.html", {"job": job})
 
 
 @login_required
+@normal_user_required
 def toggle_save_job(request, job_id):
-    print("TOGGLE VIEW HIT")
-    print(request.method)
     if request.method != "POST":
         return redirect("job_list")
-    userrole = getattr(request.user, "userrole", None)
-    if not userrole or userrole.role != "normal_user":
-        messages.error(request, "Only normal users can save jobs.")
-        return redirect("job_list")
+
     job = get_object_or_404(Job, id=job_id)
-    saved_job = SavedJob.objects.filter(user=request.user, job=job).first()
-    if saved_job:
-        saved_job.delete()
+    added = toggle_save_job(request.user, job)
+    if added:
+        messages.success(request, "Job saved.")
     else:
-        SavedJob.objects.create(user=request.user, job=job)
+        messages.info(request, "Job removed from saved.")
+
     return redirect(request.META.get("HTTP_REFERRER", "job_list"))
 
 

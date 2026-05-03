@@ -3,9 +3,8 @@ from django.contrib import messages
 from .models import Application
 from jobboard.models import Job
 from django.contrib.auth.decorators import login_required
-from jobboard.utils import log_activity
 from .services import ApplicationService
-
+from users.decorators import normal_user_required, recruiter_required, job_owner_required, recruiter_owns_application
 
 @login_required
 def application_list(request):
@@ -27,9 +26,11 @@ def application_detail(request, app_id):
 def update(request, app_id):
     application = get_object_or_404(Application, id=app_id, user=request.user)
     if request.method == "POST":
-        application.resume = request.FILES.get("resume")
-        application.status = request.POST.get("status")
-        application.save()
+        resume = request.FILES.get("resume")
+        status = request.POST.get("status")
+        application = ApplicationService.update_application(application, resume)
+
+        messages.success(request, 'Application updated successfully')
         return redirect("application_list")
     return render(
         request, "applications/update_application.html", {"application": application}
@@ -71,36 +72,19 @@ def create(request, job_id):
 @login_required
 def accept_application(request, app_id):
     application = get_object_or_404(Application, id=app_id)
-    userrole = getattr(request.user, "userrole", None)
-
-    # 1. Role check
-    if not userrole or userrole.role != "recruiter":
-        messages.error(request, "Only recruiters can update applications.")
-        return redirect("job_list")
-
-    # 2. Ownership check
-    if application.job.user != request.user:
-        messages.warning(request, "You can only update applications for your own jobs.")
-        return redirect("job_list")
 
     # 3. Method check
     if request.method != "POST":
-        log_activity(
-            user=request.user,
-            action_type="application_accepted",
-            message=f"Accepted application for '{application.job.title}'",
-            job=application.job,
-            application=application,
-        )
         return redirect("view_applicants", slug=application.job.slug)
 
-    # 4. Action
-    application.status = "accepted"
-    application.save(update_fields=["status"])
+    success, result = ApplicationService.update_application_status(
+        application, request.user, "accepted"
+    )
+
+    if not success:
+        messages.error(request, result)
 
     messages.success(request, "Application accepted.")
-
-    # 5. Redirect back
     return redirect("view_applicants", slug=application.job.slug)
 
 
@@ -108,34 +92,19 @@ def accept_application(request, app_id):
 def reject_application(request, app_id):
     application = get_object_or_404(Application, id=app_id)
 
-    # 1. Role check
-    if request.user.userrole.role != "recruiter":
-        messages.error(request, "Only recruiters can update applications.")
-        return redirect("job_list")
-
-    # 2. Ownership check
-    if application.job.user != request.user:
-        messages.warning(request, "You can only update applications for your own jobs.")
-        return redirect("job_list")
-
     # 3. Method check
     if request.method != "POST":
-        log_activity(
-            user=request.user,
-            action_type="application_rejected",
-            message=f"Rejected application for '{application.job.title}'",
-            job=application.job,
-            application=application,
-        )
         return redirect("view_applicants", slug=application.job.slug)
 
-    # 4. Action
-    application.status = "rejected"
-    application.save(update_fields=["status"])
+    success, result = ApplicationService.update_application_status(
+        application, request.user, "rejected"
+    )
+
+    if not success:
+        messages.error(request, result)
+        return redirect("job_list")
 
     messages.success(request, "Application rejected.")
-
-    # 5. Redirect back
     return redirect("view_applicants", slug=application.job.slug)
 
 

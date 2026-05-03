@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Notification, ActivityLog
 from django.core.paginator import Paginator
 from django.db.models import Q
-
+from .services import get_activity_logs_for_user
 
 # Notifications View
 @login_required
@@ -27,21 +27,8 @@ def notifications_mark_as_read(request, id):
 
 @login_required
 def activity_logs(request):
-    user = request.user
-    role = user.userrole.role
-
-    if role == "normal_user":
-        logs = ActivityLog.objects.filter(Q(user=user) | Q(application__user=user))
-
-    elif role == "recruiter":
-        logs = ActivityLog.objects.filter(Q(user=user) | Q(job__user=user))
-
-    else:
-        logs = ActivityLog.objects.none()
-
-    logs.select_related("job", "application", "user")
-    logs = logs.order_by("-created_at")[:20]
-
+    logs = get_activity_logs_for_user(request.user)
+    
     paginator = Paginator(logs, 10)
     page = request.GET.get("page")
     logs = paginator.get_page(page)
