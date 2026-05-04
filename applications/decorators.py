@@ -7,8 +7,7 @@ from applications.models import Application
 def recruiter_owns_application(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        app_id = kwargs.get("app_id")
-        application = get_object_or_404(Application, id=app_id)
+        application = kwargs.get('application')
 
         # Check recruiter
         if (
@@ -23,9 +22,6 @@ def recruiter_owns_application(view_func):
             messages.error(request, "You can only manage your own job applications.")
             return redirect("job_list")
 
-        # Inject application into view
-        kwargs["application"] = application
-
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
@@ -34,11 +30,23 @@ def recruiter_owns_application(view_func):
 def application_owner_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        application = get_object_or_404(Application, id=kwargs.get("app_id"))
+        application = kwargs.get("application")
 
         if application.user != request.user:
             messages.error(request, "You can only manage your own applications.")
             return redirect("job_list")
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+def get_application(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        application = get_object_or_404(
+            Application.objects.select_related("job", "user"), id=kwargs.get("app_id")
+        )
 
         kwargs["application"] = application
         return view_func(request, *args, **kwargs)

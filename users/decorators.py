@@ -10,6 +10,7 @@ def recruiter_required(view_func):
 
         if not userrole or userrole.role != "recruiter":
             messages.error(request, "Only recruiters can perform this action")
+            return redirect('job_list')
 
         return view_func(request, *args, **kwargs)
 

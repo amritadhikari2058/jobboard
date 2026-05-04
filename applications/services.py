@@ -1,14 +1,16 @@
 from .models import Application
 from notifications.views import activity_logs
+from jobboard.utils import log_activity
+from .exceptions import DuplicateApplicationError, InvalidApplicationStateError
 
 
 class ApplicationService:
     @staticmethod
     def apply(user, job, resume):
+        existing = Application.objects.filter(user=user, job=job).first()
 
-        # Check if already applied
-        if Application.objects.filter(user=user, job=job).exists():
-            return "You have already applied for this job."
+        if existing:
+            raise DuplicateApplicationError("You have already applied for this job")
 
         # Create Application
         application = Application.objects.create(user=user, job=job, resume=resume)
@@ -26,25 +28,38 @@ class ApplicationService:
 
     @staticmethod
     def update_application_status(application, user, status):
+        if application.status == status:
+            raise InvalidApplicationStateError(f"Application is already {status}")
+        
         application.status = status
-        application.save(update_fields=['status'])
-
-        action = 'application_accepted' if status == 'accepted' else 'applicaton_rejected'
+        application.save(update_fields=["status"])
 
         activity_logs(
             user=user,
-            action_type=action,
+            action_type=f'application_{status}',
             message=f"{status.capitalizer()} application for '{application.job.title}'",
             job=application.job,
             application=application,
         )
 
         return True, application
-    
+
     @staticmethod
     def update_application(application, resume, status):
         if resume:
             application.resume = resume
-        application.save(update_fields = ['resume'])
+            application.save(update_fields=["resume"])
 
         return application
+
+    @staticmethod
+    def delete_application(application, user):
+        job = application.job
+        application.delete()
+
+        log_activity(
+            user=user,
+            action_type="application_deleted",
+            message=f"Deleted application for '{job.title}'",
+            job=job,
+        )
