@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'notifications',
 
     'debug_toolbar',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 REST_FRAMEWORK = {
@@ -143,3 +145,6 @@ LOGOUT_URL = '/accounts/logout/'
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'

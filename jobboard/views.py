@@ -15,8 +15,8 @@ from .services import create_job_service
 from users.decorators import (
     recruiter_required,
     normal_user_required,
-    job_owner_required,
 )
+from .decorators import job_owner_required
 
 
 def job_list(request):
@@ -40,12 +40,12 @@ def job_list(request):
         "jobboard/job_list.html",
         {
             "jobs": jobs,
-            "applied_jobs": user_data.applied_jobs,
-            "total_application_count": user_data.counts.get("total", 0),
-            "accepted_application_count": user_data.counts.get("accepted", 0),
-            "rejected_application_count": user_data.counts.get("rejected", 0),
-            "pending_application_count": user_data.counts.get("pending", 0),
-            "saved_jobs": user_data.saved_jobs,
+            "applied_jobs": user_data["applied_jobs"],
+            "total_application_count": user_data["counts"].get("total", 0),
+            "accepted_application_count": user_data["counts"].get("accepted", 0),
+            "rejected_application_count": user_data["counts"].get("rejected", 0),
+            "pending_application_count": user_data["counts"].get("pending", 0),
+            "saved_jobs": user_data["saved_jobs"],
             "categories": categories,
         },
     )
@@ -68,7 +68,6 @@ def job_detail(request, id):
 @login_required
 @recruiter_required
 def create_job(request):
-    userrole = request.user.userrole
 
     if request.method == "POST":
         form = JobForm(request.POST)
@@ -84,7 +83,7 @@ def create_job(request):
 
 @login_required
 @job_owner_required
-def update_job(request, id):
+def update_job(request, id, job):
     job = Job.objects.get(id=id)
 
     if request.method == "POST":

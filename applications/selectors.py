@@ -1,12 +1,16 @@
 from applications.models import Application
 
 
-def get_user_applications(user):
-    return (
+def get_user_applications(user, status=None):
+    qs = (
         Application.objects.filter(user=user)
         .select_related("job", "user")
         .order_by("-id")
     )
+    if status:
+        qs = qs.filter(status=status)
+    
+    return qs.order_by('-id')
 
 
 def get_job_applications(job):

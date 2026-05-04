@@ -4,22 +4,16 @@ from .models import Application
 from jobboard.models import Job
 from django.contrib.auth.decorators import login_required
 from .services import ApplicationService
-from users.decorators import (
-    normal_user_required,
-    recruiter_required,
-    job_owner_required,
-    recruiter_owns_application,
-)
+from users.decorators import normal_user_required, recruiter_required
 from .decorators import application_owner_required, get_application
 from applications.exceptions import ApplicationError
-
+from applications.selectors import get_user_applications, get_job_applications
+from .decorators import recruiter_owns_application
 
 @login_required
 @normal_user_required
 def application_list(request):
-    applications = Application.objects.filter(user=request.user).select_related(
-        "job", "user"
-    )
+    applications = get_user_applications(request.user)
     return render(
         request, "applications/application_list.html", {"applications": applications}
     )
@@ -123,15 +117,11 @@ def reject_application(request, app_id, application):
 
 
 @login_required
+@recruiter_required
 def view_applicants(request, slug):
     user = request.user
-
-    if user.userrole.role != "recruiter":
-        messages.info(request, "Only recruiters have access to the applicant's list")
-        return redirect("job_list")
-
     job = get_object_or_404(Job, slug=slug, user=user)
-    applications = Application.objects.filter(job=job).select_related("job", "user")
+    applications = get_job_applications(job)
 
     return render(
         request, "jobboard/view_applicants.html", {"applications": applications}

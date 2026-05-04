@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Notification, ActivityLog
+from .models import Notification
 from django.core.paginator import Paginator
-from django.db.models import Q
-from .services import get_activity_logs_for_user
+from .services import NotificationService
+
 
 # Notifications View
 @login_required
@@ -27,8 +27,8 @@ def notifications_mark_as_read(request, id):
 
 @login_required
 def activity_logs(request):
-    logs = get_activity_logs_for_user(request.user)
-    
+    logs = NotificationService.get_activity_logs_for_user(request.user)
+
     paginator = Paginator(logs, 10)
     page = request.GET.get("page")
     logs = paginator.get_page(page)

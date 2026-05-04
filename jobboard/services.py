@@ -1,9 +1,10 @@
-from .models import Job, SavedJob, Category
+from .models import Job, SavedJob
 from applications.models import Application
-from .utils import log_activity
+from notifications.utils import log_activity
+
 
 def get_filtered_jobs(query, location, category, sort):
-    jobs = jobs.objects.all()
+    jobs = Job.objects.all()
 
     if query:
         jobs = jobs.filter(title__icontains=query)
@@ -23,28 +24,30 @@ def get_filtered_jobs(query, location, category, sort):
 
     return jobs
 
+
 def get_user_jobs_data(user):
     if not user.is_authenticated:
         return {
-            'applied_jobs': [],
-            'saved_jobs': [],
-            'counts': {},
+            "applied_jobs": [],
+            "saved_jobs": [],
+            "counts": {},
         }
-    
+
     applications = Application.objects.filter(user=user)
 
     return {
-        'applied_jobs': [app.job.id for app in applications],
-        'saved_jobs': SavedJob.objects.filter(user=user).select_related('job'),
-        'counts': {
-            'total': applications.count(),
-            'pending': applications.filter(status='pending').count(),
-            'accepted': applications.filter(status='accepted').count(),
-            'rejected': applications.filter(status='rejected').count(),
-        }
+        "applied_jobs": [app.job.id for app in applications],
+        "saved_jobs": SavedJob.objects.filter(user=user).select_related("job"),
+        "counts": {
+            "total": applications.count(),
+            "pending": applications.filter(status="pending").count(),
+            "accepted": applications.filter(status="accepted").count(),
+            "rejected": applications.filter(status="rejected").count(),
+        },
     }
 
-def toggle_save_job(user,job):
+
+def toggle_save_job(user, job):
     saved_job = SavedJob.objects.filter(user=user, job=job).first()
 
     if saved_job():
@@ -54,36 +57,39 @@ def toggle_save_job(user,job):
         SavedJob.objects.create(user=user, job=job)
         return True
 
+
 def create_job_service(form, user):
     job = form.save(commit=False)
-    job.user=user
+    job.user = user
     job.save()
     form.save_m2m()
 
     log_activity(
         user=user,
-        action_type='job_created',
+        action_type="job_created",
         message=f"Created job '{job.title}'",
         job=job,
     )
 
     return job
 
+
 def update_job_service(form, user):
     job = form.save()
     log_activity(
         user=user,
-        action_type='job_updated',
+        action_type="job_updated",
         message=f"Updated job '{job.title}'",
-        job=job
+        job=job,
     )
     return job
+
 
 def delete_job_service(user, job):
     log_activity(
         user=user,
-        action_type='job_deleted',
+        action_type="job_deleted",
         message=f"Deleted job '{job.title}'",
-        job=job
+        job=job,
     )
     job.delete()

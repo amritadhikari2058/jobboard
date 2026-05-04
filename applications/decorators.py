@@ -7,7 +7,7 @@ from applications.models import Application
 def recruiter_owns_application(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        application = kwargs.get('application')
+        application = kwargs.get("application")
 
         # Check recruiter
         if (

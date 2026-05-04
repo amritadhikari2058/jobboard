@@ -1,6 +1,11 @@
+{% extends "base.html" %}
+{%block title%} Application Detail {%endblock%}
+{%block content%}
+
 {%for log in logs%}
 <div class="border p-2 mb-2">
     <strong>{{ log.message }}</strong><br>
     <small>{{ log.created_at }}</small>
 </div>
 {%endfor%}
+{%endblock%}

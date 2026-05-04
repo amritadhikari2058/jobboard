@@ -1,5 +1,6 @@
-{% extends "base.html" %} {%block content%}
-
+{% extends "base.html" %}
+{%block title%} Notifications {%endblock%}
+{%block content%}
 <h2>Notifications</h2>
 {% for n in notifications %}
 <div class="card mb-2 {% if not n.is_read %} border-primary {%endif%}">

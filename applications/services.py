@@ -1,7 +1,7 @@
 from .models import Application
-from notifications.views import activity_logs
-from jobboard.utils import log_activity
+from notifications.utils import log_activity
 from .exceptions import DuplicateApplicationError, InvalidApplicationStateError
+from notifications.services import NotificationService
 
 
 class ApplicationService:
@@ -16,7 +16,7 @@ class ApplicationService:
         application = Application.objects.create(user=user, job=job, resume=resume)
 
         # log_activity
-        activity_logs(
+        log_activity(
             user=user,
             action_type="application_created",
             message=f"Applied to '{job.title}'",
@@ -30,13 +30,19 @@ class ApplicationService:
     def update_application_status(application, user, status):
         if application.status == status:
             raise InvalidApplicationStateError(f"Application is already {status}")
-        
+
         application.status = status
         application.save(update_fields=["status"])
 
+        NotificationService.notify(
+            user=application.user,
+            message=f"Your application for '{application.job.title}' was {status}",
+            link=f"/applications/{application.id}",
+        )
+
         activity_logs(
             user=user,
-            action_type=f'application_{status}',
+            action_type=f"application_{status}",
             message=f"{status.capitalizer()} application for '{application.job.title}'",
             job=application.job,
             application=application,
@@ -56,6 +62,12 @@ class ApplicationService:
     def delete_application(application, user):
         job = application.job
         application.delete()
+
+        NotificationService.notify(
+            user=application.job.user,
+            message=f"{user.username} withdrew application from '{application.job.title}'",
+            link=f"/jobs/{application.job.slug}/applicants/",
+        )
 
         log_activity(
             user=user,
