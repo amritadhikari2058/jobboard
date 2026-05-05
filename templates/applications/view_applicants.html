@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Applicants{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold">Applicants</h3>
+    <a href="{% url 'job_list' %}" class="btn btn-secondary btn-sm">
+      Back to Jobs
+    </a>
+  </div>
+
+  {% if applications %}
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Applicant</th>
+              <th>Job</th>
+              <th>Status</th>
+              <th>Resume</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for app in applications %}
+            <tr>
+
+              <!-- Applicant -->
+              <td class="fw-semibold">
+                {{ app.user.username }}
+              </td>
+
+              <!-- Job -->
+              <td>
+                {{ app.job.title }}
+              </td>
+
+              <!-- Status -->
+              <td>
+                {% if app.status == "pending" %}
+                  <span class="badge bg-secondary">Pending</span>
+                {% elif app.status == "accepted" %}
+                  <span class="badge bg-success">Accepted</span>
+                {% else %}
+                  <span class="badge bg-danger">Rejected</span>
+                {% endif %}
+              </td>
+
+              <!-- Resume -->
+              <td>
+                {% if app.resume %}
+                  <a href="{{ app.resume.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                    View
+                  </a>
+                {% else %}
+                  <span class="text-muted">No resume</span>
+                {% endif %}
+              </td>
+
+              <!-- Actions -->
+              <td class="text-center">
+
+                {% if app.status == "pending" %}
+
+                  <form method="POST" action="{% url 'accept_application' app.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-success">
+                      Accept
+                    </button>
+                  </form>
+
+                  <form method="POST" action="{% url 'reject_application' app.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-danger">
+                      Reject
+                    </button>
+                  </form>
+
+                {% else %}
+
+                  <span class="text-muted small">No actions</span>
+
+                {% endif %}
+
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+
+      </div>
+    </div>
+
+  {% else %}
+
+    <!-- Empty state -->
+    <div class="alert alert-info">
+      No applications found for this job.
+    </div>
+
+  {% endif %}
+
+</div>
+
+{% endblock %}

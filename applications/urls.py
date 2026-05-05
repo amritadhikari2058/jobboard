@@ -12,4 +12,5 @@ urlpatterns = [
     path("<int:app_id>/reject/", views.reject_application, name="reject_application"),
     # Job-based Route
     path("apply/<int:job_id>/", views.create, name="apply_application"),
+    path('<slug:slug>/applicants/', views.view_applicants, name='view_applicants'),
 ]

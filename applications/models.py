@@ -9,9 +9,9 @@ class Application(models.Model):
         ("rejected", "Rejected"),
     ]
 
-    job = models.ForeignKey('jobboard.Job', on_delete=models.CASCADE, related_name="applications")
+    job = models.ForeignKey('jobboard.Job', on_delete=models.CASCADE, related_name="application")
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="applications"
+        User, on_delete=models.CASCADE, related_name="application"
     )
     resume = models.FileField(upload_to="resumes/", null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")

@@ -150,6 +150,36 @@
             {% endfor %}
           </div>
 
+{% if user.is_authenticated and user.userrole.role == 'recruiter' and job.user == user %}
+<div class="mb-2">
+
+  <!-- Total -->
+  <a href="{% url 'application_list' %}?job={{ job.id }}"
+     class="text-decoration-none">
+    <span class="badge bg-secondary me-1">
+      {{ job.total_applications }} Applicants
+    </span>
+  </a>
+
+  <!-- Accepted -->
+  <a href="{% url 'application_list' %}?job={{ job.id }}&status=accepted"
+     class="text-decoration-none">
+    <span class="badge bg-success me-1">
+      {{ job.accepted_count }} Accepted
+    </span>
+  </a>
+
+  <!-- Pending -->
+  <a href="{% url 'application_list' %}?job={{ job.id }}&status=pending"
+     class="text-decoration-none">
+    <span class="badge bg-warning text-dark">
+      {{ job.pending_count }} Pending
+    </span>
+  </a>
+
+</div>
+{% endif %}
+
           {% if application%}
 <div class="my-2">
 
@@ -186,16 +216,23 @@
               </form>
 
               <!-- Recruiter actions -->
-              {% if user.is_authenticated and user.userrole.role == 'recruiter' %}
-              <div class="d-flex gap-1">
-                <a href="{% url 'update_job' job.id %}" class="btn btn-sm btn-outline-warning">
-                  Edit
-                </a>
-                <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger">
-                  Delete
-                </a>
-              </div>
-              {% endif %}
+{% if user.is_authenticated and user.userrole.role == 'recruiter' and job.user == user %}
+<div class="d-flex gap-1">
+
+  <a href="{% url 'view_applicants' job.slug %}" class="btn btn-sm btn-outline-primary">
+    Applicants
+  </a>
+
+  <a href="{% url 'update_job' job.id %}" class="btn btn-sm btn-outline-warning">
+    Edit
+  </a>
+
+  <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger">
+    Delete
+  </a>
+
+</div>
+{% endif %}
 
             </div>
 

@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from notifications.models import Notification
 from .models import Application
 
+
 @receiver(pre_save, sender=Application)
 def old_status(sender, instance, **kwargs):
     if instance.pk:

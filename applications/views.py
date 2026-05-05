@@ -13,7 +13,7 @@ from .decorators import recruiter_owns_application
 @login_required
 @normal_user_required
 def application_list(request):
-    status = request.GET.get('status')
+    status = request.GET.get("status")
     applications = get_user_applications(request.user, status)
     return render(
         request, "applications/application_list.html", {"applications": applications}
@@ -125,5 +125,5 @@ def view_applicants(request, slug):
     applications = get_job_applications(job)
 
     return render(
-        request, "jobboard/view_applicants.html", {"applications": applications}
+        request, "applications/view_applicants.html", {"applications": applications}
     )

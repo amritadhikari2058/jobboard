@@ -18,9 +18,8 @@ class NotificationService:
         return logs.select_related("job", "application", "user").order_by("-created_at")
 
     @staticmethod
-    def notify(user, message, link=None):
+    def notify(user, message):
         return Notification.objects.create(
             user=user,
             message=message,
-            link=link,
         )

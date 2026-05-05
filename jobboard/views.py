@@ -24,8 +24,9 @@ def job_list(request):
     location = request.GET.get("location")
     sort = request.GET.get("sort")
     category = request.GET.get("category")
+    user = request.user
 
-    jobs = get_filtered_jobs(search_query, location, category, sort)
+    jobs = get_filtered_jobs(search_query, location, category, sort, user)
 
     paginator = Paginator(jobs, 4)
     page_number = request.GET.get("page")

@@ -1,10 +1,21 @@
 from .models import Job, SavedJob
 from applications.models import Application
 from notifications.utils import log_activity
+from django.db.models import Count, Q
 
 
-def get_filtered_jobs(query, location, category, sort):
+def get_filtered_jobs(query, location, category, sort, user):
     jobs = Job.objects.all()
+
+    # Recruiter sees only their jobs
+    if user.is_authenticated and user.userrole.role == "recruiter":
+        jobs = jobs.filter(user=user)
+
+    jobs = jobs.annotate(
+        total_applications=Count("application"),
+        accepted_count=Count("application", filter=Q(application__status="accepted")),
+        pending_count=Count("application", filter=Q(application__status="pending")),
+    )
 
     if query:
         jobs = jobs.filter(title__icontains=query)
