@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Application
 from jobboard.models import Job
 from django.contrib.auth.decorators import login_required
 from .services import ApplicationService
@@ -10,10 +9,12 @@ from applications.exceptions import ApplicationError
 from applications.selectors import get_user_applications, get_job_applications
 from .decorators import recruiter_owns_application
 
+
 @login_required
 @normal_user_required
 def application_list(request):
-    applications = get_user_applications(request.user)
+    status = request.GET.get('status')
+    applications = get_user_applications(request.user, status)
     return render(
         request, "applications/application_list.html", {"applications": applications}
     )

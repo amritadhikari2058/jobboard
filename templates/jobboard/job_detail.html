@@ -45,7 +45,7 @@
     </small>
 
     {% endif %}
-    <a href="{% url 'job_list' %}" class="btn btn-secondary mt-3">Back</a>
+    <a href="{% url 'job_list' %}" onclick = "event.preventDefault(); window.history.back();" class="btn btn-secondary mt-3">Back</a>
   </div>
 </div>
 {% endblock %}

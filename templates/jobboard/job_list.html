@@ -73,42 +73,50 @@
 
   </form>
 
+{%if request.GET.status%}
+<h5>Showing {{request.GET.status|title}} Applications</h5>
+{%endif%}
+
   <!-- Dashboard Cards -->
   <div class="row mb-4 g-3">
-
     <div class="col-md-3">
       <div class="card text-center shadow-sm border-0">
+        <a href="{%url 'application_list'%}"class='text-decoration-none stretched-link'>
         <div class="card-body">
           <h6 class="text-muted">Total Applications</h6>
           <h4 class="fw-bold">{{ total_application_count }}</h4>
         </div>
+      </a>
       </div>
     </div>
-
-    <div class="col-md-3">
-      <div class="card text-center shadow-sm border-0 bg-warning-subtle">
-        <div class="card-body">
+<div class="col-md-3">
+  <div class="card text-center shadow-sm border-0 bg-warning-subtle position-relative">
+    <a href="{%url 'application_list'%}?status=pending"class='text-decoration-none stretched-link'>
+    <div class="card-body">
           <h6>Pending</h6>
           <h4 class="fw-bold">{{ pending_application_count }}</h4>
         </div>
+      </a>
       </div>
     </div>
-
     <div class="col-md-3">
-      <div class="card text-center shadow-sm border-0 bg-success-subtle">
+      <div class="card text-center shadow-sm border-0 bg-danger-subtle position-relative">
+        <a href="{%url 'application_list'%}?status=accepted"class='text-decoration-none stretched-link'>
         <div class="card-body">
           <h6>Accepted</h6>
           <h4 class="fw-bold text-success">{{ accepted_application_count }}</h4>
         </div>
+      </a>
       </div>
     </div>
-
     <div class="col-md-3">
-      <div class="card text-center shadow-sm border-0 bg-danger-subtle">
+      <div class="card text-center shadow-sm border-0 bg-danger-subtle position-relative">
+        <a href="{%url 'application_list'%}?status=rejected"class='text-decoration-none stretched-link'>
         <div class="card-body">
           <h6>Rejected</h6>
           <h4 class="fw-bold text-danger">{{ rejected_application_count }}</h4>
         </div>
+      </a>
       </div>
     </div>
 

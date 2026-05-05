@@ -37,10 +37,9 @@ class ApplicationService:
         NotificationService.notify(
             user=application.user,
             message=f"Your application for '{application.job.title}' was {status}",
-            link=f"/applications/{application.id}",
         )
 
-        activity_logs(
+        log_activity(
             user=user,
             action_type=f"application_{status}",
             message=f"{status.capitalizer()} application for '{application.job.title}'",
@@ -66,7 +65,6 @@ class ApplicationService:
         NotificationService.notify(
             user=application.job.user,
             message=f"{user.username} withdrew application from '{application.job.title}'",
-            link=f"/jobs/{application.job.slug}/applicants/",
         )
 
         log_activity(

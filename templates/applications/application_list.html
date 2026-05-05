@@ -18,68 +18,67 @@
           <tr>
             <td>{{ app.job.title }}</td>
             <td>{{ app.user.username }}</td>
+<td>
+  {% if request.user.userrole.role == "recruiter" %}
+
+    {% if app.status == 'pending' %}
+      <span class="badge bg-secondary">Pending</span>
+
+      <form method="POST" action="{% url 'accept_application' app.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary me-2">Accept</button>
+      </form>
+
+      <form method="POST" action="{% url 'reject_application' app.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning">Reject</button>
+      </form>
+
+    {% elif app.status == 'rejected' %}
+      <span class="badge bg-danger">Rejected</span>
+
+      <form method="POST" action="{% url 'accept_application' app.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Accept</button>
+      </form>
+
+    {% else %}
+      <span class="badge bg-success">Accepted</span>
+
+      <form method="POST" action="{% url 'reject_application' app.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning">Reject</button>
+      </form>
+    {% endif %}
+
+  {% else %}
+    <!-- Normal user view -->
+    {% if app.status == 'pending' %}
+      <span class="badge bg-secondary">Pending</span>
+    {% elif app.status == 'rejected' %}
+      <span class="badge bg-danger">Rejected</span>
+    {% else %}
+      <span class="badge bg-success">Accepted</span>
+    {% endif %}
+  {% endif %}
+</td>
             <td>
-              {% if app.status == 'pending' %}
-              <span class="badge bg-secondary">Pending</span>
+  {% if request.user.userrole.role == "recruiter" %}
 
-              <form
-                method="POST"
-                action="{% url 'accept_application' app.id %}"
-              >
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary me-2">
-                  Accept
-                </button>
-              </form>
+    <!-- Recruiter actions -->
+    <a href="{% url 'application_detail' app.id %}" class="btn btn-sm btn-info">
+      View
+    </a>
 
-              <form
-                method="POST"
-                action="{% url 'reject_application' app.id %}"
-              >
-                {% csrf_token %}
-                <button type="submit" class="btn btn-warning">Reject</button>
-              </form>
+  {% else %}
 
-              {% elif app.status == 'rejected' %}
-              <span class="badge bg-danger">Rejected</span>
+    <!-- Normal user actions -->
+    <a href="{% url 'delete_application' app.id %}" class="btn btn-sm btn-danger">
+      Delete
+    </a>
 
-              <form
-                method="POST"
-                action="{% url 'accept_application' app.id %}"
-              >
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Accept</button>
-              </form>
-
-              {% else %}
-              <span class="badge bg-success">Accepted</span>
-
-              <form
-                method="POST"
-                action="{% url 'reject_application' app.id %}"
-              >
-                {% csrf_token %}
-                <button type="submit" class="btn btn-warning">Reject</button>
-              </form>
-              {% endif %}
-            </td>
-            <td>
-              <a
-                href="{% url 'application_detail' app.id %}"
-                class="btn btn-sm btn-info"
-                >View</a
-              >
-              <a
-                href="{% url 'update_application' app.id %}"
-                class="btn btn-sm btn-warning"
-                >Edit</a
-              >
-              <a
-                href="{% url 'delete_application' app.id %}"
-                class="btn btn-sm btn-danger"
-                >Delete</a
-              >
-            </td>
+  {% endif %}
+</td>
           </tr>
           {% empty %}
           <tr>

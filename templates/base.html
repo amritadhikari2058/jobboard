@@ -11,34 +11,38 @@
 <body class="bg-light">
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-gradient shadow-sm mb-4">
   <div class="container">
 
     <!-- Left -->
-    <a class="navbar-brand fw-bold" href="{% url 'job_list' %}">
-      Job Board
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{% url 'job_list' %}">
+      🚀 <span>Job Board</span>
     </a>
 
     <!-- Right -->
     <div class="d-flex align-items-center gap-3">
 
       {% if user.is_authenticated and user.userrole.role == 'recruiter' %}
-        <a href="{% url 'recruiter_dashboard' %}" class="text-white text-decoration-none">
+        <a href="{% url 'recruiter_dashboard' %}" class="nav-link text-white px-2">
+          Dashboard
+        </a>
+      {% elif user.is_authenticated and user.userrole.role == 'normal_user' %}
+        <a href="{% url 'user_dashboard' %}" class="nav-link text-white px-2">
           Dashboard
         </a>
       {% endif %}
 
       {% if user.is_authenticated %}
-        <a href="{% url 'view_user_profile' user.username %}" class="text-white text-decoration-none">
+        <a href="{% url 'view_user_profile' user.username %}" class="nav-link text-white px-2">
           My Profile
         </a>
       {% endif %}
 
       {% if user.is_authenticated %}
-        <a href="{% url 'notifications' %}" class="text-white text-decoration-none position-relative">
+        <a href="{% url 'notifications' %}" class="nav-link text-white position-relative px-2">
           🔔
           {% if unread_notification_count > 0 %}
-            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+            <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
               {{ unread_notification_count }}
             </span>
           {% endif %}
@@ -50,13 +54,15 @@
 
         <form method="POST" action="{% url 'logout' %}" class="d-inline">
           {% csrf_token %}
-          <button type="submit" class="btn btn-sm btn-outline-light">
+          <button type="submit" class="btn btn-sm btn-outline-light rounded-pill px-3">
             Logout
           </button>
         </form>
 
       {% else %}
-        <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light">Login</a>
+        <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+          Login
+        </a>
       {% endif %}
 
     </div>
