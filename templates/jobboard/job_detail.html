@@ -31,7 +31,7 @@
     {% elif request.user.userrole.role == 'normal_user' %}
 
     <a
-      href="{% url 'apply_application' job.id %}"
+      href="{% url 'applications:apply_application' job.id %}"
       class="btn btn-primary mt-3 w-100"
     >
       Apply for Job

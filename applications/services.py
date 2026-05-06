@@ -42,7 +42,7 @@ class ApplicationService:
         log_activity(
             user=user,
             action_type=f"application_{status}",
-            message=f"{status.capitalizer()} application for '{application.job.title}'",
+            message=f"{status.capitalize()} application for '{application.job.title}'",
             job=application.job,
             application=application,
         )

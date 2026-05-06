@@ -12,11 +12,11 @@ from .models import Application
 
 
 @login_required
-@normal_user_required
 def application_list(request):
     status = request.GET.get("status")
     job_id = request.GET.get("job")
-    applications = get_user_applications(request.user, status)
+    job = Job.objects.get(id=job_id)
+    applications = get_user_applications(job, status)
     if job_id:
         applications = applications.filter(job_id=job_id)
     return render(
@@ -43,7 +43,7 @@ def update(request, app_id, application):
 
         messages.success(request, "Application updated successfully")
 
-        return redirect("application_list")
+        return redirect("applications:application_list")
     return render(
         request, "applications/update_application.html", {"application": application}
     )
@@ -58,7 +58,7 @@ def delete(request, app_id, application):
         ApplicationService.delete_application(application, request.user)
 
         messages.success(request, "Application deleted successfully")
-        return redirect("application_list")
+        return redirect("applications:application_list")
 
     return render(
         request, "applications/delete_application.html", {"application": application}
@@ -80,7 +80,7 @@ def create(request, job_id):
         except ApplicationError as e:
             messages.warning(request, str(e))
 
-        return redirect("application_list")
+        return redirect("applications:application_list")
 
     return render(request, "applications/apply_application.html", {"job": job})
 
@@ -100,7 +100,7 @@ def accept_application(request, app_id, application):
     except ApplicationError as e:
         messages.error(request, str(e))
 
-    return redirect("view_applicants", slug=application.job.slug)
+    return redirect("applications:view_applicants", slug=application.job.slug)
 
 
 @login_required
@@ -118,7 +118,7 @@ def reject_application(request, app_id, application):
     except ApplicationError as e:
         messages.error(request, str(e))
 
-    return redirect("view_applicants", slug=application.job.slug)
+    return redirect("applications:view_applicants", slug=application.job.slug)
 
 
 @login_required
@@ -132,9 +132,12 @@ def view_applicants(request, slug):
         request, "applications/view_applicants.html", {"applications": applications}
     )
 
+
 @login_required
 @recruiter_required
 def applications_by_job(request):
-    job_id=request.GET.get(job_id)
+    job_id = request.GET.get(job_id)
     applications = Application.objects.filter(job_id=job_id)
-    return render(request, 'applications/application_list.html', {'applications': applications})
+    return render(
+        request, "applications/application_list.html", {"applications": applications}
+    )

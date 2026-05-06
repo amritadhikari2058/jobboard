@@ -24,12 +24,12 @@
     {% if app.status == 'pending' %}
       <span class="badge bg-secondary">Pending</span>
 
-      <form method="POST" action="{% url 'accept_application' app.id %}">
+      <form method="POST" action="{% url 'applications:accept_application' app.id %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-primary me-2">Accept</button>
       </form>
 
-      <form method="POST" action="{% url 'reject_application' app.id %}">
+      <form method="POST" action="{% url 'applications:reject_application' app.id %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-warning">Reject</button>
       </form>
@@ -37,7 +37,7 @@
     {% elif app.status == 'rejected' %}
       <span class="badge bg-danger">Rejected</span>
 
-      <form method="POST" action="{% url 'accept_application' app.id %}">
+      <form method="POST" action="{% url 'applications:accept_application' app.id %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-primary">Accept</button>
       </form>
@@ -45,7 +45,7 @@
     {% else %}
       <span class="badge bg-success">Accepted</span>
 
-      <form method="POST" action="{% url 'reject_application' app.id %}">
+      <form method="POST" action="{% url 'applications:reject_application' app.id %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-warning">Reject</button>
       </form>
@@ -66,14 +66,14 @@
   {% if request.user.userrole.role == "recruiter" %}
 
     <!-- Recruiter actions -->
-    <a href="{% url 'application_detail' app.id %}" class="btn btn-sm btn-info">
+    <a href="{% url 'applications:application_detail' app.id %}" class="btn btn-sm btn-info">
       View
     </a>
 
   {% else %}
 
     <!-- Normal user actions -->
-    <a href="{% url 'delete_application' app.id %}" class="btn btn-sm btn-danger">
+    <a href="{% url 'applications:delete_application' app.id %}" class="btn btn-sm btn-danger">
       Delete
     </a>
 

@@ -5,13 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .forms import JobForm
-from .services import (
-    get_filtered_jobs,
-    get_user_jobs_data,
-    update_job_service,
-    delete_job_service,
-)
-from .services import create_job_service
+from .services import JobService
 from users.decorators import (
     recruiter_required,
     normal_user_required,
@@ -26,15 +20,16 @@ def job_list(request):
     category = request.GET.get("category")
     user = request.user
 
-    jobs = get_filtered_jobs(search_query, location, category, sort, user)
+    jobs = JobService.get_filtered_jobs(search_query, location, category, sort, user)
 
-    paginator = Paginator(jobs, 4)
+    paginator = Paginator(jobs, 10)
     page_number = request.GET.get("page")
     jobs = paginator.get_page(page_number)
 
     categories = Category.objects.all()
 
-    user_data = get_user_jobs_data(request.user)
+    user_data = JobService.get_user_jobs_data(request.user)
+    print("user: ", request.user)
 
     return render(
         request,
@@ -74,7 +69,7 @@ def create_job(request):
         form = JobForm(request.POST)
 
         if form.is_valid():
-            create_job_service(form, request.user)
+            JobService.create_job_service(form, request.user)
             messages.success(request, "Job has successfully created.")
             return redirect("job_list")
     else:
@@ -90,7 +85,7 @@ def update_job(request, id, job):
     if request.method == "POST":
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
-            update_job_service(form, request.user)
+            JobService.update_job_service(form, request.user)
             return redirect("job_list")
     else:
         form = JobForm(instance=job)
@@ -103,7 +98,7 @@ def delete_job(request, id):
     job = Job.objects.get(id=id)
 
     if request.method == "POST":
-        delete_job_service(request.user, job)
+        JobService.delete_job_service(request.user, job)
         messages.success(request, "Job deleted successfully")
         return redirect("job_list")
 

@@ -71,14 +71,14 @@
 
                 {% if app.status == "pending" %}
 
-                  <form method="POST" action="{% url 'accept_application' app.id %}" class="d-inline">
+                  <form method="POST" action="{% url 'applications:accept_application' app.id %}" class="d-inline">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-success">
                       Accept
                     </button>
                   </form>
 
-                  <form method="POST" action="{% url 'reject_application' app.id %}" class="d-inline">
+                  <form method="POST" action="{% url 'applications:reject_application' app.id %}" class="d-inline">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-danger">
                       Reject

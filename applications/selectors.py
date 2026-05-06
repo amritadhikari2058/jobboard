@@ -1,9 +1,9 @@
 from applications.models import Application
 
 
-def get_user_applications(user, status=None):
+def get_user_applications(job, status=None):
     qs = (
-        Application.objects.filter(user=user)
+        Application.objects.filter(job=job)
         .select_related("job", "user")
         .order_by("-id")
     )
@@ -17,7 +17,7 @@ def get_job_applications(job):
     return (
         Application.objects.filter(job=job)
         .select_related("job", "user")
-        .order_by("=id")
+        .order_by("-id")
     )
 
 

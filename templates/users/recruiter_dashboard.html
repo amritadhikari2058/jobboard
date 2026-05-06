@@ -51,12 +51,12 @@
 
               <!-- Actions -->
               {% if app.status == 'pending' %}
-                <form method="POST" action="{% url 'accept_application' app.id %}">
+                <form method="POST" action="{% url 'applications:accept_application' app.id %}">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-success">Accept</button>
                 </form>
 
-                <form method="POST" action="{% url 'reject_application' app.id %}">
+                <form method="POST" action="{% url 'applications:reject_application' app.id %}">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-danger">Reject</button>
                 </form>

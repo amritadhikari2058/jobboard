@@ -14,11 +14,11 @@ def recruiter_owns_application(view_func):
         ):
             messages.error(request, "Only recruiters can perform this action.")
             return redirect("job_list")
-        
+
         application = kwargs.get("application")
         if not application:
-            messages.error(request, 'Application not found')
-            return redirect('job_list')
+            messages.error(request, "Application not found")
+            return redirect("job_list")
 
         # Check ownership
         if application.job.user != request.user:
