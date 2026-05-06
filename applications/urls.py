@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = "applications"
+
 urlpatterns = [
     path("", views.application_list, name="application_list"),
     # Application Routes
@@ -12,5 +14,5 @@ urlpatterns = [
     path("<int:app_id>/reject/", views.reject_application, name="reject_application"),
     # Job-based Route
     path("apply/<int:job_id>/", views.create, name="apply_application"),
-    path('<slug:slug>/applicants/', views.view_applicants, name='view_applicants'),
+    path("<slug:slug>/applicants/", views.view_applicants, name="view_applicants"),
 ]

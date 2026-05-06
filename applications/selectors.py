@@ -9,8 +9,8 @@ def get_user_applications(user, status=None):
     )
     if status:
         qs = qs.filter(status=status)
-    
-    return qs.order_by('-id')
+
+    return qs.order_by("-id")
 
 
 def get_job_applications(job):

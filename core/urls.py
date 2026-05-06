@@ -7,7 +7,10 @@ import debug_toolbar
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("jobboard.urls")),
-    path("applications/", include("applications.urls")),
+    path(
+        "applications/",
+        include(("applications.urls", "applications"), namespace="applications"),
+    ),
     path("users/", include("users.urls")),
     path("notifications/", include("notifications.urls")),
     path("accounts/", include("django.contrib.auth.urls")),

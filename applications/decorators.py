@@ -7,8 +7,6 @@ from applications.models import Application
 def recruiter_owns_application(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        application = kwargs.get("application")
-
         # Check recruiter
         if (
             not hasattr(request.user, "userrole")
@@ -16,6 +14,11 @@ def recruiter_owns_application(view_func):
         ):
             messages.error(request, "Only recruiters can perform this action.")
             return redirect("job_list")
+        
+        application = kwargs.get("application")
+        if not application:
+            messages.error(request, 'Application not found')
+            return redirect('job_list')
 
         # Check ownership
         if application.job.user != request.user:

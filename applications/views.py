@@ -8,13 +8,17 @@ from .decorators import application_owner_required, get_application
 from applications.exceptions import ApplicationError
 from applications.selectors import get_user_applications, get_job_applications
 from .decorators import recruiter_owns_application
+from .models import Application
 
 
 @login_required
 @normal_user_required
 def application_list(request):
     status = request.GET.get("status")
+    job_id = request.GET.get("job")
     applications = get_user_applications(request.user, status)
+    if job_id:
+        applications = applications.filter(job_id=job_id)
     return render(
         request, "applications/application_list.html", {"applications": applications}
     )
@@ -127,3 +131,10 @@ def view_applicants(request, slug):
     return render(
         request, "applications/view_applicants.html", {"applications": applications}
     )
+
+@login_required
+@recruiter_required
+def applications_by_job(request):
+    job_id=request.GET.get(job_id)
+    applications = Application.objects.filter(job_id=job_id)
+    return render(request, 'applications/application_list.html', {'applications': applications})

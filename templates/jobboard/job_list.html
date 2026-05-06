@@ -81,7 +81,7 @@
   <div class="row mb-4 g-3">
     <div class="col-md-3">
       <div class="card text-center shadow-sm border-0">
-        <a href="{%url 'application_list'%}"class='text-decoration-none stretched-link'>
+        <a href="{%url 'applications:application_list'%}"class='text-decoration-none stretched-link'>
         <div class="card-body">
           <h6 class="text-muted">Total Applications</h6>
           <h4 class="fw-bold">{{ total_application_count }}</h4>
@@ -91,7 +91,7 @@
     </div>
 <div class="col-md-3">
   <div class="card text-center shadow-sm border-0 bg-warning-subtle position-relative">
-    <a href="{%url 'application_list'%}?status=pending"class='text-decoration-none stretched-link'>
+    <a href="{%url 'applications:application_list'%}?status=pending"class='text-decoration-none stretched-link'>
     <div class="card-body">
           <h6>Pending</h6>
           <h4 class="fw-bold">{{ pending_application_count }}</h4>
@@ -101,7 +101,7 @@
     </div>
     <div class="col-md-3">
       <div class="card text-center shadow-sm border-0 bg-danger-subtle position-relative">
-        <a href="{%url 'application_list'%}?status=accepted"class='text-decoration-none stretched-link'>
+        <a href="{%url 'applications:application_list'%}?status=accepted"class='text-decoration-none stretched-link'>
         <div class="card-body">
           <h6>Accepted</h6>
           <h4 class="fw-bold text-success">{{ accepted_application_count }}</h4>
@@ -111,7 +111,7 @@
     </div>
     <div class="col-md-3">
       <div class="card text-center shadow-sm border-0 bg-danger-subtle position-relative">
-        <a href="{%url 'application_list'%}?status=rejected"class='text-decoration-none stretched-link'>
+        <a href="{%url 'applications:application_list'%}?status=rejected"class='text-decoration-none stretched-link'>
         <div class="card-body">
           <h6>Rejected</h6>
           <h4 class="fw-bold text-danger">{{ rejected_application_count }}</h4>
@@ -154,7 +154,7 @@
 <div class="mb-2">
 
   <!-- Total -->
-  <a href="{% url 'application_list' %}?job={{ job.id }}"
+  <a href="{% url 'applications:application_list' %}?job={{ job.id }}"
      class="text-decoration-none">
     <span class="badge bg-secondary me-1">
       {{ job.total_applications }} Applicants
@@ -162,7 +162,7 @@
   </a>
 
   <!-- Accepted -->
-  <a href="{% url 'application_list' %}?job={{ job.id }}&status=accepted"
+  <a href="{% url 'applications:application_list' %}?job={{ job.id }}&status=accepted"
      class="text-decoration-none">
     <span class="badge bg-success me-1">
       {{ job.accepted_count }} Accepted
@@ -170,7 +170,7 @@
   </a>
 
   <!-- Pending -->
-  <a href="{% url 'application_list' %}?job={{ job.id }}&status=pending"
+  <a href="{% url 'applications:application_list' %}?job={{ job.id }}&status=pending"
      class="text-decoration-none">
     <span class="badge bg-warning text-dark">
       {{ job.pending_count }} Pending
@@ -219,7 +219,7 @@
 {% if user.is_authenticated and user.userrole.role == 'recruiter' and job.user == user %}
 <div class="d-flex gap-1">
 
-  <a href="{% url 'view_applicants' job.slug %}" class="btn btn-sm btn-outline-primary">
+  <a href="{% url 'applications:view_applicants' job.slug %}" class="btn btn-sm btn-outline-primary">
     Applicants
   </a>
 
