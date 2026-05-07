@@ -29,7 +29,6 @@ def job_list(request):
     categories = Category.objects.all()
 
     user_data = JobService.get_user_jobs_data(request.user)
-    print("user: ", request.user)
 
     return render(
         request,
@@ -41,7 +40,7 @@ def job_list(request):
             "accepted_application_count": user_data["counts"].get("accepted", 0),
             "rejected_application_count": user_data["counts"].get("rejected", 0),
             "pending_application_count": user_data["counts"].get("pending", 0),
-            "saved_jobs": user_data["saved_jobs"],
+            "saved_job_ids": user_data["saved_job_ids"],
             "categories": categories,
         },
     )
@@ -112,17 +111,21 @@ def toggle_save_job(request, job_id):
         return redirect("job_list")
 
     job = get_object_or_404(Job, id=job_id)
-    added = toggle_save_job(request.user, job)
+    added = JobService.toggle_save_job(request.user, job)
     if added:
         messages.success(request, "Job saved.")
     else:
         messages.info(request, "Job removed from saved.")
 
-    return redirect(request.META.get("HTTP_REFERRER", "job_list"))
+    return redirect(request.META.get("HTTP_REFERER", "job_list"))
 
 
 # Handling saved jobs with separate page
 @login_required
 def saved_jobs_view(request):
-    saved_jobs = SavedJob.objects.filter(user=request.user).select_related("job")
+    saved_jobs = (
+        SavedJob.objects.filter(user=request.user)
+        .select_related("job")
+        .order_by("-created_at")
+    )
     return render(request, "jobboard/saved_jobs.html", {"saved_jobs": saved_jobs})

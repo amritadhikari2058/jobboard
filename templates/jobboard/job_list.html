@@ -119,8 +119,12 @@
       </a>
       </div>
     </div>
-
   </div>
+
+<a href="{% url 'saved_jobs' %}"
+   class="btn btn-outline-primary my-2 text-decoration-none">
+   Saved Jobs
+</a>
 
   <!-- Job Cards -->
   <div class="row g-4">
@@ -208,7 +212,7 @@
               <form method="POST" action="{% url 'toggle_save_job' job.id %}">
                 {% csrf_token %}
 
-                {% if job in saved_jobs %}
+                {% if job.id in saved_job_ids %}
                   <button class="btn btn-sm btn-outline-info">Unsave</button>
                 {% else %}
                   <button class="btn btn-sm btn-outline-info">Save</button>

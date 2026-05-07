@@ -18,7 +18,9 @@ class JobService:
             accepted_count=Count(
                 "applications", filter=Q(applications__status="accepted")
             ),
-            pending_count=Count("applications", filter=Q(applications__status="pending")),
+            pending_count=Count(
+                "applications", filter=Q(applications__status="pending")
+            ),
         )
 
         if query:
@@ -44,7 +46,7 @@ class JobService:
         if not user.is_authenticated:
             return {
                 "applied_jobs": [],
-                "saved_jobs": [],
+                "saved_job_ids": [],
                 "counts": {},
             }
 
@@ -52,7 +54,9 @@ class JobService:
 
         return {
             "applied_jobs": [app.job.id for app in applications],
-            "saved_jobs": SavedJob.objects.filter(user=user).select_related("job"),
+            "saved_job_ids": SavedJob.objects.filter(user=user)
+            .select_related("job")
+            .values_list("job_id", flat=True),
             "counts": {
                 "total": applications.count(),
                 "pending": applications.filter(status="pending").count(),
@@ -65,7 +69,7 @@ class JobService:
     def toggle_save_job(user, job):
         saved_job = SavedJob.objects.filter(user=user, job=job).first()
 
-        if saved_job():
+        if saved_job:
             saved_job.delete()
             return False
         else:
