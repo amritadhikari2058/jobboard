@@ -7,6 +7,7 @@ from applications.models import Application
 from django.contrib import messages
 from jobboard.models import Job
 from django.db import reset_queries
+from django.db.models import Count, Q
 
 
 # Recruiter Dashboard
@@ -14,11 +15,53 @@ from django.db import reset_queries
 def recruiter_dashboard(request):
     if request.user.userrole.role != "recruiter":
         return redirect("job_list")
-    jobs = Job.objects.filter(user=request.user).prefetch_related("applications")
+
+    jobs = Job.objects.filter(user=request.user).annotate(
+        total_applications=Count("applications"),
+        accepted_count=Count("applications", filter=Q(applications__status="accepted")),
+        pending_count=Count("applications", filter=Q(applications__status="pending")),
+        rejected_count=Count("applications", filter=Q(applications__status="rejected")),
+    )
+
+    total_jobs = jobs.count()
+    total_applications = sum(job.total_applications for job in jobs)
+    accepted_applications = sum(job.accepted_count for job in jobs)
+    pending_applications = sum(job.pending_count for job in jobs)
+    rejected_applications = sum(job.rejected_count for job in jobs)
+
+    job_titles = [job.title for job in jobs]
+    application_counts = [job.total_applications for job in jobs]
+    top_job = jobs.order_by('-total_applications').first()
+
+    for job in jobs:
+        if job.total_applications > 0:
+            job.acceptance_rate = round(
+                (job.accepted_count / job.total_applications) * 100, 1
+            )
+        else:
+            job.acceptance_rate = 0
+    
+    if top_job and top_job.total_applications > 0:
+        top_job.acceptance_rate = round(
+            (top_job.accepted_count / top_job.total_applications) *100, 1
+        )
+    else:
+        top_job.acceptance_rate=0
+
     return render(
         request,
         "users/recruiter_dashboard.html",
-        {"jobs": jobs},
+        {
+            "jobs": jobs,
+            "total_jobs": total_jobs,
+            "total_applications": total_applications,
+            "accepted_applications": accepted_applications,
+            "rejected_applications": rejected_applications,
+            "pending_applications": pending_applications,
+            'job_titles': job_titles,
+            'application_counts': application_counts,
+            'top_job': top_job,
+        },
     )
 
 
