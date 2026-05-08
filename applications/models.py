@@ -43,8 +43,8 @@ class Application(models.Model):
 
     # Applicant data
     resume = models.FileField(upload_to="resumes/", null=True, blank=True)
-    cover_letter = models.TextField(max_length=1000)
-    experience = models.TextField(max_length=750)
+    cover_letter = models.TextField(max_length=1000, default='Put your Cover Letter here')
+    experience = models.TextField(max_length=750, default='No Experience')
     skills = models.CharField(max_length=250, blank=True)
 
     # Availability
@@ -55,6 +55,7 @@ class Application(models.Model):
     )
     availability_period = models.CharField(
         max_length=50,
+        default='Immediate',
         help_text="e.g. Immediate, 2 weeks, 1 month",
     )
 

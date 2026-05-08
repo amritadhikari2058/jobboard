@@ -15,29 +15,27 @@
                     <p class="text-muted mb-0">{{ job.location }}</p>
                 </div>
 
-                <!-- Form -->
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
+ <form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
 
-                    <!-- Resume Upload -->
-                    <div class="mb-3">
-                        <label class="form-label">Upload Resume</label>
-                        <input type="file" name="cover_letter" class="form-control" required>
-                    </div>
+  <!-- Application form -->
+  {{ form.as_p }}
 
-                    <!-- Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
-                            Cancel
-                        </a>
+  <!-- VERY IMPORTANT -->
+  {{ formset.management_form }}
 
-                        <button type="submit" class="btn btn-primary">
-                            Apply Now
-                        </button>
-                    </div>
+  <!-- Loop through link forms -->
+  {% for link_form in formset %}
+    <div class="mb-3">
+      {{ link_form.link_type }}
+      {{ link_form.url }}
+    </div>
+  {% endfor %}
 
-                </form>
-
+  <button type="submit" class="btn btn-primary">
+    Submit Application
+  </button>
+</form>
             </div>
 
         </div>

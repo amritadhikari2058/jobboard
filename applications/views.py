@@ -9,6 +9,7 @@ from applications.exceptions import ApplicationError
 from applications.selectors import get_user_applications, get_job_applications
 from .decorators import recruiter_owns_application
 from .models import Application
+from .forms import ApplicationForm, ApplicationLinkFormSet
 
 
 @login_required
@@ -65,24 +66,24 @@ def delete(request, app_id, application):
     )
 
 
-@login_required
-@normal_user_required
-def create(request, job_id):
-    job = get_object_or_404(Job, id=job_id)
+# @login_required
+# @normal_user_required
+# def create(request, job_id):
+#     job = get_object_or_404(Job, id=job_id)
 
-    if request.method == "POST":
-        resume = request.FILES.get("resume")
+#     if request.method == "POST":
+#         resume = request.FILES.get("resume")
 
-        try:
-            ApplicationService.apply(user=request.user, job=job, resume=resume)
-            messages.success(request, "Application applied successfully!")
+#         try:
+#             ApplicationService.apply(user=request.user, job=job, resume=resume)
+#             messages.success(request, "Application applied successfully!")
 
-        except ApplicationError as e:
-            messages.warning(request, str(e))
+#         except ApplicationError as e:
+#             messages.warning(request, str(e))
 
-        return redirect("applications:application_list")
+#         return redirect("applications:application_list")
 
-    return render(request, "applications/apply_application.html", {"job": job})
+#     return render(request, "applications/apply_application.html", {"job": job})
 
 
 @login_required
@@ -140,4 +141,40 @@ def applications_by_job(request):
     applications = Application.objects.filter(job_id=job_id)
     return render(
         request, "applications/application_list.html", {"applications": applications}
+    )
+
+
+@login_required
+def create(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+
+    if request.method == "POST":
+        form = ApplicationForm(request.POST, request.FILES)
+        formset = ApplicationLinkFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            # Save main application first
+            application = form.save(commit=False)
+            application.user = request.user
+            application.job = job
+            application.save()
+
+            # Attach formset to this application
+            formset.instance = application
+            formset.save()
+            
+            messages.success(request, "Application submitted successfully")
+            return redirect('job_list')
+    
+    else:
+        form = ApplicationForm()
+        formset = ApplicationLinkFormSet()
+    
+    return render(
+        request,
+        'applications/apply_application.html',
+        {
+            'form': form,
+            'formset': formset,
+        }
     )
