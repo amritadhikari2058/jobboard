@@ -209,14 +209,17 @@
             <div class="d-flex justify-content-between align-items-center">
 
               <!-- Save -->
-              <form method="POST" action="{% url 'toggle_save_job' job.id %}">
+              <form method='POST' class='save-job-form' data-job-id="{{job.id}}">
                 {% csrf_token %}
 
+                <button type='button' class='btn btn-sm btn-outline-info save-btn'>
+
                 {% if job.id in saved_job_ids %}
-                  <button class="btn btn-sm btn-outline-info">Unsave</button>
+                  Unsave
                 {% else %}
-                  <button class="btn btn-sm btn-outline-info">Save</button>
+                  Save
                 {% endif %}
+                </button> 
               </form>
 
               <!-- Recruiter actions -->
@@ -298,5 +301,37 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 </style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+  document.querySelectorAll(".save-job-form").forEach(form => {
+
+    const button = form.querySelector(".save-btn");
+
+    button.addEventListener("click", function () {
+
+      const jobId = form.dataset.jobId;
+      const csrfToken = form.querySelector("[name=csrfmiddlewaretoken]").value;
+
+      fetch(`/toggle_save_job/${jobId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.added) {
+          button.textContent = "Unsave";
+        } else {
+          button.textContent = "Save";
+        }
+      });
+
+    });
+
+  });
+
+});
+</script>
 {% endblock %}
