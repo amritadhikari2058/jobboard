@@ -22,15 +22,27 @@
   {{ form.as_p }}
 
   <!-- VERY IMPORTANT -->
-  {{ formset.management_form }}
+  <div id="formset-container">
+    {{ formset.management_form }}
 
-  <!-- Loop through link forms -->
-  {% for link_form in formset %}
-    <div class="mb-3">
-      {{ link_form.link_type }}
-      {{ link_form.url }}
+    {%for link_form in formset%}
+    <div class="link-form border p-3 mb-2 rounded">
+      {{link_form.link_type}}
+      {{link_form.url}}
     </div>
-  {% endfor %}
+    {%endfor%}
+  </div>
+
+  <div id="empty-form" class="d-none">
+  <div class="link-form border p-3 mb-2 rounded">
+    {{ formset.empty_form.link_type }}
+    {{ formset.empty_form.url }}
+  </div>
+</div>
+
+  <button class="btn btn-sm btn-outline-primary" id='add-link-btn' type='button'>
+    +Add Link
+  </button>
 
   <button type="submit" class="btn btn-primary">
     Submit Application
@@ -41,4 +53,27 @@
         </div>
     </div>
 </div>
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("JS LOADED");  // test
+
+    document.getElementById("add-link-btn").addEventListener("click", function () {
+        console.log("clicked"); // test
+
+        const container = document.getElementById("formset-container");
+        const totalForms = document.getElementById("id_form-TOTAL_FORMS");
+        const currentFormCount = parseInt(totalForms.value);
+
+        const emptyForm = document.getElementById("empty-form").innerHTML;
+
+        const newFormHtml = emptyForm.replace(/__prefix__/g, currentFormCount);
+
+        container.insertAdjacentHTML("beforeend", newFormHtml);
+
+        totalForms.value = currentFormCount + 1;
+    });
+});
+</script>
+{% endblock %}
 {%endblock%}
