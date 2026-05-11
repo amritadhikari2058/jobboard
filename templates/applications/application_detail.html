@@ -1,24 +1,144 @@
 {% extends "base.html" %}
-{%block title%} Application Detail {%endblock%}
-{%block content%}
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-body">
-            <h3 class="card-title">{{ application.job.title }}</h3>
-            <p><strong>User:</strong> {{ application.user.username }}</p>
-            <p><strong>Status:</strong> 
-                <span class="badge bg-info">{{ application.status }}</span>
-            </p>
+{% block title %}Application Detail{% endblock %}
 
-            {% if application.cover_letter %}
-                <p>
-                    <strong>Resume:</strong>
-                    <a href="{{ application.cover_letter.url }}" class="btn btn-sm btn-primary">Download</a>
-                </p>
-            {% endif %}
+{% block content %}
+<div class="container mt-4">
 
-            <a href="{% url 'application_list' %}" class="btn btn-secondary mt-3">Back</a>
+    <!-- HEADER -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-1">{{ application.job.title }}</h3>
+                <p class="text-muted mb-0">{{ application.job.location }}</p>
+            </div>
+
+            <!-- Status Badge -->
+            <span class="badge fs-6 
+                {% if application.status == 'pending' %}bg-warning
+                {% elif application.status == 'accepted' %}bg-success
+                {% else %}bg-danger
+                {% endif %}">
+                {{ application.status|title }}
+            </span>
         </div>
     </div>
+
+    <div class="row">
+
+        <!-- LEFT SIDE -->
+        <div class="col-md-8">
+
+            <!-- Cover Letter -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Cover Letter</h5>
+                    <p class="mb-0">
+                        {{ application.cover_letter|linebreaks }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Experience</h5>
+                    <p class="mb-0">
+                        {{ application.experience|linebreaks }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Skills</h5>
+                    <p class="mb-0">{{ application.skills }}</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-md-4">
+
+            <!-- Applicant Info -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Applicant Info</h5>
+
+                    <p><strong>User:</strong> {{ application.user.username }}</p>
+
+                    <p>
+                        <strong>Applied On:</strong><br>
+                        {{ application.created_at|date:"M d, Y" }}
+                    </p>
+
+                    <p>
+                        <strong>Availability:</strong><br>
+                        {{ application.availability_type|title }}
+                    </p>
+
+                    <p>
+                        <strong>Available From:</strong><br>
+                        {{ application.availability_period }}
+                    </p>
+
+                    <p>
+                        <strong>Expected Salary:</strong><br>
+                        {{ application.expected_salary }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Resume -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body text-center">
+                    <h5 class="mb-3">Resume</h5>
+
+                    {% if application.resume %}
+                        <a href="{{ application.resume.url }}" class="btn btn-primary w-100">
+                            Download Resume
+                        </a>
+                    {% else %}
+                        <p class="text-muted">No resume uploaded</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Portfolio Links -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Portfolio</h5>
+
+                    {% for link in application.links.all %}
+                        <div class="mb-2">
+                            <strong>{{ link.link_type|title }}:</strong><br>
+                            <a href="{{ link.url }}" target="_blank">
+                                {{ link.url }}
+                            </a>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No links provided</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="mt-4 d-flex gap-2">
+
+        {% if application.status == "pending" %}
+            <a href="#" class="btn btn-outline-primary">Edit</a>
+            <a href="#" class="btn btn-outline-danger">Withdraw</a>
+        {% endif %}
+
+        <a href="{% url 'applications:user_applications' %}" class="btn btn-secondary">
+            Back to Applications
+        </a>
+    </div>
+
 </div>
-{%endblock%}
+{% endblock %}

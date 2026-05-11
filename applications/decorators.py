@@ -33,10 +33,12 @@ def recruiter_owns_application(view_func):
 def application_owner_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        application = kwargs.get("application")
+        application = Application.objects.get(id=kwargs.get("app_id"))
+        is_owner = application.user == request.user
+        is_recruiter = application.job.user == request.user
 
-        if application.user != request.user:
-            messages.error(request, "You can only manage your own applications.")
+        if not (is_owner or is_recruiter):
+            messages.error(request, "You are not allowed to view this application.")
             return redirect("job_list")
 
         return view_func(request, *args, **kwargs)

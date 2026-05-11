@@ -66,26 +66,6 @@ def delete(request, app_id, application):
     )
 
 
-# @login_required
-# @normal_user_required
-# def create(request, job_id):
-#     job = get_object_or_404(Job, id=job_id)
-
-#     if request.method == "POST":
-#         resume = request.FILES.get("resume")
-
-#         try:
-#             ApplicationService.apply(user=request.user, job=job, resume=resume)
-#             messages.success(request, "Application applied successfully!")
-
-#         except ApplicationError as e:
-#             messages.warning(request, str(e))
-
-#         return redirect("applications:application_list")
-
-#     return render(request, "applications/apply_application.html", {"job": job})
-
-
 @login_required
 @get_application
 @recruiter_owns_application
@@ -162,19 +142,40 @@ def create(request, job_id):
             # Attach formset to this application
             formset.instance = application
             formset.save()
-            
+
             messages.success(request, "Application submitted successfully")
-            return redirect('job_list')
-    
+            return redirect("job_list")
+
     else:
         form = ApplicationForm()
         formset = ApplicationLinkFormSet()
-    
+
     return render(
         request,
-        'applications/apply_application.html',
+        "applications/apply_application.html",
         {
-            'form': form,
-            'formset': formset,
-        }
+            "form": form,
+            "formset": formset,
+        },
     )
+
+@login_required
+@normal_user_required
+def user_applications(request):
+    applications = Application.objects.filter(user=request.user).select_related("job")
+    status = request.GET.get('status')
+    if status:
+        applications = applications.filter(status=status)
+
+    return render(request, 'applications/user_applications.html', {
+        'applications': applications,
+    })
+
+@login_required
+@recruiter_required
+def recruiter_applications(request):
+    jobs = Job.objects.filter(user=request.user).prefetch_related('applications')
+
+    return render(request, 'applications/recruiter_applications.html', {
+        'jobs': jobs,
+    })
