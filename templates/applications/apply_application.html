@@ -53,16 +53,14 @@
         </div>
     </div>
 </div>
-{% block scripts %}
+
 <script>
+  console.log("MY SCRIPT RUNNING ONLY ONCE");
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("JS LOADED");  // test
 
     document.getElementById("add-link-btn").addEventListener("click", function () {
-        console.log("clicked"); // test
-
         const container = document.getElementById("formset-container");
-        const totalForms = document.getElementById("id_form-TOTAL_FORMS");
+        const totalForms = document.getElementById("id_links-TOTAL_FORMS");
         const currentFormCount = parseInt(totalForms.value);
 
         const emptyForm = document.getElementById("empty-form").innerHTML;
@@ -75,5 +73,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-{% endblock %}
+
 {%endblock%}
