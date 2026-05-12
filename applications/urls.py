@@ -12,6 +12,7 @@ urlpatterns = [
     # Update Application Status
     path("<int:app_id>/accept/", views.accept_application, name="accept_application"),
     path("<int:app_id>/reject/", views.reject_application, name="reject_application"),
+    path('<int:app_id>/withdraw/', views.withdraw_application, name='withdraw_application'),
     # Job-based Route
     path("apply/<int:job_id>/", views.create, name="apply_application"),
     path('user_applications/', views.user_applications, name='user_applications'),

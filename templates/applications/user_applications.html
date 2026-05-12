@@ -33,7 +33,14 @@
         <div class="mt-3">
             {% if app.status == "pending" %}
                 <a href="#" class="btn btn-sm btn-outline-primary">Edit</a>
-                <a href="#" class="btn btn-sm btn-outline-danger">Withdraw</a>
+                {% if app.status == "pending" %}
+<form method="POST" action="{% url 'applications:withdraw_application' app.id %}">
+    {% csrf_token %}
+    <button class="btn btn-sm btn-outline-danger">
+        Withdraw
+    </button>
+</form>
+{% endif %}
             {% endif %}
 
             <a href="{% url 'applications:application_detail' app.id %}" class="btn btn-sm btn-outline-secondary">View</a>

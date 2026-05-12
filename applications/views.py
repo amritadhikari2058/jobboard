@@ -159,23 +159,51 @@ def create(request, job_id):
         },
     )
 
+
 @login_required
 @normal_user_required
 def user_applications(request):
     applications = Application.objects.filter(user=request.user).select_related("job")
-    status = request.GET.get('status')
+    status = request.GET.get("status")
     if status:
         applications = applications.filter(status=status)
 
-    return render(request, 'applications/user_applications.html', {
-        'applications': applications,
-    })
+    return render(
+        request,
+        "applications/user_applications.html",
+        {
+            "applications": applications,
+        },
+    )
+
 
 @login_required
 @recruiter_required
 def recruiter_applications(request):
-    jobs = Job.objects.filter(user=request.user).prefetch_related('applications')
+    jobs = Job.objects.filter(user=request.user).prefetch_related("applications")
 
-    return render(request, 'applications/recruiter_applications.html', {
-        'jobs': jobs,
-    })
+    return render(
+        request,
+        "applications/recruiter_applications.html",
+        {
+            "jobs": jobs,
+        },
+    )
+
+
+@login_required
+@application_owner_required
+def withdraw_application(request, app_id):
+    application = get_object_or_404(Application, id=app_id)
+
+    if application.user != request.user:
+        messages.error(request, "Not allowed")
+
+    if application.status != "pending":
+        messages.warning(request, "Cannot withdraw after decision.")
+        return redirect("applications:user_applications")
+
+    application.delete()
+
+    messages.success(request, "Application withdrawn")
+    return redirect("applications:user_applications")
