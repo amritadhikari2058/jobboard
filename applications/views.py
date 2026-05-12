@@ -30,7 +30,12 @@ def application_list(request):
 @application_owner_required
 def application_detail(request, app_id, application):
     return render(
-        request, "applications/application_detail.html", {"application": application}
+        request,
+        "applications/application_detail.html",
+        {
+            "application": application,
+            "previous_url": request.META.get("HTTP_REFERER", "/"),
+        },
     )
 
 
@@ -203,7 +208,10 @@ def withdraw_application(request, app_id):
         messages.warning(request, "Cannot withdraw after decision.")
         return redirect("applications:user_applications")
 
-    application.delete()
+    if request.method == "POST":
+        application.status = "withdrawn"
+        application.save()
+        messages.success(request, "Application withdrawn")
 
-    messages.success(request, "Application withdrawn")
+    messages.error(request, "Sorry, the application couldn't be withdrawn")
     return redirect("applications:user_applications")
