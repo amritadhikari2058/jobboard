@@ -6,7 +6,7 @@
 <div class="card mb-2 {% if not n.is_read %} border-primary {%endif%}">
   <div class="card-body">
     <a
-      href="{% url 'notifications_mark_as_read' n.id %}"
+      href="{% url 'notifications:notifications_mark_as_read' n.id %}"
       class="text-decoration-none text-dark"
     >
       <div class="card mb-2 {% if not n.is_read %}border-primary{% endif %}">

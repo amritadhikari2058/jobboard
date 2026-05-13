@@ -8,6 +8,7 @@ class Notification(models.Model):
         ("application_created", "Application Created"),
         ("application_accepted", "Application Accepted"),
         ("application_rejected", "Application Rejected"),
+        ("application_withdrawn", "Application Withdrawn"),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE, null=True, blank=True)
@@ -33,6 +34,7 @@ class ActivityLog(models.Model):
         ("application_created", "Application Created"),
         ("application_accepted", "Application Accepted"),
         ("application_rejected", "Application Rejected"),
+        ("application_withdrawn", "Application Withdrawn"),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)

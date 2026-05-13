@@ -13,6 +13,7 @@ from users.decorators import (
 from .decorators import job_owner_required
 from django.http import JsonResponse
 
+
 def job_list(request):
     search_query = request.GET.get("q")
     location = request.GET.get("location")
@@ -108,7 +109,7 @@ def delete_job(request, id):
 @normal_user_required
 def toggle_save_job(request, job_id):
     if request.method != "POST":
-        return JsonResponse({'error':"Invalid Request"}, status=400)
+        return JsonResponse({"error": "Invalid Request"}, status=400)
 
     job = get_object_or_404(Job, id=job_id)
     added = JobService.toggle_save_job(request.user, job)
@@ -117,9 +118,7 @@ def toggle_save_job(request, job_id):
     else:
         messages.info(request, "Job removed from saved.")
 
-    return JsonResponse({
-        'added':added
-    })
+    return JsonResponse({"added": added})
 
 
 # Handling saved jobs with separate page
