@@ -22,7 +22,15 @@ def notifications_mark_as_read(request, id):
     notification = get_object_or_404(Notification, id=id, user=request.user)
     notification.is_read = True
     notification.save()
-    return redirect("job_detail", id=notification.job.id)
+
+    if notification.application:
+        return redirect(
+            "applications:application_detail", app_id=notification.application.id
+        )
+    elif notification.job:
+        return redirect("job_detail", id=notification.job.id)
+
+    return redirect("notifications")
 
 
 @login_required

@@ -16,10 +16,14 @@ from .forms import ApplicationForm, ApplicationLinkFormSet
 def application_list(request):
     status = request.GET.get("status")
     job_id = request.GET.get("job")
-    job = Job.objects.get(id=job_id)
-    applications = get_user_applications(job, status)
+
+    applications = Application.objects.none()
+    job = None
+    
     if job_id:
-        applications = applications.filter(job_id=job_id)
+        job = get_object_or_404(Job, id=job_id)
+
+        applications = get_user_applications(job, status)
     return render(
         request, "applications/application_list.html", {"applications": applications}
     )
