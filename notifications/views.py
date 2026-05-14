@@ -30,7 +30,7 @@ def notifications_mark_as_read(request, id):
     elif notification.job:
         return redirect("job_detail", id=notification.job.id)
 
-    return redirect("notifications")
+    return redirect("notifications:notifications")
 
 
 @login_required
