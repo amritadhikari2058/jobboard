@@ -5,7 +5,7 @@ from .forms import UserProfileForm
 from django.contrib.auth.models import User
 from applications.models import Application
 from django.contrib import messages
-from jobboard.models import Job
+from jobs.models import Job
 from django.db import reset_queries
 from django.db.models import Count, Q
 
@@ -31,7 +31,7 @@ def recruiter_dashboard(request):
 
     job_titles = [job.title for job in jobs]
     application_counts = [job.total_applications for job in jobs]
-    top_job = jobs.order_by('-total_applications').first()
+    top_job = jobs.order_by("-total_applications").first()
 
     for job in jobs:
         if job.total_applications > 0:
@@ -40,13 +40,13 @@ def recruiter_dashboard(request):
             )
         else:
             job.acceptance_rate = 0
-    
+
     if top_job and top_job.total_applications > 0:
         top_job.acceptance_rate = round(
-            (top_job.accepted_count / top_job.total_applications) *100, 1
+            (top_job.accepted_count / top_job.total_applications) * 100, 1
         )
     else:
-        top_job.acceptance_rate=0
+        top_job.acceptance_rate = 0
 
     return render(
         request,
@@ -58,9 +58,9 @@ def recruiter_dashboard(request):
             "accepted_applications": accepted_applications,
             "rejected_applications": rejected_applications,
             "pending_applications": pending_applications,
-            'job_titles': job_titles,
-            'application_counts': application_counts,
-            'top_job': top_job,
+            "job_titles": job_titles,
+            "application_counts": application_counts,
+            "top_job": top_job,
         },
     )
 

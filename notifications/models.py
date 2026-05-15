@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from jobboard.models import Job
+from jobs.models import Job
 
 
 class Notification(models.Model):

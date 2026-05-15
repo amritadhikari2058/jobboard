@@ -6,7 +6,7 @@ import debug_toolbar
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("jobboard.urls")),
+    path("", include("jobs.urls")),
     path(
         "applications/",
         include(("applications.urls", "applications"), namespace="applications"),

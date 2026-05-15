@@ -32,7 +32,7 @@ class Application(models.Model):
 
     # Core relations
     job = models.ForeignKey(
-        "jobboard.Job",
+        "jobs.Job",
         on_delete=models.CASCADE,
         related_name="applications",
     )

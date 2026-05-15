@@ -54,7 +54,7 @@
 
 <!-- NAVBAR (cleaned) -->
 <nav class="navbar navbar-dark bg-dark px-3 shadow-sm">
-    <a class="navbar-brand fw-bold" href="{% url 'job_list' %}">
+    <a class="navbar-brand fw-bold" href="{% url 'jobs:job_list' %}">
         🚀 Job Board
     </a>
 
@@ -94,6 +94,10 @@
             <a href="{% url 'recruiter_dashboard' %}">Dashboard</a>
         {% else %}
             <a href="{% url 'user_dashboard' %}">Dashboard</a>
+        {% endif %}
+
+        {% if user.userrole.role == 'recruiter' %}
+            <a href="{% url 'jobs:recruiter_jobs' %}">Your Jobs</a>
         {% endif %}
 
        {% if user.userrole.role == 'normal_user' %}

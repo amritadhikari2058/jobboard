@@ -42,18 +42,18 @@ class JobService:
         return jobs
 
     @staticmethod
-    def get_user_jobs_data(user):
+    def get_jobs_stats(user):
         if not user.is_authenticated:
             return {
-                "applied_jobs": [],
+                "applied_job_ids": [],
                 "saved_job_ids": [],
                 "counts": {},
             }
 
-        applications = Application.objects.filter(job__user=user)
+        applications = Application.objects.filter(user=user)
 
         return {
-            "applied_jobs": [app.job.id for app in applications],
+            "applied_job_ids": [app.job.id for app in applications],
             "saved_job_ids": SavedJob.objects.filter(user=user)
             .select_related("job")
             .values_list("job_id", flat=True),

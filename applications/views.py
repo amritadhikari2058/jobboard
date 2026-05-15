@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from jobboard.models import Job
+from jobs.models import Job
 from django.contrib.auth.decorators import login_required
 from .services import ApplicationService
 from users.decorators import normal_user_required, recruiter_required

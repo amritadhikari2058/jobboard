@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'jobboard',
+    'jobs',
     'applications',
     'users',
     'notifications',
@@ -80,7 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'jobboard.context_processors.notification_count',
+                'jobs.context_processors.notification_count',
             ],
         },
     },

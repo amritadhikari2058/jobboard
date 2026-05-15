@@ -8,7 +8,6 @@ from .forms import JobForm
 from .services import JobService
 from users.decorators import (
     recruiter_required,
-    normal_user_required,
 )
 from .decorators import job_owner_required
 from django.http import JsonResponse
@@ -29,22 +28,23 @@ def job_list(request):
 
     categories = Category.objects.all()
 
-    user_data = JobService.get_user_jobs_data(request.user)
+    user_data = JobService.get_jobs_stats(request.user)
 
     return render(
         request,
-        "jobboard/job_list.html",
+        "jobs/job_list.html",
         {
             "jobs": jobs,
-            "applied_jobs": user_data["applied_jobs"],
-            "total_application_count": user_data["counts"].get("total", 0),
-            "accepted_application_count": user_data["counts"].get("accepted", 0),
-            "rejected_application_count": user_data["counts"].get("rejected", 0),
-            "pending_application_count": user_data["counts"].get("pending", 0),
+            "applied_job_ids": user_data["applied_job_ids"],
             "saved_job_ids": user_data["saved_job_ids"],
             "categories": categories,
         },
     )
+
+
+def recruiter_jobs(request):
+    jobs = Job.objects.filter(user=request.user)
+    return render(request, "jobs/recruiter_jobs.html", {"jobs": jobs})
 
 
 def job_detail(request, id):
@@ -56,7 +56,7 @@ def job_detail(request, id):
         applied_jobs = [app.job.id for app in applications]
     return render(
         request,
-        "jobboard/job_detail.html",
+        "jobs/job_detail.html",
         {"job": job, "applied_jobs": applied_jobs, "application": application},
     )
 
@@ -74,7 +74,7 @@ def create_job(request):
             return redirect("job_list")
     else:
         form = JobForm()
-    return render(request, "jobboard/create_job.html", {"form": form})
+    return render(request, "jobs/create_job.html", {"form": form})
 
 
 @login_required
@@ -89,7 +89,7 @@ def update_job(request, id, job):
             return redirect("job_list")
     else:
         form = JobForm(instance=job)
-    return render(request, "jobboard/update_job.html", {"form": form})
+    return render(request, "jobs/update_job.html", {"form": form})
 
 
 @login_required
@@ -102,11 +102,10 @@ def delete_job(request, id):
         messages.success(request, "Job deleted successfully")
         return redirect("job_list")
 
-    return render(request, "jobboard/delete_job.html", {"job": job})
+    return render(request, "jobs/delete_job.html", {"job": job})
 
 
 @login_required
-@normal_user_required
 def toggle_save_job(request, job_id):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid Request"}, status=400)
@@ -129,4 +128,4 @@ def saved_jobs_view(request):
         .select_related("job")
         .order_by("-created_at")
     )
-    return render(request, "jobboard/saved_jobs.html", {"saved_jobs": saved_jobs})
+    return render(request, "jobs/saved_jobs.html", {"saved_jobs": saved_jobs})
