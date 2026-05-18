@@ -72,7 +72,7 @@
         </a>
 
         <!-- User + Logout -->
-        <span class="text-white small">Hi, {{ user.username }}</span>
+        <span class="text-white small">Hi, {{ user.email }}</span>
 
         <form method="POST" action="{% url 'logout' %}" class="d-inline">
             {% csrf_token %}
@@ -88,7 +88,7 @@
 
     {% if user.is_authenticated %}
 
-        <a href="{% url 'view_user_profile' user.username %}">My Profile</a>
+        <a href="{% url 'view_user_profile' user.email %}">My Profile</a>
 
         {% if user.userrole.role == 'recruiter' %}
             <a href="{% url 'recruiter_dashboard' %}">Dashboard</a>

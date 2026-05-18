@@ -163,8 +163,8 @@
 
             <!-- Applicant Info -->
             <div>
-              <a href="{% url 'view_user_profile' app.user.username %}" class="fw-semibold text-decoration-none">
-                {{ app.user.username }}
+              <a href="{% url 'view_user_profile' app.user.email %}" class="fw-semibold text-decoration-none">
+                {{ app.user.email }}
               </a>
               <br>
               <small class="text-muted">Applied on {{ app.created_at|date:"M d, Y" }}</small>

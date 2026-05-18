@@ -17,7 +17,7 @@
           {% for app in applications %}
           <tr>
             <td>{{ app.job.title }}</td>
-            <td>{{ app.user.username }}</td>
+            <td>{{ app.user.email }}</td>
 <td>
   {% if request.user.userrole.role == "recruiter" %}
 
