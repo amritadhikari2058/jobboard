@@ -10,7 +10,7 @@ class JobService:
         jobs = Job.objects.all()
 
         # Recruiter sees only their jobs
-        if user.is_authenticated and user.userrole.role == "recruiter":
+        if user.is_authenticated and user.role == "recruiter":
             jobs = jobs.filter(user=user)
 
         jobs = jobs.annotate(

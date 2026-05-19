@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class Application(models.Model):
@@ -37,7 +37,7 @@ class Application(models.Model):
         related_name="applications",
     )
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="applications",
     )
@@ -88,7 +88,7 @@ class Application(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.job.title} - {self.user.username}"
+        return f"{self.job.title} - {self.user.email}"
 
     class Meta:
         unique_together = ("job", "user")

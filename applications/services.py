@@ -64,7 +64,7 @@ class ApplicationService:
 
         NotificationService.notify(
             user=application.job.user,
-            message=f"{user.username} withdrew application from '{application.job.title}'",
+            message=f"{user.email} withdrew application from '{application.job.title}'",
         )
 
         log_activity(

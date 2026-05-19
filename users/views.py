@@ -1,33 +1,46 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile
-from .forms import UserProfileForm
-from django.contrib.auth.models import User
+from .forms import UserProfileForm, RegisterForm, LoginForm
 from applications.models import Application
 from django.contrib import messages
 from jobs.models import Job
 from django.db import reset_queries
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from .decorators import recruiter_required, normal_user_required
+
+User = get_user_model()
 
 
 # Recruiter Dashboard
 @login_required
+@recruiter_required
 def recruiter_dashboard(request):
-    if request.user.userrole.role != "recruiter":
-        return redirect("job_list")
-
-    jobs = Job.objects.filter(user=request.user).annotate(
-        total_applications=Count("applications"),
-        accepted_count=Count("applications", filter=Q(applications__status="accepted")),
-        pending_count=Count("applications", filter=Q(applications__status="pending")),
-        rejected_count=Count("applications", filter=Q(applications__status="rejected")),
+    jobs = (
+        Job.objects.filter(user=request.user)
+        .select_related("user")
+        .annotate(
+            total_applications=Count("applications"),
+            accepted_count=Count(
+                "applications", filter=Q(applications__status="accepted")
+            ),
+            pending_count=Count(
+                "applications", filter=Q(applications__status="pending")
+            ),
+            rejected_count=Count(
+                "applications", filter=Q(applications__status="rejected")
+            ),
+        )
     )
 
     total_jobs = jobs.count()
-    total_applications = sum(job.total_applications for job in jobs)
-    accepted_applications = sum(job.accepted_count for job in jobs)
-    pending_applications = sum(job.pending_count for job in jobs)
-    rejected_applications = sum(job.rejected_count for job in jobs)
+    totals = jobs.aggregate(
+        total_applications=Sum("total_applications"),
+        accepted_applications=Sum("accepted_count"),
+        pending_applications=Sum("pending_count"),
+        rejected_applications=Sum("rejected_count"),
+    )
 
     job_titles = [job.title for job in jobs]
     application_counts = [job.total_applications for job in jobs]
@@ -54,10 +67,10 @@ def recruiter_dashboard(request):
         {
             "jobs": jobs,
             "total_jobs": total_jobs,
-            "total_applications": total_applications,
-            "accepted_applications": accepted_applications,
-            "rejected_applications": rejected_applications,
-            "pending_applications": pending_applications,
+            "total_applications": totals["total_applications"] or 0,
+            "accepted_applications": totals["accepted_applications"] or 0,
+            "rejected_applications": totals["rejected_applications"] or 0,
+            "pending_applications": totals["pending_applications"] or 0,
             "job_titles": job_titles,
             "application_counts": application_counts,
             "top_job": top_job,
@@ -66,10 +79,9 @@ def recruiter_dashboard(request):
 
 
 @login_required
+@normal_user_required
 def user_dashboard(request):
     reset_queries()
-    if request.user.userrole.role != "normal_user":
-        return redirect("job_list")
     applications = Application.objects.filter(user=request.user).select_related("job")
     response = render(
         request, "users/user_dashboard.html", {"applications": applications}
@@ -85,7 +97,7 @@ def edit_user_profile(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect("view_user_profile", profile.user.username)
+            return redirect("view_user_profile", profile.user.email)
     else:
         form = UserProfileForm(instance=profile)
 
@@ -93,9 +105,9 @@ def edit_user_profile(request):
 
 
 @login_required
-def view_user_profile(request, username):
-    target_user = get_object_or_404(User, username=username)
-    profile = get_object_or_404(UserProfile, user=target_user)
+def view_user_profile(request, email):
+    target_user = get_object_or_404(User, email=email)
+    profile = UserProfile.objects.get_or_create(user=target_user)
 
     # SELF VIEW
     if request.user == target_user:
@@ -111,3 +123,43 @@ def view_user_profile(request, username):
 
     messages.warning(request, "You are not eligible to view this user's profile.")
     return redirect("job_list")
+
+
+def register_view(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Account created successfully")
+            return redirect("login")
+    else:
+        form = RegisterForm()
+
+    return render(request, "users/register.html", {"form": form})
+
+
+def login_view(request):
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
+
+            user = authenticate(request, email=email, password=password)
+
+            if user:
+                login(request, user)
+                return redirect("job_list")
+            else:
+                messages.error(request, "Invalid email or password")
+
+    else:
+        form = LoginForm()
+
+    return render(request, "users/login.html", {"form": form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")

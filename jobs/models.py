@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils.text import slugify
 
 
@@ -14,7 +14,7 @@ class Category(models.Model):
 
 
 class Job(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, null=False)
     slug = models.SlugField(unique=True, null=True, blank=True)
     location = models.CharField(max_length=100, null=False)
@@ -36,7 +36,7 @@ class Job(models.Model):
 
 
 class SavedJob(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from jobs.models import Job
 
 
@@ -10,7 +10,7 @@ class Notification(models.Model):
         ("application_rejected", "Application Rejected"),
         ("application_withdrawn", "Application Withdrawn"),
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE, null=True, blank=True)
     application = models.ForeignKey(
         "applications.Application", on_delete=models.CASCADE, null=True, blank=True
@@ -37,7 +37,7 @@ class ActivityLog(models.Model):
         ("application_withdrawn", "Application Withdrawn"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     action_type = models.CharField(max_length=75, choices=ACTION_CHOICES)
     message = models.TextField()
 
