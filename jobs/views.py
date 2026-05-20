@@ -71,7 +71,7 @@ def create_job(request):
         if form.is_valid():
             JobService.create_job_service(form, request.user)
             messages.success(request, "Job has successfully created.")
-            return redirect("job_list")
+            return redirect("jobs:job_list")
     else:
         form = JobForm()
     return render(request, "jobs/create_job.html", {"form": form})
