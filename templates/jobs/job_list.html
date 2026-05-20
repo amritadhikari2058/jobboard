@@ -3,11 +3,19 @@
 {% block content %}
 
 <div class="container mt-4">
+  
 
-  <!-- HEADER -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="fw-bold mb-0">Job Listings</h2>
-  </div>
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="fw-bold mb-0">Job Listings</h2>
+
+  {% if user.is_authenticated and user.role == 'recruiter' %}
+  <a href="{% url 'jobs:create_job' %}"
+     class="btn btn-primary rounded-pill px-4 shadow-sm">
+    + Create Job
+  </a>
+  {% endif %}
+</div>
 
   <!-- FILTER CARD -->
   <div class="card shadow-sm border-0 mb-4 p-3">
