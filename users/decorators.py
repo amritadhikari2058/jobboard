@@ -6,6 +6,9 @@ from functools import wraps
 def recruiter_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("login")
+
         role = getattr(request.user, "role", None)
 
         if role != "recruiter":
@@ -20,9 +23,9 @@ def recruiter_required(view_func):
 def normal_user_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        userrole = getattr(request.user, "userrole", None)
+        role = getattr(request.user, "role", None)
 
-        if not userrole or userrole.role != "normal_user":
+        if not role or role != "normal_user":
             messages.error(request, "Only job seekers can perform this action")
             return redirect("jobs:job_list")
 

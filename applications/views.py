@@ -153,7 +153,7 @@ def create(request, job_id):
             formset.save()
 
             messages.success(request, "Application submitted successfully")
-            return redirect("job_list")
+            return redirect("jobs:job_list")
 
     else:
         form = ApplicationForm()

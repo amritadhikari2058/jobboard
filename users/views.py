@@ -53,13 +53,13 @@ def recruiter_dashboard(request):
             )
         else:
             job.acceptance_rate = 0
-
-    if top_job and top_job.total_applications > 0:
-        top_job.acceptance_rate = round(
-            (top_job.accepted_count / top_job.total_applications) * 100, 1
-        )
-    else:
-        top_job.acceptance_rate = 0
+    if top_job:
+        if top_job.total_applications > 0:
+            top_job.acceptance_rate = round(
+                (top_job.accepted_count / top_job.total_applications) * 100, 1
+            )
+        else:
+            top_job.acceptance_rate = 0
 
     return render(
         request,
@@ -107,7 +107,7 @@ def edit_user_profile(request):
 @login_required
 def view_user_profile(request, email):
     target_user = get_object_or_404(User, email=email)
-    profile = UserProfile.objects.get_or_create(user=target_user)
+    profile, created = UserProfile.objects.get_or_create(user=target_user)
 
     # SELF VIEW
     if request.user == target_user:
@@ -150,7 +150,7 @@ def login_view(request):
 
             if user:
                 login(request, user)
-                return redirect("job_list")
+                return redirect("jobs:job_list")
             else:
                 messages.error(request, "Invalid email or password")
 

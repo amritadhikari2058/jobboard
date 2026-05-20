@@ -7,14 +7,19 @@
 
       <div class="row">
 
-        <!-- Profile Picture -->
-        <div class="col-md-3 text-center">
-          {% if profile.profile_pic %}
-            <img src="{{ profile.profile_pic.url }}" class="img-fluid rounded-circle mb-3" style="max-height: 150px;">
-          {% else %}
-            <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle mb-3">
-          {% endif %}
-        </div>
+      <div class="col-md-3 text-center">
+
+        {% if profile.profile_pic %}
+          <img src="{{ profile.profile_pic.url }}"
+              class="rounded-circle object-fit-cover"
+              style="width:150px; height:150px;">
+        {% else %}
+          <img src="https://via.placeholder.com/150"
+              class="rounded-circle object-fit-cover"
+              style="width:150px; height:150px;">
+        {% endif %}
+
+      </div>
 
         <!-- Basic Info -->
         <div class="col-md-9">
@@ -54,8 +59,8 @@
       </div>
 
     </div>
-    {%if request.user == profile.user %}
-      <a href='{% url 'edit_user_profile' %}' class="btn btn-primary">Edit Profile</a>
+    {%if request.user.id == profile.user.id %}
+      <a href='{% url 'users:edit_user_profile' %}' class="btn btn-primary">Edit Profile</a>
     {%endif%}
   </div>
 </div>

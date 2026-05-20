@@ -28,7 +28,7 @@
 
     <button class="btn btn-success mt-3 w-100" disabled>Applied ✓</button>
 
-    {% elif request.user.userrole.role == 'normal_user' %}
+    {% elif request.user.role == 'normal_user' %}
 
     <a
       href="{% url 'applications:apply_application' job.id %}"
