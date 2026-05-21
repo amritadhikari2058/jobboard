@@ -151,5 +151,7 @@ LOGIN_REDIRECT_URL = 'job_list'
 LOGOUT_REDIRECT_URL = 'login'
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'users.backends.EmailBackend',
 ]
+
+LOGIN_URL = 'users:login'
