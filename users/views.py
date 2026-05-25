@@ -126,15 +126,16 @@ def view_user_profile(request, email):
 
 
 def register_view(request):
+    form = RegisterForm()
     if request.method == "POST":
         form = RegisterForm(request.POST)
+        role = request.POST.get("role")
         if form.is_valid():
-            form.save()
+            form.save(role=role)
             messages.success(request, "Account created successfully")
-            return redirect("login")
+            return redirect("users:login")
     else:
-        form = RegisterForm()
-
+        print(form.errors)
     return render(request, "users/register.html", {"form": form})
 
 

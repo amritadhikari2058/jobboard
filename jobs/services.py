@@ -33,6 +33,7 @@ class JobService:
             jobs = jobs.filter(categories__name__icontains=category)
 
         jobs = jobs.distinct()
+        jobs=jobs.order_by('-created_at')
 
         if sort == "latest":
             jobs = jobs.order_by("-created_at")

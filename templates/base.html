@@ -78,6 +78,16 @@
             {% csrf_token %}
             <button class="btn btn-sm btn-outline-light">Logout</button>
         </form>
+
+        {%else%}
+            <!-- Login + Register -->
+            <a href="{% url 'users:login' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                Login
+            </a>
+
+            <a href="{% url 'users:register' %}" class="btn btn-sm btn-primary rounded-pill px-3">
+                Register
+            </a>
         {% endif %}
 
     </div>

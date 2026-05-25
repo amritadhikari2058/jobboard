@@ -13,6 +13,11 @@
 
 <form method="POST" class="mx-auto p-4 shadow-sm border rounded" style="max-width: 400px;">
     {% csrf_token %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {{ form.errors }}
+    </div>
+    {% endif %}
 
     <!-- Email -->
     <div class="mb-3">
@@ -33,9 +38,12 @@
     </div>
 
     <!-- Button -->
-    <div class="d-grid">
-        <button type="submit" class="btn btn-success btn-lg rounded-pill">
-            Register
+    <div class="d-grid gap-2">
+        <button type="submit" name='role' value='user' class="btn btn-success btn-lg rounded-pill">
+            Register as Job Seeker
+        </button>
+        <button type='submit' name='role' value='recruiter' class='btn btn-dark btn-lg rounded-pill'>
+            Register as Recruiter
         </button>
     </div>
 
