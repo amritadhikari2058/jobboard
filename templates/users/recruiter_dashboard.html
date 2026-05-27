@@ -139,7 +139,7 @@
     </span>
 
     <span class="badge bg-dark">
-      {{ job.acceptance_rate }}% Acceptance
+      {{ job.acceptance_rate }}% Acceptance Rate
     </span>
 
   </div>
@@ -163,7 +163,7 @@
 
             <!-- Applicant Info -->
             <div>
-              <a href="{% url 'view_user_profile' app.user.email %}" class="fw-semibold text-decoration-none">
+              <a href="{% url 'users:view_user_profile' app.user.email %}" class="fw-semibold text-decoration-none">
                 {{ app.user.email }}
               </a>
               <br>

@@ -78,7 +78,9 @@ def delete(request, app_id, application):
 @login_required
 @get_application
 @recruiter_owns_application
-def accept_application(request, app_id, application):
+def accept_application(request, app_id):
+    application = get_object_or_404(Application, id=app_id)
+    print(request.method)
     if request.method != "POST":
         return redirect("view_applicants", slug=application.job.slug)
 
