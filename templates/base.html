@@ -9,13 +9,15 @@
     <style>
         body {
             overflow-x: hidden;
+            background: #f8f9fa;
         }
 
-        /* Sticky navbar */
+        /* Navbar */
         .navbar {
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 1000;
+            width: 100%;
+            z-index: 1050;
         }
 
         /* Sidebar */
@@ -23,7 +25,7 @@
             width: 220px;
             height: 100vh;
             position: fixed;
-            top: 56px; /* below navbar */
+            top: 56px;
             left: 0;
             background: #212529;
             padding-top: 20px;
@@ -36,23 +38,32 @@
             text-decoration: none;
             border-radius: 6px;
             margin: 5px 10px;
+            transition: 0.2s;
         }
 
         .sidebar a:hover {
             background: #343a40;
         }
 
-        /* Main content shift */
+        /* Main content */
         .main-content {
             margin-left: 240px;
+            margin-top: 80px; /* 👈 IMPORTANT FIX */
             padding: 20px;
+        }
+
+        /* Messages container fix */
+        .message-wrapper {
+            margin-left: 240px;
+            margin-top: 70px;
+            padding: 10px 20px;
         }
     </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-<!-- NAVBAR (cleaned) -->
+<!-- NAVBAR -->
 <nav class="navbar navbar-dark bg-dark px-3 shadow-sm">
     <a class="navbar-brand fw-bold" href="{% url 'jobs:job_list' %}">
         🚀 Job Board
@@ -60,27 +71,26 @@
 
     <div class="d-flex align-items-center gap-3">
 
-        <!-- Notifications -->
         {% if user.is_authenticated %}
-        <a href="{% url 'notifications:notifications' %}" class="text-white text-decoration-none position-relative">
-            🔔
-            {% if unread_notification_count > 0 %}
-                <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
-                    {{ unread_notification_count }}
-                </span>
-            {% endif %}
-        </a>
 
-        <!-- User + Logout -->
-        <span class="text-white small">Hi, {{ user.email }}</span>
+            <a href="{% url 'notifications:notifications' %}" class="text-white position-relative">
+                🔔
+                {% if unread_notification_count > 0 %}
+                    <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
+                        {{ unread_notification_count }}
+                    </span>
+                {% endif %}
+            </a>
 
-        <form method="POST" action="{% url 'users:logout' %}" class="d-inline">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-outline-light">Logout</button>
-        </form>
+            <span class="text-white small">Hi, {{ user.email }}</span>
 
-        {%else%}
-            <!-- Login + Register -->
+            <form method="POST" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-light">Logout</button>
+            </form>
+
+        {% else %}
+
             <a href="{% url 'users:login' %}" class="btn btn-sm btn-outline-light rounded-pill px-3">
                 Login
             </a>
@@ -88,6 +98,7 @@
             <a href="{% url 'users:register' %}" class="btn btn-sm btn-primary rounded-pill px-3">
                 Register
             </a>
+
         {% endif %}
 
     </div>
@@ -95,36 +106,49 @@
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-
     {% if user.is_authenticated %}
 
         <a href="{% url 'users:view_user_profile' user.email %}">My Profile</a>
 
         {% if user.role == 'recruiter' %}
             <a href="{% url 'users:recruiter_dashboard' %}">Dashboard</a>
+            <a href="{% url 'jobs:recruiter_jobs' %}">Your Jobs</a>
         {% else %}
             <a href="{% url 'users:user_dashboard' %}">Dashboard</a>
-        {% endif %}
-
-        {% if user.role == 'recruiter' %}
-            <a href="{% url 'jobs:recruiter_jobs' %}">Your Jobs</a>
-        {% endif %}
-
-       {% if user.role == 'normal_user' %}
             <a href="{% url 'applications:user_applications' %}">Applications</a>
-
-            {% elif user.role == 'recruiter' %}
-                <a href="{% url 'applications:recruiter_applications' %}">Applications</a>
-            {% endif %}
+        {% endif %}
 
     {% endif %}
-
 </div>
+
+<!-- MESSAGES (clean placement) -->
+{% if messages %}
+<div class="message-wrapper">
+    {% for message in messages %}
+        <div class="alert 
+            {% if message.tags == 'error' %}alert-danger
+            {% elif message.tags == 'success' %}alert-success
+            {% elif message.tags == 'warning' %}alert-warning
+            {% else %}alert-info{% endif %}
+            alert-dismissible fade show shadow-sm"
+        >
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
     {% block content %}{% endblock %}
 </div>
+
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(el => el.remove());
+    }, 5000);
+</script>
 
 </body>
 </html>

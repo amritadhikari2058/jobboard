@@ -10,6 +10,7 @@ from applications.selectors import get_user_applications, get_job_applications
 from .decorators import recruiter_owns_application
 from .models import Application
 from .forms import ApplicationForm, ApplicationLinkFormSet
+from .selectors import get_application_by_id
 
 
 @login_required
@@ -19,7 +20,7 @@ def application_list(request):
 
     applications = Application.objects.none()
     job = None
-    
+
     if job_id:
         job = get_object_or_404(Job, id=job_id)
 
@@ -76,10 +77,9 @@ def delete(request, app_id, application):
 
 
 @login_required
-@get_application
 @recruiter_owns_application
 def accept_application(request, app_id):
-    application = get_object_or_404(Application, id=app_id)
+    application = get_application_by_id(app_id)
     print(request.method)
     if request.method != "POST":
         return redirect("view_applicants", slug=application.job.slug)

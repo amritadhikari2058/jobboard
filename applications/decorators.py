@@ -8,22 +8,16 @@ def recruiter_owns_application(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         # Check recruiter
-        if (
-            not hasattr(request.user, "userrole")
-            or request.user.userrole.role != "recruiter"
-        ):
+        if request.user.role != "recruiter":
             messages.error(request, "Only recruiters can perform this action.")
-            return redirect("jobs:job_list")
+            return redirect("users:recruiter_dashboard")
 
-        application = kwargs.get("application")
-        if not application:
-            messages.error(request, "Application not found")
-            return redirect("job_list")
-
+        application = get_object_or_404(Application, id=kwargs.get("app_id"))
+        
         # Check ownership
         if application.job.user != request.user:
             messages.error(request, "You can only manage your own job applications.")
-            return redirect("job_list")
+            return redirect("jobs:job_list")
 
         return view_func(request, *args, **kwargs)
 

@@ -1,4 +1,5 @@
 from applications.models import Application
+from django.shortcuts import get_object_or_404
 
 
 def get_user_applications(job, status=None):
