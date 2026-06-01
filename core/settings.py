@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "django_extensions",
+    "rest_framework",
 ]
 
 REST_FRAMEWORK = {
@@ -147,11 +148,11 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTH_USER_MODEL = "users.User"
 
-LOGIN_REDIRECT_URL = 'job_list'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_REDIRECT_URL = "job_list"
+LOGOUT_REDIRECT_URL = "login"
 
 AUTHENTICATION_BACKENDS = [
-    'users.backends.EmailBackend',
+    "users.backends.EmailBackend",
 ]
 
-LOGIN_URL = 'users:login'
+LOGIN_URL = "users:login"

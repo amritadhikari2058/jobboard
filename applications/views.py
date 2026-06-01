@@ -11,6 +11,10 @@ from .decorators import recruiter_owns_application
 from .models import Application
 from .forms import ApplicationForm, ApplicationLinkFormSet
 from .selectors import get_application_by_id
+from rest_framework.decorators import api_view
+from .serializers import ApplicationSerializer
+from rest_framework.response import Response
+from rest_framework import status
 
 
 @login_required
@@ -221,3 +225,13 @@ def withdraw_application(request, app_id):
 
     messages.error(request, "Sorry, the application couldn't be withdrawn")
     return redirect("applications:user_applications")
+
+@api_view(['POST'])
+def apply_to_job(request):
+    serializer = ApplicationSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
