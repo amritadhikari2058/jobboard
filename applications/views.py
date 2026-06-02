@@ -11,10 +11,11 @@ from .decorators import recruiter_owns_application
 from .models import Application
 from .forms import ApplicationForm, ApplicationLinkFormSet
 from .selectors import get_application_by_id
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from .serializers import ApplicationSerializer
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 
 @login_required
@@ -226,12 +227,33 @@ def withdraw_application(request, app_id):
     messages.error(request, "Sorry, the application couldn't be withdrawn")
     return redirect("applications:user_applications")
 
-@api_view(['POST'])
-def apply_to_job(request):
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def apply_to_job(request, job_id):
+    # 1. Authentication Check
+    if not request.user.is_authenticated:
+        return Response(
+            {"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    job = get_object_or_404(Job, id=job_id)
+
     serializer = ApplicationSerializer(data=request.data)
 
     if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+        try:
+            application = ApplicationService.apply_to_job(
+                request.user, job, serializer.validated_data
+            )
+            return Response(
+                {
+                    "message": "Application submitted successfully",
+                    "application_id": application.id,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

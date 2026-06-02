@@ -6,6 +6,28 @@ from notifications.services import NotificationService
 
 class ApplicationService:
     @staticmethod
+    def apply_to_job(user, job, data):
+
+        # 1. Role Check
+        if user.role == "recruiter":
+            raise Exception("Recruiters cannot apply")
+
+        # 2. Duplicate Check
+        if Application.objects.filter(user=user, job=job).exists():
+            raise Exception("Already Applied")
+
+        # 3. Create Application
+        application = Application.objects.create(
+            user=user,
+            job=job,
+            experience=data.get("experience"),
+            availability_type=data.get("availability_type"),
+            status="pending",
+        )
+
+        return application
+
+    @staticmethod
     def apply(user, job, resume):
         existing = Application.objects.filter(user=user, job=job).first()
 
