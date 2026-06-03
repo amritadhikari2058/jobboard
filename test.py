@@ -1,70 +1,31 @@
-from rest_framework import serializers
+from rest_framework.viewsets import ModelViewSet
 from jobs.models import Job
-from applications.models import Application
+from jobs.serializers import JobSerializer
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework import status
-
-class JobSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Job
-        fields = ['title', 'location']
-
-@api_view
-def job_detail(request, id):
-    job = Job.objects.get(id=id)
-    serializer = JobSerializer(job)
-
-    return Response(serializer.data)
 
 
-@api_view(['POST'])
-def create_job(request):
-    serializer = JobSerializer(data=request.data)
+class JobViewSet(ModelViewSet):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
 
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=["get"])
+    def retrieve_detail(self, request, pk=None):
+        job = self.get_object()
+        applications = job.application_set.all()
+
+        serializer = ApplicationSerializer(applications, many=True)
+        return Response(serializer.data)
     
-    return Response(serializer.errors)
 
+from rest_framework.routers import DefaultRouter
+from applications.views import ApplicationViewSet
 
-class JobSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Job
-        fields = ['title', 'location']
-    
-    def validate_title(self, value):
-        if len(value)<3:
-            raise serializers.ValidationError('Title too short.')
-        
-        return value
+router = DefaultRouter()
+router.register('applications', ApplicationViewSet)
+router.register('jobs', JobViewSet)
 
-
-class JobSerializer(serializers.ModelSerializer):
-    recruiter_email = serializers.EmailField(source='user.email')
-
-    class Meta:
-        model = Job
-        fields = ['title', 'location', 'recruiter_email']
-
-
-class ApplicationSerialiser(serializers.ModelSerializer):
-    class Meta:
-        model=Application
-        fields=['id', 'status']
-
-class JobSerializer(serializers.ModelSerializer):
-    applications= ApplicationSerialiser(source='user.email')
-
-    class Meta:
-        model = Job
-        fields=['title', 'applications']
-
-
-class JobSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = Job
-        fields = '__all__'
+urlpatterns = router.urls
