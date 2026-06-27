@@ -7,13 +7,14 @@ import debug_toolbar
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("jobs.urls")),
+    path('', include('home.urls')),
+    path("project-1/", include("jobs.urls")),
     path(
-        "applications/",
+        "project-1/applications/",
         include(("applications.urls", "applications"), namespace="applications"),
     ),
-    path("users/", include("users.urls")),
-    path("notifications/", include("notifications.urls")),
+    path("project-1/users/", include("users.urls")),
+    path("project-1/notifications/", include("notifications.urls")),
     path("login/", user_views.login_view, name="login"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
