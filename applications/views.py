@@ -11,11 +11,12 @@ from .decorators import recruiter_owns_application
 from .models import Application
 from .forms import ApplicationForm, ApplicationLinkFormSet
 from .selectors import get_application_by_id
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes
 from .serializers import ApplicationSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
 
 
 @login_required
@@ -228,32 +229,66 @@ def withdraw_application(request, app_id):
     return redirect("applications:user_applications")
 
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def apply_to_job(request, job_id):
-    # 1. Authentication Check
-    if not request.user.is_authenticated:
-        return Response(
-            {"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED
-        )
+class ApplicationViewSet(ModelViewSet):
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAuthenticated]
 
-    job = get_object_or_404(Job, id=job_id)
+    queryset = Application.objects.all()
 
-    serializer = ApplicationSerializer(data=request.data)
+    # Only user's Applications
+    def get_queryset(self):
+        return Application.objects.filter(user=self.request.user)
+    
+    # Create (POST /applications/)
+    def create(self, request, *args, **kwargs):
+        job_id = request.data.get('job_id')
 
-    if serializer.is_valid():
-        try:
-            application = ApplicationService.apply_to_job(
-                request.user, job, serializer.validated_data
-            )
-            return Response(
-                {
-                    "message": "Application submitted successfully",
-                    "application_id": application.id,
-                },
-                status=status.HTTP_201_CREATED,
-            )
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if not job_id:
+            return Response({'error': 'job_id required'}, status=400)
+        
+        job = get_object_or_404(Job, id=job_id)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Business Logic
+        if request.user.role == 'recruiter':
+            return Response({'error': 'Recruiters cannot apply'}, status=403)
+        
+        if Application.objects.filter(user=request.user, job=job).exists():
+            return Response({"error": 'Already Applied'}, status=400)
+        
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(user=request.user, job=job, status='pending')
+            return Response(serializer.data, status=201)
+        
+        return Response(serializer.errors, status=400)
+    
+    @action(detail=True, methods=['post'])
+    def accept(self, request, pk=None):
+        application = self.get_object()
+
+        if request.user.role != 'recruiter':
+            return Response({'error': 'Only Recruiters allowed'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if application.job.user != request.user:
+            return Response({'error': 'Not your job'}, status=403)
+        
+        application.status='accepted'
+        application.save()
+
+        return Response({'message': 'Application Accepted'})
+    
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        application = self.get_object()
+
+        if request.user.role != 'recruiter':
+            return Response({'error': 'Only recruiters allowed'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if application.job.user != request.user:
+            return Response({'error': 'Not your job'}, status=status.HTTP_403_FORBIDDEN)
+        
+        application.status = 'rejected'
+        application.save()
+
+        return Response({'message': 'Appliaction Rejected'})
