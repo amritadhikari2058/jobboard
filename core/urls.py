@@ -6,7 +6,7 @@ from users import views as user_views
 import debug_toolbar
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("project-1/admin/", admin.site.urls),
     path('', include('home.urls')),
     path("project-1/", include("jobs.urls")),
     path(

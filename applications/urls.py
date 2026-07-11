@@ -25,6 +25,6 @@ urlpatterns = [
         views.recruiter_applications,
         name="recruiter_applications",
     ),
-    path('api/v1/jobs/<int:job_id>/apply/', views.apply_to_job, name='apply_to_job'),
+    # path('api/v1/jobs/<int:job_id>/apply/', views.apply_to_job, name='apply_to_job'),
     path("<slug:slug>/applicants/", views.view_applicants, name="view_applicants"),
 ]
