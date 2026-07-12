@@ -20,12 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-yr4#k(i2+xptsdubgk)ufw9jd=#d$xwe%*0pgrm)m89qojeb0m"
+SECRET_KEY = os.environ.get('SECRET_KEY')   
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG') == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", 'jobboard.onrender.com',]
 
 
 # Application definition
@@ -59,6 +59,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    'django.middleware.WhiteNoiseMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -136,9 +137,12 @@ import os
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
-# STATICFILES_DIRS = [
-#     BASE_DIR / "static",
-# ]
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+STATICFILES_STORAGE = (
+    'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -160,3 +164,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 LOGIN_URL = "users:login"
+
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL')
+    )
+}
