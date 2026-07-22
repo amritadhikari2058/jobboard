@@ -36,7 +36,7 @@ class Application(models.Model):
         on_delete=models.CASCADE,
         related_name="applications",
     )
-    user = models.ForeignKey(
+    applicant = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="applications",
@@ -91,7 +91,7 @@ class Application(models.Model):
         return f"{self.job.title} - {self.user.email}"
 
     class Meta:
-        unique_together = ("job", "user")
+        unique_together = ("job", "applicant")
         ordering = ["-created_at"]
 
 

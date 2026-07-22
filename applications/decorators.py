@@ -13,7 +13,7 @@ def recruiter_owns_application(view_func):
             return redirect("users:recruiter_dashboard")
 
         application = get_object_or_404(Application, id=kwargs.get("app_id"))
-        
+
         # Check ownership
         if application.job.user != request.user:
             messages.error(request, "You can only manage your own job applications.")
