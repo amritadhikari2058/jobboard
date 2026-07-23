@@ -1,74 +1,216 @@
 {% extends "base.html" %}
-{%block title%} Edit Profile {%endblock%}
-{%block content%}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-7">
+{% block title %}Edit Profile{% endblock %}
 
-      <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
+{% block content %}
 
-          <h3 class="mb-4 text-center fw-bold text-primary">
-            ✏️ Edit Profile
-          </h3>
+<div class="container py-4">
 
-          <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
+    <!-- Header -->
+    <div class="mb-4">
 
-            <!-- Bio -->
-            <div class="mb-3">
-              <label class="form-label fw-semibold ">Bio</label>
-              {{ form.bio }}
-            </div>
+        <h2 class="fw-bold mb-1">
+            Edit Profile
+        </h2>
 
-            <!-- Skills -->
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Skills</label>
-              {{ form.skills }}
-            </div>
-
-            <!-- Phone -->
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Phone</label>
-              {{ form.phone }}
-            </div>
-
-            <!-- Location -->
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Location</label>
-              {{ form.location }}
-            </div>
-
-            <!-- Profile Picture -->
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Profile Picture</label>
-              {{ form.profile_pic }}
-            </div>
-
-            <!-- Resume -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">Resume</label>
-              {{ form.resume }}
-            </div>
-
-            <!-- Buttons -->
-            <div class="d-flex justify-content-between">
-              <a href="{% url 'view_user_profile' user.email %}" class="btn btn-outline-secondary">
-                Cancel
-              </a>
-
-              <button type="submit" class="btn btn-success px-4">
-                Save Changes
-              </button>
-            </div>
-
-          </form>
-
-        </div>
-      </div>
+        <p class="text-muted mb-0">
+            Keep your profile up to date so recruiters and employers can know you better.
+        </p>
 
     </div>
-  </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow profile-card">
+
+                <div class="card-header bg-white border-0 py-4">
+
+                    <h5 class="fw-semibold mb-1">
+
+                        Profile Information
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Update your personal details, skills and resume.
+
+                    </small>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="POST" enctype="multipart/form-data">
+
+                        {% csrf_token %}
+
+                        <!-- Bio -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+
+                                <i class="bi bi-person-lines-fill me-2"></i>
+
+                                Bio
+
+                            </label>
+
+                            {{ form.bio }}
+
+                        </div>
+
+                        <!-- Skills -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+
+                                <i class="bi bi-lightbulb me-2"></i>
+
+                                Skills
+
+                            </label>
+
+                            {{ form.skills }}
+
+                            <div class="form-text">
+                                Separate skills using commas.
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <!-- Phone -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label fw-semibold">
+
+                                    <i class="bi bi-telephone me-2"></i>
+
+                                    Phone
+
+                                </label>
+
+                                {{ form.phone }}
+
+                            </div>
+
+                            <!-- Location -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label fw-semibold">
+
+                                    <i class="bi bi-geo-alt me-2"></i>
+
+                                    Location
+
+                                </label>
+
+                                {{ form.location }}
+
+                            </div>
+
+                        </div>
+
+                        <!-- Profile Picture -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+
+                                <i class="bi bi-image me-2"></i>
+
+                                Profile Picture
+
+                            </label>
+
+                            {{ form.profile_pic }}
+
+                        </div>
+
+                        <!-- Resume -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+
+                                <i class="bi bi-file-earmark-text me-2"></i>
+
+                                Resume
+
+                            </label>
+
+                            {{ form.resume }}
+
+                        </div>
+
+                        <hr>
+
+                        <!-- Buttons -->
+
+                        <div class="d-flex justify-content-end gap-3">
+
+                            <a href="{% url 'users:view_user_profile' user.email %}"
+                               class="btn btn-outline-secondary px-4">
+
+                                Cancel
+
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                Save Changes
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
+<style>
+
+.profile-card{
+    border-radius:20px;
+}
+
+.card-header{
+    border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.form-control,
+.form-select{
+    border-radius:10px;
+}
+
+textarea.form-control{
+    min-height:160px;
+}
+
+input[type="file"]{
+    padding:.6rem;
+}
+
+.btn{
+    border-radius:10px;
+    font-weight:500;
+}
+
+</style>
 
 {% endblock %}

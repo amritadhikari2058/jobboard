@@ -114,9 +114,9 @@ def view_user_profile(request, email):
         return render(request, "users/profile_detail.html", {"profile": profile})
 
     # RECRUITER VIEW
-    if request.user.userrole.role == "recruiter":
+    if request.user.role == "recruiter":
         if Application.objects.filter(
-            user=target_user, job__user=request.user
+            applicant=target_user, job__recruiter=request.user
         ).exists():
             return render(request, "users/profile_detail.html", {"profile": profile})
         return redirect("job_list")

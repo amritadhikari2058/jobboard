@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "jobs",
     "applications",
     "users",
@@ -52,6 +53,12 @@ INSTALLED_APPS = [
     "django_extensions",
     "rest_framework",
     "home",
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 REST_FRAMEWORK = {
@@ -69,6 +76,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    'allauth.account.middleware.AccountMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -163,7 +171,13 @@ LOGIN_REDIRECT_URL = "job_list"
 LOGOUT_REDIRECT_URL = "login"
 
 AUTHENTICATION_BACKENDS = [
+
+    "django.contrib.auth.backends.ModelBackend",
+
     "users.backends.EmailBackend",
+
+    "allauth.account.auth_backends.AuthenticationBackend",
+
 ]
 
 LOGIN_URL = "users:login"
@@ -173,3 +187,6 @@ import dj_database_url
 DATABASES = {
     "default": dj_database_url.config(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 }
+
+
+SITE_ID = 1

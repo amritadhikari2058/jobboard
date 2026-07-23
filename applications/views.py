@@ -238,57 +238,61 @@ class ApplicationViewSet(ModelViewSet):
     # Only user's Applications
     def get_queryset(self):
         return Application.objects.filter(user=self.request.user)
-    
+
     # Create (POST /applications/)
     def create(self, request, *args, **kwargs):
-        job_id = request.data.get('job_id')
+        job_id = request.data.get("job_id")
 
         if not job_id:
-            return Response({'error': 'job_id required'}, status=400)
-        
+            return Response({"error": "job_id required"}, status=400)
+
         job = get_object_or_404(Job, id=job_id)
 
         # Business Logic
-        if request.user.role == 'recruiter':
-            return Response({'error': 'Recruiters cannot apply'}, status=403)
-        
+        if request.user.role == "recruiter":
+            return Response({"error": "Recruiters cannot apply"}, status=403)
+
         if Application.objects.filter(user=request.user, job=job).exists():
-            return Response({"error": 'Already Applied'}, status=400)
-        
+            return Response({"error": "Already Applied"}, status=400)
+
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save(user=request.user, job=job, status='pending')
+            serializer.save(user=request.user, job=job, status="pending")
             return Response(serializer.data, status=201)
-        
+
         return Response(serializer.errors, status=400)
-    
-    @action(detail=True, methods=['post'])
+
+    @action(detail=True, methods=["post"])
     def accept(self, request, pk=None):
         application = self.get_object()
 
-        if request.user.role != 'recruiter':
-            return Response({'error': 'Only Recruiters allowed'}, status=status.HTTP_403_FORBIDDEN)
-        
+        if request.user.role != "recruiter":
+            return Response(
+                {"error": "Only Recruiters allowed"}, status=status.HTTP_403_FORBIDDEN
+            )
+
         if application.job.user != request.user:
-            return Response({'error': 'Not your job'}, status=403)
-        
-        application.status='accepted'
+            return Response({"error": "Not your job"}, status=403)
+
+        application.status = "accepted"
         application.save()
 
-        return Response({'message': 'Application Accepted'})
-    
-    @action(detail=True, methods=['post'])
+        return Response({"message": "Application Accepted"})
+
+    @action(detail=True, methods=["post"])
     def reject(self, request, pk=None):
         application = self.get_object()
 
-        if request.user.role != 'recruiter':
-            return Response({'error': 'Only recruiters allowed'}, status=status.HTTP_403_FORBIDDEN)
-        
+        if request.user.role != "recruiter":
+            return Response(
+                {"error": "Only recruiters allowed"}, status=status.HTTP_403_FORBIDDEN
+            )
+
         if application.job.user != request.user:
-            return Response({'error': 'Not your job'}, status=status.HTTP_403_FORBIDDEN)
-        
-        application.status = 'rejected'
+            return Response({"error": "Not your job"}, status=status.HTTP_403_FORBIDDEN)
+
+        application.status = "rejected"
         application.save()
 
-        return Response({'message': 'Appliaction Rejected'})
+        return Response({"message": "Appliaction Rejected"})

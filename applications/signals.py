@@ -21,7 +21,7 @@ def old_status(sender, instance, **kwargs):
                     )
                     notif_type = "application_rejected"
                 Notification.objects.create(
-                    user=instance.user,
+                    user=instance.applicant,
                     job=instance.job,
                     application=instance,
                     message=message,

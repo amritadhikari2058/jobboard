@@ -57,7 +57,7 @@ class ApplicationService:
         application.save(update_fields=["status"])
 
         NotificationService.notify(
-            user=application.user,
+            user=application.applicant,
             message=f"Your application for '{application.job.title}' was {status}",
         )
 

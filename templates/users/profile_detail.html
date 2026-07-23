@@ -1,68 +1,251 @@
 {% extends "base.html" %}
-{%block title%} Profile Detail {%endblock%}
-{%block content%}
-<div class="container mt-4">
-  <div class="card shadow-sm border-0">
-    <div class="card-body">
+{% block title %}Profile{% endblock %}
 
-      <div class="row">
+{% block content %}
 
-      <div class="col-md-3 text-center">
+<div class="container py-4">
 
-        {% if profile.profile_pic %}
-          <img src="{{ profile.profile_pic.url }}"
-              class="rounded-circle object-fit-cover"
-              style="width:150px; height:150px;">
-        {% else %}
-          <img src="https://via.placeholder.com/150"
-              class="rounded-circle object-fit-cover"
-              style="width:150px; height:150px;">
-        {% endif %}
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-      </div>
+        <div>
 
-        <!-- Basic Info -->
-        <div class="col-md-9">
-          <h4 class="fw-bold mb-1">{{ profile.user.email }}</h4>
-          <p class="text-muted mb-2">{{ profile.user.email }}</p>
+            <h2 class="fw-bold mb-1">
+                User Profile
+            </h2>
 
-          <p><strong>Location:</strong> {{ profile.location|default:"Not provided" }}</p>
-          <p><strong>Phone:</strong> {{ profile.phone|default:"Not provided" }}</p>
+            <p class="text-muted mb-0">
+                View profile information and professional details.
+            </p>
+
         </div>
 
-      </div>
+        {% if request.user.id == profile.user.id %}
+        <a href="{% url 'users:edit_user_profile' %}"
+           class="btn btn-primary rounded-pill px-4">
 
-      <hr>
+            <i class="bi bi-pencil-square me-2"></i>
+            Edit Profile
 
-      <!-- Bio -->
-      <div class="mb-3">
-        <h5 class="fw-semibold">Bio</h5>
-        <p class="text-muted">{{ profile.bio|default:"No bio added." }}</p>
-      </div>
-
-      <!-- Skills -->
-      <div class="mb-3">
-        <h5 class="fw-semibold">Skills</h5>
-        <p class="text-muted">{{ profile.skills|default:"No skills listed." }}</p>
-      </div>
-
-      <!-- Resume -->
-      <div class="mb-3">
-        <h5 class="fw-semibold">Resume</h5>
-        {% if profile.resume %}
-          <a href="{{ profile.resume.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
-            View Resume
-          </a>
-        {% else %}
-          <p class="text-muted">No resume uploaded.</p>
+        </a>
         {% endif %}
-      </div>
 
     </div>
-    {%if request.user.id == profile.user.id %}
-      <a href='{% url 'users:edit_user_profile' %}' class="btn btn-primary">Edit Profile</a>
-    {%endif%}
-  </div>
+
+    <div class="card border-0 shadow profile-card">
+
+        <div class="card-body p-4">
+
+            <div class="row align-items-center">
+
+                <!-- Profile Image -->
+                <div class="col-lg-3 text-center mb-4 mb-lg-0">
+
+                    {% if profile.profile_pic %}
+
+                    <img src="{{ profile.profile_pic.url }}"
+                         class="profile-image">
+
+                    {% else %}
+
+                    <img src="https://via.placeholder.com/180"
+                         class="profile-image">
+
+                    {% endif %}
+
+                </div>
+
+                <!-- Basic Info -->
+                <div class="col-lg-9">
+
+                    <h3 class="fw-bold mb-1">
+
+                        {{ profile.user.email }}
+
+                    </h3>
+
+                    <p class="text-muted mb-4">
+
+                        {{ profile.user.role|title }}
+
+                    </p>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <div class="info-box">
+
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    Location
+                                </small>
+
+                                <strong>
+
+                                    {{ profile.location|default:"Not provided" }}
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="info-box">
+
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-telephone me-2"></i>
+                                    Phone
+                                </small>
+
+                                <strong>
+
+                                    {{ profile.phone|default:"Not provided" }}
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Bio -->
+
+            <div class="mb-4">
+
+                <h5 class="fw-semibold mb-3">
+
+                    <i class="bi bi-person-lines-fill me-2"></i>
+
+                    About
+
+                </h5>
+
+                <p class="text-muted mb-0">
+
+                    {{ profile.bio|default:"No bio added yet." }}
+
+                </p>
+
+            </div>
+
+            <!-- Skills -->
+
+            <div class="mb-4">
+
+                <h5 class="fw-semibold mb-3">
+
+                    <i class="bi bi-lightbulb me-2"></i>
+
+                    Skills
+
+                </h5>
+
+                {% if profile.skills %}
+
+                    {% for skill in profile.skills.split %}
+
+                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2 me-2 mb-2">
+
+                            {{ skill }}
+
+                        </span>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p class="text-muted">
+
+                        No skills listed.
+
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Resume -->
+
+            <div>
+
+                <h5 class="fw-semibold mb-3">
+
+                    <i class="bi bi-file-earmark-text me-2"></i>
+
+                    Resume
+
+                </h5>
+
+                {% if profile.resume %}
+
+                    <a href="{{ profile.resume.url }}"
+                       target="_blank"
+                       class="btn btn-outline-primary rounded-pill px-4">
+
+                        <i class="bi bi-download me-2"></i>
+
+                        View Resume
+
+                    </a>
+
+                {% else %}
+
+                    <p class="text-muted">
+
+                        No resume uploaded.
+
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
+<style>
+
+.profile-card{
+    border-radius:20px;
+}
+
+.profile-image{
+    width:180px;
+    height:180px;
+    object-fit:cover;
+    border-radius:50%;
+    border:5px solid #fff;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+.info-box{
+    background:#f8f9fa;
+    padding:1rem;
+    border-radius:14px;
+}
+
+.badge{
+    font-size:.85rem;
+    font-weight:500;
+}
+
+.btn{
+    border-radius:10px;
+}
+
+</style>
 
 {% endblock %}

@@ -15,7 +15,7 @@ def recruiter_owns_application(view_func):
         application = get_object_or_404(Application, id=kwargs.get("app_id"))
 
         # Check ownership
-        if application.job.user != request.user:
+        if application.job.recruiter != request.user:
             messages.error(request, "You can only manage your own job applications.")
             return redirect("jobs:job_list")
 
@@ -28,12 +28,12 @@ def application_owner_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         application = Application.objects.get(id=kwargs.get("app_id"))
-        is_owner = application.user == request.user
-        is_recruiter = application.job.user == request.user
+        is_owner = application.applicant == request.user
+        is_recruiter = application.job.recruiter == request.user
 
         if not (is_owner or is_recruiter):
             messages.error(request, "You are not allowed to view this application.")
-            return redirect("job_list")
+            return redirect("jobs:job_list")
 
         return view_func(request, *args, **kwargs)
 
@@ -44,7 +44,8 @@ def get_application(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         application = get_object_or_404(
-            Application.objects.select_related("job", "user"), id=kwargs.get("app_id")
+            Application.objects.select_related("job", "applicant"),
+            id=kwargs.get("app_id"),
         )
 
         kwargs["application"] = application
