@@ -122,11 +122,13 @@
           <div class="mt-auto d-flex justify-content-between align-items-center">
 
             <!-- SAVE -->
-            <form method="POST" class="save-job-form" data-job-id="{{ job.id }}">
+            <form method="POST" action="{% url 'jobs:toggle_save_job' job.id%}"" class="save-job-form" data-job-id="{{ job.id }}">
               {% csrf_token %}
-              <button type="button"
+              <button type="submit"
                 class="btn btn-sm btn-outline-primary save-btn rounded-pill px-3">
-                {% if job.id in saved_job_ids %}Saved ✓{% else %}Save{% endif %}
+                {% if job.id in saved_job_ids %}Saved ✓{% else %}
+                Save
+                {% endif %}
               </button>
             </form>
 

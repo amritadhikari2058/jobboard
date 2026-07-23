@@ -18,8 +18,8 @@ User = get_user_model()
 @recruiter_required
 def recruiter_dashboard(request):
     jobs = (
-        Job.objects.filter(user=request.user)
-        .select_related("user")
+        Job.objects.filter(recruiter=request.user)
+        .select_related("recruiter")
         .annotate(
             total_applications=Count("applications"),
             accepted_count=Count(

@@ -11,7 +11,7 @@ class JobService:
 
         # Recruiter sees only their jobs
         if user.is_authenticated and user.role == "recruiter":
-            jobs = jobs.filter(user=user)
+            jobs = jobs.filter(recruiter=user)
 
         jobs = jobs.annotate(
             total_applications=Count("applications"),
@@ -51,11 +51,11 @@ class JobService:
                 "counts": {},
             }
 
-        applications = Application.objects.filter(user=user)
+        applications = Application.objects.filter(applicant=user)
 
         return {
             "applied_job_ids": [app.job.id for app in applications],
-            "saved_job_ids": SavedJob.objects.filter(user=user)
+            "saved_job_ids": SavedJob.objects.filter(applicant=user)
             .select_related("job")
             .values_list("job_id", flat=True),
             "counts": {
@@ -68,13 +68,13 @@ class JobService:
 
     @staticmethod
     def toggle_save_job(user, job):
-        saved_job = SavedJob.objects.filter(user=user, job=job).first()
+        saved_job = SavedJob.objects.filter(applicant=user, job=job).first()
 
         if saved_job:
             saved_job.delete()
             return False
         else:
-            SavedJob.objects.create(user=user, job=job)
+            SavedJob.objects.create(applicant=user, job=job)
             return True
 
     @staticmethod

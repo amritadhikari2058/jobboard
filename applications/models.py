@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+import shortuuid
 
 
 class Application(models.Model):
@@ -88,7 +89,7 @@ class Application(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.job.title} - {self.user.email}"
+        return f"{self.job.title} - {self.applicant.email}"
 
     class Meta:
         unique_together = ("job", "applicant")

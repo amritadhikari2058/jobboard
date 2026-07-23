@@ -18,9 +18,9 @@ def job_list(request):
     location = request.GET.get("location")
     sort = request.GET.get("sort")
     category = request.GET.get("category")
-    user = request.user
+    recruiter = request.user
 
-    jobs = JobService.get_filtered_jobs(search_query, location, category, sort, user)
+    jobs = JobService.get_filtered_jobs(search_query, location, category, sort, recruiter)
 
     paginator = Paginator(jobs, 10)
     page_number = request.GET.get("page")
@@ -50,9 +50,10 @@ def recruiter_jobs(request):
 def job_detail(request, id):
     applied_jobs = []
     job = Job.objects.get(id=id)
-    application = Application.objects.filter(user=request.user, job=job).first()
+    application = None
     if request.user.is_authenticated:
-        applications = Application.objects.filter(user=request.user)
+        application = Application.objects.filter(applicant=request.user, job=job).first()
+        applications = Application.objects.filter(applicant=request.user)
         applied_jobs = [app.job.id for app in applications]
     return render(
         request,
@@ -117,14 +118,14 @@ def toggle_save_job(request, job_id):
     else:
         messages.info(request, "Job removed from saved.")
 
-    return JsonResponse({"added": added})
+    return redirect('jobs:job_list')
 
 
 # Handling saved jobs with separate page
 @login_required
 def saved_jobs_view(request):
     saved_jobs = (
-        SavedJob.objects.filter(user=request.user)
+        SavedJob.objects.filter(applicant=request.user)
         .select_related("job")
         .order_by("-created_at")
     )

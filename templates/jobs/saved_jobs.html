@@ -25,7 +25,7 @@
 
           <!-- Title -->
           <h5 class="fw-semibold">
-            <a href="{% url 'job_detail' saved.job.id %}"
+            <a href="{% url 'jobs:job_detail' saved.job.id %}"
                class="text-decoration-none text-dark">
               {{ saved.job.title }}
             </a>
@@ -53,13 +53,13 @@
           <!-- Actions -->
           <div class="mt-auto d-flex justify-content-between">
 
-            <a href="{% url 'job_detail' saved.job.id %}"
+            <a href="{% url 'jobs:job_detail' saved.job.id %}"
                class="btn btn-sm btn-primary">
               View Job
             </a>
 
             <form method="POST"
-                  action="{% url 'toggle_save_job' saved.job.id %}">
+                  action="{% url 'jobs:toggle_save_job' saved.job.id %}">
               {% csrf_token %}
 
               <button class="btn btn-sm btn-outline-danger">

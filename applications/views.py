@@ -123,7 +123,7 @@ def reject_application(request, app_id, application):
 @recruiter_required
 def view_applicants(request, slug):
     user = request.user
-    job = get_object_or_404(Job, slug=slug, user=user)
+    job = get_object_or_404(Job, slug=slug, recruiter=user)
     applications = get_job_applications(job)
 
     return render(
