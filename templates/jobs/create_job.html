@@ -1,16 +1,112 @@
 {% extends 'base.html' %}
-{% block title %}Create Job{% endblock %}
-
 {% load crispy_forms_tags %}
 
-{% block content %}
-<div class="card shadow p-4">
-  <h3>Create Job</h3>
+{% block title %}Create Job{% endblock %}
 
-  <form method="POST">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <button class="btn btn-primary">Create Job</button>
-  </form>
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-9 col-xl-8">
+
+            <div class="card border-0 shadow-sm create-job-card">
+
+                <div class="card-body p-4 p-lg-5">
+
+                    <!-- Header -->
+                    <div class="mb-4">
+
+                        <h2 class="fw-bold mb-2">
+                            Create New Job
+                        </h2>
+
+                        <p class="text-muted mb-0">
+                            Fill in the details below to publish a new job opening.
+                        </p>
+
+                    </div>
+
+                    <hr class="mb-4">
+
+                    <!-- Form -->
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+
+                            <a href="{% url 'jobs:recruiter_jobs' %}"
+                               class="btn btn-outline-secondary px-4">
+
+                                Cancel
+
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+
+                                Create
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
+<style>
+
+.create-job-card{
+    border-radius:18px;
+}
+
+.create-job-card .card-body{
+    padding:2rem;
+}
+
+.create-job-card label{
+    font-weight:600;
+    margin-bottom:.4rem;
+}
+
+.create-job-card .form-control,
+.create-job-card .form-select,
+.create-job-card textarea{
+
+    border-radius:10px;
+    padding:.75rem .9rem;
+    box-shadow:none;
+}
+
+.create-job-card .form-control:focus,
+.create-job-card .form-select:focus,
+.create-job-card textarea:focus{
+
+    border-color:#0d6efd;
+    box-shadow:0 0 0 .15rem rgba(13,110,253,.15);
+}
+
+.create-job-card textarea{
+    min-height:180px;
+}
+
+.create-job-card .btn{
+    border-radius:10px;
+}
+
+</style>
+
 {% endblock %}

@@ -1,15 +1,99 @@
-{% extends 'base.html' %} 
-{% block title %}Update Job{% endblock %} 
+{% extends 'base.html' %}
 {% load crispy_forms_tags %}
-{% block content %}
-<div class="card shadow p-4">
-  <h3>Update Job</h3>
 
-  <form method="POST">
-    {%csrf_token%} 
-    {{form|crispy}}
-    <button class="btn btn-primary">Update</button>
-    <a href="{% url 'job_list' %}" class="btn btn-secondary">Cancel</a>
-  </form>
+{% block title %}Update Job{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <!-- Heading -->
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Update Job
+        </h2>
+
+        <p class="text-muted mb-0">
+            Edit your job posting and keep the information up to date.
+        </p>
+
+    </div>
+
+    <!-- Form Card -->
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-header bg-white border-0 py-4">
+
+            <h5 class="fw-semibold mb-1">
+                Job Information
+            </h5>
+
+            <small class="text-muted">
+                Update the details below and save your changes.
+            </small>
+
+        </div>
+
+        <div class="card-body p-4">
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ form|crispy }}
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-end gap-3">
+
+                    <a href="{% url 'jobs:job_list' %}"
+                       class="btn btn-outline-danger px-4">
+
+                        Cancel
+
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary px-4">
+                        Update
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
 </div>
+
+<style>
+
+.card{
+    border-radius:18px;
+}
+
+.card-header{
+    border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.btn{
+    border-radius:10px;
+    font-weight:500;
+}
+
+.form-control,
+.form-select{
+    border-radius:10px;
+}
+
+textarea.form-control{
+    min-height:180px;
+}
+
+</style>
+
 {% endblock %}

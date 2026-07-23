@@ -7,140 +7,141 @@
     <title>{% block title %}Job Board{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <style>
-html{
-    font-size:14px;
-}
+<style>
+    html{
+        font-size:14px;
+    }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+    }
 
-body{
-    background:#f7f8fb;
-    overflow-x:hidden;
-}
+    body{
+        background:#f7f8fb;
+        overflow-x:hidden;
+    }
 
-/* ---------- NAVBAR ---------- */
+    /* ---------- NAVBAR ---------- */
 
-.navbar{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    height:4rem;
-    z-index:1000;
-}
+    .navbar{
+        position:fixed;
+        top:0;
+        left:0;
+        right:0;
+        height:4rem;
+        z-index:1000;
+    }
 
-/* ---------- LAYOUT ---------- */
-
-.layout{
-
-    display:grid;
-
-    grid-template-columns:16rem 1fr;
-
-    margin-top:4rem;
-
-    min-height:calc(100vh - 4rem);
-}
-
-/* ---------- SIDEBAR ---------- */
-
-.sidebar{
-
-    background:#212529;
-
-    padding:1rem 0;
-
-    position:sticky;
-
-    top:4rem;
-
-    height:calc(100vh - 4rem);
-
-    overflow-y:auto;
-}
-
-.sidebar a{
-
-    display:block;
-
-    color:white;
-
-    text-decoration:none;
-
-    padding:.75rem 1rem;
-
-    margin:.25rem .75rem;
-
-    border-radius:.5rem;
-
-    transition:.2s;
-}
-
-.sidebar a:hover{
-
-    background:#343a40;
-}
-
-/* ---------- CONTENT ---------- */
-
-.content{
-
-    padding:1.5rem 2rem;
-
-    width:100%;
-}
-
-.main-content{
-
-    max-width:1200px;
-}
-
-/* ---------- ALERTS ---------- */
-
-.message-wrapper{
-
-    margin-bottom:1rem;
-}
-
-/* ---------- MOBILE ---------- */
-
-@media(max-width:768px){
+    /* ---------- LAYOUT ---------- */
 
     .layout{
 
-        grid-template-columns:1fr;
+        display:grid;
+
+        grid-template-columns:16rem 1fr;
+
+        margin-top:4rem;
+
+        min-height:calc(100vh - 4rem);
     }
+
+    /* ---------- SIDEBAR ---------- */
 
     .sidebar{
 
-        position:relative;
+        background:#212529;
 
-        top:0;
+        padding:1rem 0;
 
-        height:auto;
+        position:sticky;
+
+        top:4rem;
+
+        height:calc(100vh - 4rem);
+
+        overflow-y:auto;
     }
+
+    .sidebar a{
+
+        display:block;
+
+        color:white;
+
+        text-decoration:none;
+
+        padding:.75rem 1rem;
+
+        margin:.25rem .75rem;
+
+        border-radius:.5rem;
+
+        transition:.2s;
+    }
+
+    .sidebar a:hover{
+
+        background:#343a40;
+    }
+
+    /* ---------- CONTENT ---------- */
 
     .content{
 
-        padding:1rem;
-    }
-}
-</style>
+        padding:1.5rem 2rem;
 
+        width:100%;
+    }
+
+    .main-content{
+
+        max-width:1200px;
+    }
+
+    /* ---------- ALERTS ---------- */
+
+    .message-wrapper{
+
+        margin-bottom:1rem;
+    }
+
+    /* ---------- MOBILE ---------- */
+
+    @media(max-width:768px){
+
+        .layout{
+
+            grid-template-columns:1fr;
+        }
+
+        .sidebar{
+
+            position:relative;
+
+            top:0;
+
+            height:auto;
+        }
+
+        .content{
+
+            padding:1rem;
+        }
+    }
+</style>
 </head>
 
 <body>
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-dark bg-dark px-3 shadow-sm">
-    <a class="navbar-brand fw-bold" href="{% url 'jobs:job_list' %}">
-        🚀 Job Board
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{% url 'jobs:job_list' %}">
+        <i class="bi bi-briefcase-fill fs-4 text-primary"></i>
+        <span>JobBoard</span>
     </a>
 
     <div class="d-flex align-items-center gap-3">
@@ -184,59 +185,85 @@ body{
     <aside class="sidebar">
 
         <!-- Common Links -->
-        <a href="{% url 'jobs:job_list' %}">🏠 Home</a>
-        <a href="#">ℹ️ About</a>
-        <a href="#">📞 Contact</a>
-        <a href="#">📝 Blog</a>
+        <a href="{% url 'jobs:job_list' %}">
+            <i class="bi bi-search me-2"></i>Browse Jobs
+        </a>
+
+        <a href="#">
+            <i class="bi bi-building me-2"></i>Companies
+        </a>
+
+        <a href="#">
+            <i class="bi bi-briefcase me-2"></i>Career Advice
+        </a>
+
+        <a href="#">
+            <i class="bi bi-question-circle me-2"></i>Help Center
+        </a>
 
         {% if user.is_authenticated %}
 
             <hr class="text-light mx-3">
 
             <a href="{% url 'users:view_user_profile' user.email %}">
-                👤 My Profile
+                <i class="bi bi-person-circle"></i>
+                <span>My Profile</span>
             </a>
 
             {% if user.role == 'recruiter' %}
 
                 <a href="{% url 'users:recruiter_dashboard' %}">
-                    📊 Dashboard
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
                 </a>
 
                 <a href="{% url 'jobs:recruiter_jobs' %}">
-                    💼 Your Jobs
+                    <i class="bi bi-briefcase"></i>
+                    <span>Your Jobs</span>
                 </a>
 
             {% else %}
 
                 <a href="{% url 'users:user_dashboard' %}">
-                    📊 Dashboard
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
                 </a>
 
                 <a href="{% url 'applications:user_applications' %}">
-                    📄 My Applications
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>My Applications</span>
                 </a>
 
             {% endif %}
 
-            <a href="#">⭐ Saved Jobs</a>
-            <a href="#">❓ Help Center</a>
+            <a href="{% url 'jobs:saved_jobs' %}">
+                <i class="bi bi-bookmark-star"></i>
+                <span>Saved Jobs</span>
+            </a>
 
         {% else %}
 
             <hr class="text-light mx-3">
 
             <a href="{% url 'users:login' %}">
-                🔑 Login
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span>Login</span>
             </a>
 
             <a href="{% url 'users:register' %}">
-                📝 Register
+                <i class="bi bi-person-plus"></i>
+                <span>Register</span>
             </a>
 
-            <a href="#">💼 Browse Jobs</a>
-            <a href="#">🏢 Companies</a>
-            <a href="#">❓ Help Center</a>
+            <a href="{% url 'jobs:job_list' %}">
+                <i class="bi bi-search"></i>
+                <span>Browse Jobs</span>
+            </a>
+
+            <a href="#">
+                <i class="bi bi-question-circle"></i>
+                <span>Help Center</span>
+            </a>
 
         {% endif %}
 

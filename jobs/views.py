@@ -20,7 +20,9 @@ def job_list(request):
     category = request.GET.get("category")
     recruiter = request.user
 
-    jobs = JobService.get_filtered_jobs(search_query, location, category, sort, recruiter)
+    jobs = JobService.get_filtered_jobs(
+        search_query, location, category, sort, recruiter
+    )
 
     paginator = Paginator(jobs, 10)
     page_number = request.GET.get("page")
@@ -43,7 +45,7 @@ def job_list(request):
 
 
 def recruiter_jobs(request):
-    jobs = Job.objects.filter(user=request.user)
+    jobs = Job.objects.filter(recruiter=request.user)
     return render(request, "jobs/recruiter_jobs.html", {"jobs": jobs})
 
 
@@ -52,7 +54,9 @@ def job_detail(request, id):
     job = Job.objects.get(id=id)
     application = None
     if request.user.is_authenticated:
-        application = Application.objects.filter(applicant=request.user, job=job).first()
+        application = Application.objects.filter(
+            applicant=request.user, job=job
+        ).first()
         applications = Application.objects.filter(applicant=request.user)
         applied_jobs = [app.job.id for app in applications]
     return render(
@@ -80,7 +84,7 @@ def create_job(request):
 
 @login_required
 @job_owner_required
-def update_job(request, id, job):
+def update_job(request, id):
     job = Job.objects.get(id=id)
 
     if request.method == "POST":
@@ -101,7 +105,7 @@ def delete_job(request, id):
     if request.method == "POST":
         JobService.delete_job_service(request.user, job)
         messages.success(request, "Job deleted successfully")
-        return redirect("job_list")
+        return redirect("jobs:job_list")
 
     return render(request, "jobs/delete_job.html", {"job": job})
 
@@ -118,7 +122,7 @@ def toggle_save_job(request, job_id):
     else:
         messages.info(request, "Job removed from saved.")
 
-    return redirect('jobs:job_list')
+    return redirect("jobs:job_list")
 
 
 # Handling saved jobs with separate page
