@@ -14,7 +14,7 @@ class Category(models.Model):
 
 
 class Job(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    recruiter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, null=False)
     slug = models.SlugField(unique=True, null=True, blank=True)
     location = models.CharField(max_length=100, null=False)
@@ -36,12 +36,12 @@ class Job(models.Model):
 
 
 class SavedJob(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "job")
+        unique_together = ("applicant", "job")
 
     def __str__(self):
         return f"{self.user} saved job {self.job}"

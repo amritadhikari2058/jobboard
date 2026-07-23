@@ -11,7 +11,7 @@ from .decorators import recruiter_owns_application
 from .models import Application
 from .forms import ApplicationForm, ApplicationLinkFormSet
 from .selectors import get_application_by_id
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action
 from .serializers import ApplicationSerializer
 from rest_framework.response import Response
 from rest_framework import status
