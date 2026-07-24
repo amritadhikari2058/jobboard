@@ -97,7 +97,7 @@ def edit_user_profile(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect("view_user_profile", profile.user.email)
+            return redirect("users:view_user_profile", profile.user.email)
     else:
         form = UserProfileForm(instance=profile)
 
