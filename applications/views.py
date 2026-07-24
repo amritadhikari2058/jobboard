@@ -152,7 +152,7 @@ def create(request, job_id):
         if form.is_valid() and formset.is_valid():
             # Save main application first
             application = form.save(commit=False)
-            application.user = request.user
+            application.applicant = request.user
             application.job = job
             application.save()
 

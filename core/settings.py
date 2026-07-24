@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "jobs",
     "applications",
     "users",
@@ -53,12 +52,11 @@ INSTALLED_APPS = [
     "django_extensions",
     "rest_framework",
     "home",
-
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 REST_FRAMEWORK = {
@@ -71,12 +69,12 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    'allauth.account.middleware.AccountMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -167,17 +165,13 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTH_USER_MODEL = "users.User"
 
-LOGIN_REDIRECT_URL = "job_list"
-LOGOUT_REDIRECT_URL = "login"
+LOGIN_REDIRECT_URL = "jobs:job_list"
+LOGOUT_REDIRECT_URL = "users:login"
 
 AUTHENTICATION_BACKENDS = [
-
     "django.contrib.auth.backends.ModelBackend",
-
     "users.backends.EmailBackend",
-
     "allauth.account.auth_backends.AuthenticationBackend",
-
 ]
 
 LOGIN_URL = "users:login"
@@ -190,3 +184,14 @@ DATABASES = {
 
 
 SITE_ID = 1
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "password1*",
+    "password2*",
+]
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_VERIFICATION = "none"
