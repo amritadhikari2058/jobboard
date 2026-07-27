@@ -180,7 +180,7 @@ def create(request, job_id):
 @login_required
 @normal_user_required
 def user_applications(request):
-    applications = Application.objects.filter(user=request.user).select_related("job")
+    applications = Application.objects.filter(applicant=request.user).select_related("job")
     status = request.GET.get("status")
     if status:
         applications = applications.filter(status=status)
@@ -213,7 +213,7 @@ def recruiter_applications(request):
 def withdraw_application(request, app_id):
     application = get_object_or_404(Application, id=app_id)
 
-    if application.user != request.user:
+    if application.applicant != request.user:
         messages.error(request, "Not allowed")
 
     if application.status != "pending":

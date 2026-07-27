@@ -82,7 +82,7 @@ def recruiter_dashboard(request):
 @normal_user_required
 def user_dashboard(request):
     reset_queries()
-    applications = Application.objects.filter(user=request.user).select_related("job")
+    applications = Application.objects.filter(applicant=request.user).select_related("job")
     response = render(
         request, "users/user_dashboard.html", {"applications": applications}
     )

@@ -25,7 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', "fdfds8373827283")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG=True
+# DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     # "127.0.0.1",
@@ -83,7 +84,7 @@ MIDDLEWARE = [
 if DEBUG:
     INSTALLED_APPS += ['debug_toolbar']
 
-    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddlware",]
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware",]
 
 ROOT_URLCONF = "core.urls"
 

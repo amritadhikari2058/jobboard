@@ -132,7 +132,7 @@
 
                         {% if app.status == "pending" %}
 
-                        <a href="#"
+                        <a href="{% url 'applications:update_application' app.id %}"
                            class="btn btn-outline-primary rounded-pill">
 
                             <i class="bi bi-pencil-square me-2"></i>
