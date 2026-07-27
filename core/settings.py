@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY') | "fdfds8373827283"
+SECRET_KEY = os.environ.get('SECRET_KEY', "fdfds8373827283")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True"
@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     "applications",
     "users",
     "notifications",
-    "debug_toolbar",
     "crispy_forms",
     "crispy_bootstrap5",
     "django_extensions",
@@ -79,8 +78,12 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddlware",]
 
 ROOT_URLCONF = "core.urls"
 
@@ -181,14 +184,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 LOGIN_URL = "users:login"
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "Name": BASE_DIR / "db.sqlite3",
-    }
-}
-
 
 SITE_ID = 1
 
