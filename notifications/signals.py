@@ -5,7 +5,9 @@ from applications.models import Application
 
 
 @receiver(post_save, sender=Application)
-def create_notification(sender, instance, created, **kwargs):
+def create_notification(sender, instance, created, raw, **kwargs):
+    if raw:
+        return
     if created:
         Notification.objects.create(
             user=instance.job.user,

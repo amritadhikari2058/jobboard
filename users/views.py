@@ -82,7 +82,9 @@ def recruiter_dashboard(request):
 @normal_user_required
 def user_dashboard(request):
     reset_queries()
-    applications = Application.objects.filter(applicant=request.user).select_related("job")
+    applications = Application.objects.filter(applicant=request.user).select_related(
+        "job"
+    )
     response = render(
         request, "users/user_dashboard.html", {"applications": applications}
     )
@@ -127,16 +129,46 @@ def view_user_profile(request, email):
 
 def register_view(request):
     form = RegisterForm()
+
     if request.method == "POST":
         form = RegisterForm(request.POST)
         role = request.POST.get("role")
+
+        if role not in ["normal_user", "recruiter"]:
+            messages.error(request, "Please select a valid role.")
+            return render(
+                request,
+                "users/register.html",
+                {"form": form},
+            )
+
         if form.is_valid():
             form.save(role=role)
-            messages.success(request, "Account created successfully")
+
+            messages.success(
+                request,
+                "Account created! Please check your email to verify your account.",
+            )
+
             return redirect("users:login")
-    else:
-        print(form.errors)
-    return render(request, "users/register.html", {"form": form})
+
+    return render(
+        request,
+        "users/register.html",
+        {"form": form},
+    )
+
+
+def google_register(request):
+    role = request.GET.get("role")
+
+    if role not in ["normal_user", "recruiter"]:
+        messages.error(request, "Please select a role first.")
+        return redirect("users:register")
+
+    request.session["google_registration_role"] = role
+
+    return redirect("google_login")
 
 
 def login_view(request):
@@ -150,6 +182,20 @@ def login_view(request):
             user = authenticate(request, username=email, password=password)
 
             if user:
+                email_address = EmailAddress.objects.filter(
+                    user=user,
+                    email=user.email,
+                    primary=True,
+                ).first()
+
+                if email_address and not email_address.verified:
+                    messages.error(
+                        request,
+                        "Please verify your email address before loggin in.",
+                    )
+
+                    return redirect("users:login")
+
                 login(request, user)
                 return redirect("jobs:job_list")
             else:
