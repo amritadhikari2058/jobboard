@@ -147,7 +147,7 @@ def register_view(request):
 
             messages.success(
                 request,
-                "Account created successfully",
+                "Account created! Please check your email to verify your account.",
             )
 
             return redirect("users:login")
@@ -168,7 +168,7 @@ def google_register(request):
 
     request.session["google_registration_role"] = role
 
-    return redirect("/accounts/google/login/")
+    return redirect("google_login")
 
 
 def login_view(request):
@@ -182,6 +182,20 @@ def login_view(request):
             user = authenticate(request, username=email, password=password)
 
             if user:
+                email_address = EmailAddress.objects.filter(
+                    user=user,
+                    email=user.email,
+                    primary=True,
+                ).first()
+
+                if email_address and not email_address.verified:
+                    messages.error(
+                        request,
+                        "Please verify your email address before loggin in.",
+                    )
+
+                    return redirect("users:login")
+
                 login(request, user)
                 return redirect("jobs:job_list")
             else:

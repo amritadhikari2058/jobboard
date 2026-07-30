@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -209,4 +208,11 @@ ACCOUNT_SIGNUP_FIELDS = [
 ]
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+SOCIALACCOUNT_ADAPTER = "users.adapters.GoogleSocialAccountAdapter"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
