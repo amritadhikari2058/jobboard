@@ -10,7 +10,7 @@ def create_notification(sender, instance, created, raw, **kwargs):
         return
     if created:
         Notification.objects.create(
-            user=instance.job.user,
+            user=instance.job.recruiter,
             job=instance.job,
             application=instance,
             message=f'New Application received for "{instance.job.title}"',

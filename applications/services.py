@@ -13,12 +13,12 @@ class ApplicationService:
             raise Exception("Recruiters cannot apply")
 
         # 2. Duplicate Check
-        if Application.objects.filter(user=user, job=job).exists():
+        if Application.objects.filter(applicant=user, job=job).exists():
             raise Exception("Already Applied")
 
         # 3. Create Application
         application = Application.objects.create(
-            user=user,
+            applicant=user,
             job=job,
             experience=data.get("experience"),
             availability_type=data.get("availability_type"),
@@ -29,13 +29,13 @@ class ApplicationService:
 
     @staticmethod
     def apply(user, job, resume):
-        existing = Application.objects.filter(user=user, job=job).first()
+        existing = Application.objects.filter(applicant=user, job=job).first()
 
         if existing:
             raise DuplicateApplicationError("You have already applied for this job")
 
         # Create Application
-        application = Application.objects.create(user=user, job=job, resume=resume)
+        application = Application.objects.create(applicant=user, job=job, resume=resume)
 
         # log_activity
         log_activity(

@@ -56,7 +56,8 @@ def application_detail(request, app_id, application):
 def update(request, app_id, application):
     if request.method == "POST":
         resume = request.FILES.get("resume")
-        application = ApplicationService.update_application(application, resume)
+        status = request.POST.get("status")
+        application = ApplicationService.update_application(application, resume, status)
 
         messages.success(request, "Application updated successfully")
 
@@ -180,7 +181,9 @@ def create(request, job_id):
 @login_required
 @normal_user_required
 def user_applications(request):
-    applications = Application.objects.filter(applicant=request.user).select_related("job")
+    applications = Application.objects.filter(applicant=request.user).select_related(
+        "job"
+    )
     status = request.GET.get("status")
     if status:
         applications = applications.filter(status=status)

@@ -33,7 +33,7 @@ class JobService:
             jobs = jobs.filter(categories__name__icontains=category)
 
         jobs = jobs.distinct()
-        jobs=jobs.order_by('-created_at')
+        jobs = jobs.order_by("-created_at")
 
         if sort == "latest":
             jobs = jobs.order_by("-created_at")
@@ -80,7 +80,7 @@ class JobService:
     @staticmethod
     def create_job_service(form, user):
         job = form.save(commit=False)
-        job.user = user
+        job.recruiter = user
         job.save()
         form.save_m2m()
 

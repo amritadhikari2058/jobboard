@@ -6,9 +6,10 @@ from applications.models import Application
 from django.contrib import messages
 from jobs.models import Job
 from django.db import reset_queries
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from .decorators import recruiter_required, normal_user_required
+from allauth.account.models import EmailAddress
 
 User = get_user_model()
 
@@ -36,10 +37,19 @@ def recruiter_dashboard(request):
 
     total_jobs = jobs.count()
     totals = jobs.aggregate(
-        total_applications=Sum("total_applications"),
-        accepted_applications=Sum("accepted_count"),
-        pending_applications=Sum("pending_count"),
-        rejected_applications=Sum("rejected_count"),
+        total_applications=Count("applications"),
+        accepted_applications=Count(
+            "applications",
+            filter=Q(applications__status="accepted"),
+        ),
+        pending_applications=Count(
+            "applications",
+            filter=Q(applications__status="pending"),
+        ),
+        rejected_applications=Count(
+            "applications",
+            filter=Q(applications__status="rejected"),
+        ),
     )
 
     job_titles = [job.title for job in jobs]
