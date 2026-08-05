@@ -1,8 +1,6 @@
 from django import forms
 from .models import UserProfile
 from django.contrib.auth import get_user_model
-from allauth.account.models import EmailAddress
-from django.db import transaction
 
 User = get_user_model()
 
@@ -43,14 +41,6 @@ class RegisterForm(forms.ModelForm):
         user.role = role
         if commit:
             user.save()
-
-            # Register the email with allauth
-            EmailAddress.objects.create(
-                user=user,
-                email=user.email,
-                primary=True,
-                verified=False,
-            )
         return user
 
     def __init__(self, *args, **kwargs):

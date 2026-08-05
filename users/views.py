@@ -153,7 +153,14 @@ def register_view(request):
             )
 
         if form.is_valid():
-            form.save(role=role)
+            user = form.save(role=role)
+
+            EmailAddress.objects.create(
+                user=user,
+                email=user.email,
+                primary=True,
+                verified=False,
+            )
 
             messages.success(
                 request,
