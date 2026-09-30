@@ -1,0 +1,101 @@
+{% comment %}
+A job, rendered as a card. Switches on the caller's context:
+  show_recruiter=True   - show who posted it
+  show_applied=True     - show an "Applied" badge (needs applied_job_ids)
+  show_save=True        - show the save toggle (needs saved_job_ids)
+  show_unsave=True      - show the remove-from-saved toggle
+  show_actions=True     - show the owner-only Edit link
+  show_manage=True      - show the full owner toolbar (view applicants, edit, delete)
+  show_applicants=True  - show the annotated application count
+  note / note_label     - a small line under the meta row
+{% endcomment %}
+<div class="card jb-card-interactive h-100">
+    <div class="card-body d-flex flex-column">
+
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+            <h3 class="jb-card-title mb-0">
+                <a class="jb-link-title" href="{% url 'jobs:job_detail' job.id %}">{{ job.title }}</a>
+            </h3>
+            {% if show_applied and job.id in applied_job_ids %}
+                <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+                    <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Applied
+                </span>
+            {% elif show_applicants %}
+                <span class="jb-count flex-shrink-0">
+                    {{ job.total_applications }} {% if job.total_applications == 1 %}applicant{% else %}applicants{% endif %}
+                </span>
+            {% endif %}
+        </div>
+
+        {% if show_recruiter %}
+            <p class="jb-meta mb-2">
+                <i class="bi bi-building me-1" aria-hidden="true"></i>{{ job.recruiter.email }}
+            </p>
+        {% endif %}
+
+        <div class="jb-job-meta mb-3">
+            <span><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ job.location }}</span>
+            <span><i class="bi bi-clock" aria-hidden="true"></i>{{ job.created_at|timesince }} ago</span>
+        </div>
+
+        {% if note %}
+            <p class="jb-meta mb-3">
+                {% if note_label %}{{ note_label }} {% endif %}{{ note }}
+            </p>
+        {% endif %}
+
+        {% if job.categories.all %}
+            <p class="mb-3">
+                {% for category in job.categories.all %}
+                    <span class="jb-chip">{{ category.name }}</span>
+                {% endfor %}
+            </p>
+        {% endif %}
+
+        <p class="jb-body-sm mb-3">{{ job.description|striptags|truncatewords:18 }}</p>
+
+        <div class="jb-job-actions mt-auto">
+            <a class="btn btn-primary w-100" href="{% url 'jobs:job_detail' job.id %}">
+                View details
+            </a>
+
+            {% if show_save and user.is_authenticated %}
+                <form method="post" action="{% url 'jobs:toggle_save_job' job.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light btn-sm w-100">
+                        {% if job.id in saved_job_ids %}
+                            <i class="bi bi-bookmark-check-fill me-1" aria-hidden="true"></i>Saved
+                        {% else %}
+                            <i class="bi bi-bookmark me-1" aria-hidden="true"></i>Save job
+                        {% endif %}
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if show_unsave %}
+                <form method="post" action="{% url 'jobs:toggle_save_job' job.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light btn-sm w-100">
+                        <i class="bi bi-bookmark-x me-1" aria-hidden="true"></i>Remove from saved
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if show_manage %}
+                <a class="btn btn-light btn-sm w-100" href="{% url 'applications:view_applicants' job.slug %}">
+                    <i class="bi bi-people me-1" aria-hidden="true"></i>View applicants
+                </a>
+                <a class="btn btn-light btn-sm w-100" href="{% url 'jobs:update_job' job.id %}">
+                    <i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit
+                </a>
+                <a class="btn btn-outline-danger btn-sm w-100" href="{% url 'jobs:delete_job' job.id %}">
+                    <i class="bi bi-trash3 me-1" aria-hidden="true"></i>Delete
+                </a>
+            {% elif show_actions %}
+                <a class="btn btn-light btn-sm w-100" href="{% url 'jobs:update_job' job.id %}">
+                    <i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>

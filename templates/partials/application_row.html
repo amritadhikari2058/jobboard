@@ -1,0 +1,54 @@
+{% comment %}
+One application rendered as a list row.
+show_applicant=true  -> recruiter's view (shows who applied)
+show_job=true        -> applicant/owner's view (shows which job)
+Usage:
+  {% include "partials/application_row.html" with application=app show_job=True %}
+{% endcomment %}
+<div class="card jb-row-card h-100{% if unread %} jb-unread{% endif %}">
+    <div class="card-body">
+        <div class="d-flex gap-3 align-items-start">
+
+            {% if show_applicant %}
+                <span class="jb-avatar" aria-hidden="true">{{ application.applicant.email|first|upper }}</span>
+            {% else %}
+                <span class="jb-icon-disc" aria-hidden="true"><i class="bi bi-briefcase"></i></span>
+            {% endif %}
+
+            <div class="flex-grow-1 min-width-0">
+                <h3 class="jb-card-title mb-1">
+                    {% if show_applicant %}
+                        <a class="jb-link-title"
+                           href="{% url 'users:view_user_profile' application.applicant.email %}">{{ application.applicant.email }}</a>
+                    {% else %}
+                        <a class="jb-link-title" href="{% url 'jobs:job_detail' application.job.id %}">{{ application.job.title }}</a>
+                    {% endif %}
+                </h3>
+
+                <p class="jb-meta mb-2">
+                    {% if show_applicant %}
+                        Applied for {{ application.job.title }}
+                    {% else %}
+                        {{ application.job.recruiter.email }}
+                    {% endif %}
+                    &middot; {{ application.created_at|date:"M j, Y" }}
+                </p>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    {% application_status application.status as status %}
+                    <span class="jb-status {{ status.css }}">
+                        <i class="bi {{ status.icon }}" aria-hidden="true"></i>{{ status.label }}
+                    </span>
+                    {% if unread %}
+                        <span class="jb-meta">New</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <a class="btn btn-light btn-sm flex-shrink-0"
+               href="{% url 'applications:application_detail' application.id %}">
+                Review
+            </a>
+        </div>
+    </div>
+</div>

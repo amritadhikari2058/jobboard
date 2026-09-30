@@ -1,238 +1,41 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Saved Jobs{% endblock %}
+{% block title %}Saved jobs{% endblock %}
+{% block meta_description %}Jobs you have bookmarked for later.{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Bookmarks</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Saved jobs</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">Roles you have bookmarked so you can come back to them.</p>
+{% endblock %}
+
+{% block page_actions %}
+    <a class="btn btn-light" href="{% url 'jobs:job_list' %}">
+        <i class="bi bi-search me-1" aria-hidden="true"></i>Browse jobs
+    </a>
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-4">
-
-    <!-- Header -->
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-
-            <h2 class="fw-bold mb-1">
-                Saved Jobs
-            </h2>
-
-            <p class="text-muted mb-0">
-                Jobs you've bookmarked for later.
-            </p>
-
-        </div>
-
-        <span class="badge bg-primary rounded-pill px-4 py-2 fs-6">
-
-            <i class="bi bi-bookmark-heart-fill me-2"></i>
-
-            {{ saved_jobs|length }} Saved
-
-        </span>
-
-    </div>
-
-    <!-- Saved Jobs -->
-
-    <div class="row g-4">
-
-        {% for saved in saved_jobs %}
-
-        <div class="col-lg-4 col-md-6">
-
-            <div class="card job-card border-0 shadow-sm h-100">
-
-                <div class="card-body d-flex flex-column">
-
-                    <!-- Title -->
-
-                    <h5 class="fw-bold mb-2">
-
-                        <a href="{% url 'jobs:job_detail' saved.job.id %}"
-                           class="job-title text-decoration-none">
-
-                            {{ saved.job.title }}
-
-                        </a>
-
-                    </h5>
-
-                    <!-- Location -->
-
-                    <div class="text-muted small mb-3">
-
-                        <i class="bi bi-geo-alt-fill me-2"></i>
-
-                        {{ saved.job.location }}
-
-                    </div>
-
-                    <!-- Categories -->
-
-                    <div class="mb-3">
-
-                        {% for category in saved.job.categories.all %}
-
-                            <span class="badge bg-light text-dark border rounded-pill px-3 py-2 me-1 mb-1">
-
-                                {{ category.name }}
-
-                            </span>
-
-                        {% empty %}
-
-                            <span class="text-muted small">
-
-                                No Categories
-
-                            </span>
-
-                        {% endfor %}
-
-                    </div>
-
-                    <!-- Description -->
-
-                    <p class="text-muted flex-grow-1">
-
-                        {{ saved.job.description|truncatewords:18 }}
-
-                    </p>
-
-                    <hr>
-
-                    <!-- Footer -->
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-
-                        <small class="text-muted">
-
-                            <i class="bi bi-calendar-event me-1"></i>
-
-                            Saved {{ saved.saved_at|date:"M d, Y" }}
-
-                        </small>
-
-                    </div>
-
-                    <!-- Buttons -->
-
-                    <div class="d-grid gap-2">
-
-                        <a href="{% url 'jobs:job_detail' saved.job.id %}"
-                           class="btn btn-primary">
-
-                            <i class="bi bi-eye me-2"></i>
-
-                            View Job
-
-                        </a>
-
-                        <form method="POST"
-                              action="{% url 'jobs:toggle_save_job' saved.job.id %}">
-
-                            {% csrf_token %}
-
-                            <button class="btn btn-outline-danger w-100">
-
-                                <i class="bi bi-trash me-2"></i>
-
-                                Remove from Saved
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
+    {% if saved_jobs %}
+        <p class="jb-meta mb-3">
+            <strong class="text-body">{{ saved_jobs|length }}</strong>
+            {% if saved_jobs|length == 1 %}job saved{% else %}jobs saved{% endif %}
+        </p>
+
+        <div class="row g-4">
+            {% for saved in saved_jobs %}
+                <div class="col-lg-4 col-md-6">
+                    {% include "partials/job_card.html" with job=saved.job show_recruiter=True note=saved.created_at|date:"M j, Y" note_label="Saved" show_unsave=True %}
                 </div>
-
-            </div>
-
+            {% endfor %}
         </div>
-
-        {% empty %}
-
-        <div class="col-12">
-
-            <div class="card border-0 shadow-sm py-5">
-
-                <div class="card-body text-center">
-
-                    <i class="bi bi-bookmark-x display-1 text-muted"></i>
-
-                    <h3 class="fw-bold mt-3">
-
-                        No Saved Jobs
-
-                    </h3>
-
-                    <p class="text-muted mb-4">
-
-                        You haven't saved any jobs yet. Browse jobs and bookmark the ones you're interested in.
-
-                    </p>
-
-                    <a href="{% url 'jobs:job_list' %}"
-                       class="btn btn-primary rounded-pill px-4">
-
-                        <i class="bi bi-search me-2"></i>
-
-                        Browse Jobs
-
-                    </a>
-
-                </div>
-
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                {% include "partials/empty_state.html" with icon="bi-bookmark-x" title="Nothing saved yet" text="Browse the board and bookmark the roles that interest you. They will collect here." action_url=job_list_url action_label="Browse jobs" action_icon="bi-search" %}
             </div>
-
         </div>
-
-        {% endfor %}
-
-    </div>
-
-</div>
-
-<style>
-
-.job-card{
-    border-radius:18px;
-    transition:.25s;
-    background:#fff;
-}
-
-.job-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 15px 35px rgba(0,0,0,.12)!important;
-}
-
-.job-title{
-    color:#212529;
-    transition:.2s;
-}
-
-.job-title:hover{
-    color:#0d6efd;
-}
-
-.job-card .badge{
-    font-weight:500;
-}
-
-.job-card hr{
-    opacity:.12;
-}
-
-.btn{
-    border-radius:10px;
-    font-weight:600;
-}
-
-.card-body{
-    padding:1.5rem;
-}
-
-</style>
+    {% endif %}
 
 {% endblock %}

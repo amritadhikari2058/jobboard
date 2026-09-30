@@ -1,216 +1,45 @@
 {% extends "base.html" %}
-{% block title %}Edit Profile{% endblock %}
+
+{% block title %}Edit profile{% endblock %}
+{% block meta_description %}Update your profile, skills and resume.{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Account</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Edit profile</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">Keep your details current so recruiters reach you on the right terms.</p>
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-4">
+    <div class="jb-form-shell">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
 
-    <!-- Header -->
-    <div class="mb-4">
+                    {% if form.non_field_errors %}
+                        <div class="jb-form-error" role="alert">{{ form.non_field_errors }}</div>
+                    {% endif %}
 
-        <h2 class="fw-bold mb-1">
-            Edit Profile
-        </h2>
+                    {% include "partials/form_field.html" with field=form.profile_pic %}
+                    {% include "partials/form_field.html" with field=form.bio %}
+                    {% include "partials/form_field.html" with field=form.skills %}
 
-        <p class="text-muted mb-0">
-            Keep your profile up to date so recruiters and employers can know you better.
-        </p>
-
-    </div>
-
-    <div class="row justify-content-center">
-
-        <div class="col-lg-8">
-
-            <div class="card border-0 shadow profile-card">
-
-                <div class="card-header bg-white border-0 py-4">
-
-                    <h5 class="fw-semibold mb-1">
-
-                        Profile Information
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        Update your personal details, skills and resume.
-
-                    </small>
-
-                </div>
-
-                <div class="card-body p-4">
-
-                    <form method="POST" enctype="multipart/form-data">
-
-                        {% csrf_token %}
-
-                        <!-- Bio -->
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                <i class="bi bi-person-lines-fill me-2"></i>
-
-                                Bio
-
-                            </label>
-
-                            {{ form.bio }}
-
+                    <div class="jb-form-grid">
+                        {% include "partials/form_field.html" with field=form.phone %}
+                        {% include "partials/form_field.html" with field=form.location %}
+                        <div class="jb-form-full">
+                            {% include "partials/form_field.html" with field=form.resume %}
                         </div>
+                    </div>
 
-                        <!-- Skills -->
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                <i class="bi bi-lightbulb me-2"></i>
-
-                                Skills
-
-                            </label>
-
-                            {{ form.skills }}
-
-                            <div class="form-text">
-                                Separate skills using commas.
-                            </div>
-
-                        </div>
-
-                        <div class="row">
-
-                            <!-- Phone -->
-
-                            <div class="col-md-6 mb-4">
-
-                                <label class="form-label fw-semibold">
-
-                                    <i class="bi bi-telephone me-2"></i>
-
-                                    Phone
-
-                                </label>
-
-                                {{ form.phone }}
-
-                            </div>
-
-                            <!-- Location -->
-
-                            <div class="col-md-6 mb-4">
-
-                                <label class="form-label fw-semibold">
-
-                                    <i class="bi bi-geo-alt me-2"></i>
-
-                                    Location
-
-                                </label>
-
-                                {{ form.location }}
-
-                            </div>
-
-                        </div>
-
-                        <!-- Profile Picture -->
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                <i class="bi bi-image me-2"></i>
-
-                                Profile Picture
-
-                            </label>
-
-                            {{ form.profile_pic }}
-
-                        </div>
-
-                        <!-- Resume -->
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                <i class="bi bi-file-earmark-text me-2"></i>
-
-                                Resume
-
-                            </label>
-
-                            {{ form.resume }}
-
-                        </div>
-
-                        <hr>
-
-                        <!-- Buttons -->
-
-                        <div class="d-flex justify-content-end gap-3">
-
-                            <a href="{% url 'users:view_user_profile' user.email %}"
-                               class="btn btn-outline-secondary px-4">
-
-                                Cancel
-
-                            </a>
-
-                            <button type="submit"
-                                    class="btn btn-primary px-4">
-                                Save Changes
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
+                    <div class="jb-form-actions">
+                        <button type="submit" class="btn btn-primary">Save profile</button>
+                        <a class="btn btn-light" href="{% url 'users:view_user_profile' user.email %}">Cancel</a>
+                    </div>
+                </form>
             </div>
-
         </div>
-
     </div>
-
-</div>
-
-<style>
-
-.profile-card{
-    border-radius:20px;
-}
-
-.card-header{
-    border-bottom:1px solid rgba(0,0,0,.06);
-}
-
-.form-control,
-.form-select{
-    border-radius:10px;
-}
-
-textarea.form-control{
-    min-height:160px;
-}
-
-input[type="file"]{
-    padding:.6rem;
-}
-
-.btn{
-    border-radius:10px;
-    font-weight:500;
-}
-
-</style>
 
 {% endblock %}

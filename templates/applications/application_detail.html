@@ -1,350 +1,132 @@
 {% extends "base.html" %}
 
-{% block title %}Application Detail{% endblock %}
+{% block title %}Application for {{ application.job.title }}{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Application</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">{{ application.job.title }}</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">
+        <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ application.job.location }}
+        &middot; applied {{ application.created_at|timesince }} ago
+    </p>
+{% endblock %}
+
+{% block page_actions %}
+    {% application_status application.status as page_status %}
+    <span class="jb-status {{ page_status.css }}">
+        <i class="bi {{ page_status.icon }}" aria-hidden="true"></i>{{ page_status.label }}
+    </span>
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-4">
+    <div class="jb-detail-layout">
+        <div class="jb-list">
 
-    <!-- ================= HEADER ================= -->
-
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
-
-        <div class="card-body">
-
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-                <div>
-
-                    <h2 class="fw-bold mb-2">
-                        {{ application.job.title }}
-                    </h2>
-
-                    <div class="text-muted">
-
-                        <i class="bi bi-geo-alt-fill me-2"></i>
-
-                        {{ application.job.location }}
-
-                    </div>
-
+            <article class="card">
+                <div class="card-body">
+                    <h2 class="jb-section-heading">Cover letter</h2>
+                    <div class="jb-prose">{{ application.cover_letter|linebreaksbr }}</div>
                 </div>
+            </article>
 
-                {% if application.status == "accepted" %}
+            <article class="card">
+                <div class="card-body">
+                    <h2 class="jb-section-heading">Experience</h2>
+                    <div class="jb-prose">{{ application.experience|linebreaksbr }}</div>
+                </div>
+            </article>
 
-                    <span class="badge bg-success rounded-pill px-4 py-3 fs-6">
-
-                        <i class="bi bi-check-circle-fill me-2"></i>
-
-                        Accepted
-
-                    </span>
-
-                {% elif application.status == "pending" %}
-
-                    <span class="badge bg-warning text-dark rounded-pill px-4 py-3 fs-6">
-
-                        <i class="bi bi-hourglass-split me-2"></i>
-
-                        Pending
-
-                    </span>
-
-                {% else %}
-
-                    <span class="badge bg-danger rounded-pill px-4 py-3 fs-6">
-
-                        <i class="bi bi-x-circle-fill me-2"></i>
-
-                        Rejected
-
-                    </span>
-
-                {% endif %}
-
-            </div>
+            <article class="card">
+                <div class="card-body">
+                    <h2 class="jb-section-heading">Skills</h2>
+                    {% for skill in application.skills|split:"," %}
+                        <span class="jb-chip">{{ skill }}</span>
+                    {% empty %}
+                        <p class="jb-meta mb-0">No skills listed.</p>
+                    {% endfor %}
+                </div>
+            </article>
 
         </div>
 
-    </div>
+        <aside class="jb-detail-aside jb-list" aria-label="Applicant summary">
 
-    <div class="row g-4">
-
-        <!-- ================= LEFT COLUMN ================= -->
-
-        <div class="col-lg-8">
-
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-
+            <div class="card">
                 <div class="card-body">
-
-                    <h5 class="fw-bold mb-3">
-
-                        <i class="bi bi-envelope-paper me-2"></i>
-
-                        Cover Letter
-
-                    </h5>
-
-                    {{ application.cover_letter|linebreaks }}
-
+                    <h2 class="jb-section-heading">Applicant</h2>
+                    <div class="jb-info-list">
+                        <div class="jb-kv">
+                            <span class="jb-kv-label">Email</span>
+                            <a class="jb-kv-value"
+                               href="{% url 'users:view_user_profile' application.applicant.email %}">{{ application.applicant.email }}</a>
+                        </div>
+                        <div class="jb-kv">
+                            <span class="jb-kv-label">Availability</span>
+                            <span class="jb-kv-value">{{ application.get_availability_type_display }}</span>
+                        </div>
+                        <div class="jb-kv">
+                            <span class="jb-kv-label">Available from</span>
+                            <span class="jb-kv-value">{{ application.availability_period }}</span>
+                        </div>
+                        <div class="jb-kv">
+                            <span class="jb-kv-label">Expected salary</span>
+                            <span class="jb-kv-value">
+                                {% if application.expected_salary %}{{ application.expected_salary }}{% else %}Not stated{% endif %}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-
+            <div class="card">
                 <div class="card-body">
-
-                    <h5 class="fw-bold mb-3">
-
-                        <i class="bi bi-briefcase-fill me-2"></i>
-
-                        Experience
-
-                    </h5>
-
-                    {{ application.experience|linebreaks }}
-
-                </div>
-
-            </div>
-
-            <div class="card border-0 shadow-sm rounded-4">
-
-                <div class="card-body">
-
-                    <h5 class="fw-bold mb-3">
-
-                        <i class="bi bi-tools me-2"></i>
-
-                        Skills
-
-                    </h5>
-
-                    <p class="mb-0">
-
-                        {{ application.skills }}
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- ================= RIGHT COLUMN ================= -->
-
-        <div class="col-lg-4">
-
-            <!-- Applicant -->
-
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-
-                <div class="card-body">
-
-                    <h5 class="fw-bold mb-3">
-
-                        <i class="bi bi-person-circle me-2"></i>
-
-                        Applicant
-
-                    </h5>
-
-                    <div class="mb-3">
-
-                        <small class="text-muted d-block">
-                            Email
-                        </small>
-
-                        <a href="{% url 'users:view_user_profile' application.applicant.email %}"
-                           class="fw-semibold text-decoration-none">
-
-                            {{ application.user.email }}
-
-                        </a>
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <small class="text-muted d-block">
-                            Applied
-                        </small>
-
-                        {{ application.created_at|timesince }} ago
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <small class="text-muted d-block">
-                            Availability
-                        </small>
-
-                        {{ application.availability_type|title }}
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <small class="text-muted d-block">
-                            Available From
-                        </small>
-
-                        {{ application.availability_period }}
-
-                    </div>
-
-                    <div>
-
-                        <small class="text-muted d-block">
-                            Expected Salary
-                        </small>
-
-                        {{ application.expected_salary }}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- Resume -->
-
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-
-                <div class="card-body text-center">
-
-                    <h5 class="fw-bold mb-3">
-
-                        <i class="bi bi-file-earmark-pdf me-2"></i>
-
-                        Resume
-
-                    </h5>
+                    <h2 class="jb-section-heading">Documents and links</h2>
 
                     {% if application.resume %}
-
-                        <a href="{{ application.resume.url }}"
-                           target="_blank"
-                           class="btn btn-primary rounded-pill w-100">
-
-                            <i class="bi bi-download me-2"></i>
-
-                            Download Resume
-
+                        <a class="btn btn-primary w-100 mb-3" href="{{ application.resume.url }}" target="_blank" rel="noopener">
+                            <i class="bi bi-download me-1" aria-hidden="true"></i>Resume
                         </a>
-
                     {% else %}
-
-                        <p class="text-muted mb-0">
-
-                            No resume uploaded.
-
-                        </p>
-
+                        <p class="jb-meta mb-3">No resume uploaded.</p>
                     {% endif %}
 
-                </div>
-
-            </div>
-
-            <!-- Portfolio -->
-
-            <div class="card border-0 shadow-sm rounded-4">
-
-                <div class="card-body">
-
-                    <h5 class="fw-bold mb-3">
-
-                        <i class="bi bi-link-45deg me-2"></i>
-
-                        Portfolio Links
-
-                    </h5>
-
                     {% for link in application.links.all %}
-
-                        <div class="border rounded-3 p-3 mb-2">
-
-                            <div class="fw-semibold">
-
-                                {{ link.link_type|title }}
-
-                            </div>
-
-                            <a href="{{ link.url }}"
-                               target="_blank"
-                               class="small">
-
-                                {{ link.url }}
-
-                            </a>
-
-                        </div>
-
+                        <a class="jb-chip d-block mb-1 text-truncate" href="{{ link.url }}" target="_blank" rel="noopener">
+                            {{ link.get_link_type_display }}
+                        </a>
                     {% empty %}
-
-                        <p class="text-muted mb-0">
-
-                            No portfolio links provided.
-
-                        </p>
-
+                        <p class="jb-meta mb-0">No portfolio links provided.</p>
                     {% endfor %}
-
                 </div>
-
             </div>
 
-        </div>
+            <div class="card">
+                <div class="card-body jb-list">
+                    {% if application.applicant == user %}
+                        <a class="btn btn-light w-100" href="{% url 'applications:user_applications' %}">
+                            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All applications
+                        </a>
+                    {% else %}
+                        <a class="btn btn-light w-100" href="{% url 'applications:view_applicants' application.job.slug %}">
+                            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>All applicants
+                        </a>
+                    {% endif %}
 
+                    {% if application.applicant == user and application.status == 'pending' %}
+                        <a class="btn btn-light w-100" href="{% url 'applications:update_application' application.id %}">
+                            <i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit application
+                        </a>
+                        <form method="post" action="{% url 'applications:withdraw_application' application.id %}"
+                              data-confirm="Withdraw your application for {{ application.job.title }}?">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger w-100">Withdraw</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+        </aside>
     </div>
-
-    <!-- ================= ACTIONS ================= -->
-
-    <div class="d-flex justify-content-between align-items-center mt-5 flex-wrap gap-2">
-
-        <a href="#"
-           onclick="event.preventDefault(); window.history.back();"
-           class="btn btn-outline-secondary rounded-pill px-4">
-
-            <i class="bi bi-arrow-left me-2"></i>
-
-            Back
-
-        </a>
-
-        {% if application.status == "pending" %}
-
-        <div class="d-flex gap-2">
-
-            <a href="{% url 'applications:update_application' application.id %}"
-               class="btn btn-outline-primary rounded-pill px-4">
-
-                <i class="bi bi-pencil-square me-2"></i>
-
-                Edit
-
-            </a>
-
-            <a href="#"
-               class="btn btn-outline-danger rounded-pill px-4">
-
-                <i class="bi bi-trash me-2"></i>
-
-                Withdraw
-
-            </a>
-
-        </div>
-
-        {% endif %}
-
-    </div>
-
-</div>
 
 {% endblock %}

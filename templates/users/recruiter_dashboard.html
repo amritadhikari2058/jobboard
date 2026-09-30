@@ -1,501 +1,101 @@
 {% extends "base.html" %}
-{%block title%} Recruiter Dashboard {%endblock%}
-{%block content%}
-<div class="container mt-4">
 
-    <!-- Header -->
-
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-
-        <div>
-
-            <h2 class="fw-bold mb-1">
-
-                Recruiter Dashboard
-
-            </h2>
-
-            <p class="text-muted mb-0">
-
-                Track your jobs and manage applicants from one place.
-
-            </p>
-
-        </div>
-
-        <a href="{% url 'jobs:create_job' %}"
-           class="btn btn-primary rounded-pill px-4">
-
-            <i class="bi bi-plus-circle me-2"></i>
-
-            Create Job
-
-        </a>
-
-    </div>
-
-
-    <!-- Statistics -->
-
-<div class="row g-3 mb-4">
-
-    <div class="col-lg col-md-6">
-
-        <div class="card border-0 shadow-sm h-100 rounded-4">
-
-            <div class="card-body py-3 text-center">
-
-                <i class="bi bi-briefcase-fill fs-4 text-primary mb-2"></i>
-
-                <h4 class="fw-bold mb-1 text-primary">
-                    {{ total_jobs }}
-                </h4>
-
-                <small class="text-muted">
-                    Jobs Posted
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg col-md-6">
-
-        <div class="card border-0 shadow-sm h-100 rounded-4">
-
-            <div class="card-body py-3 text-center">
-
-                <i class="bi bi-file-earmark-person fs-4 text-dark mb-2"></i>
-
-                <h4 class="fw-bold mb-1">
-                    {{ total_applications }}
-                </h4>
-
-                <small class="text-muted">
-                    Applications
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg col-md-4">
-
-        <div class="card border-0 shadow-sm h-100 rounded-4">
-
-            <div class="card-body py-3 text-center">
-
-                <i class="bi bi-check-circle-fill fs-4 text-success mb-2"></i>
-
-                <h4 class="fw-bold mb-1 text-success">
-                    {{ accepted_applications }}
-                </h4>
-
-                <small class="text-muted">
-                    Accepted
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg col-md-4">
-
-        <div class="card border-0 shadow-sm h-100 rounded-4">
-
-            <div class="card-body py-3 text-center">
-
-                <i class="bi bi-hourglass-split fs-4 text-warning mb-2"></i>
-
-                <h4 class="fw-bold mb-1 text-warning">
-                    {{ pending_applications }}
-                </h4>
-
-                <small class="text-muted">
-                    Pending
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-lg col-md-4">
-
-        <div class="card border-0 shadow-sm h-100 rounded-4">
-
-            <div class="card-body py-3 text-center">
-
-                <i class="bi bi-x-circle-fill fs-4 text-danger mb-2"></i>
-
-                <h4 class="fw-bold mb-1 text-danger">
-                    {{ rejected_applications }}
-                </h4>
-
-                <small class="text-muted">
-                    Rejected
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-{% if top_job %}
-
-<div class="card border-0 shadow rounded-4 mb-4">
-
-    <div class="card-body p-4">
-
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-            <div>
-
-                <span class="badge bg-warning text-dark rounded-pill px-3 py-2 mb-3">
-
-                    ⭐ Top Performing Job
-
-                </span>
-
-                <h4 class="fw-bold mb-2">
-
-                    {{ top_job.title }}
-
-                </h4>
-
-                <p class="text-muted mb-0">
-
-                    <i class="bi bi-geo-alt-fill me-2"></i>
-
-                    {{ top_job.location }}
-
-                </p>
-
-            </div>
-
-            <a href="{% url 'applications:view_applicants' top_job.slug %}"
-               class="btn btn-primary rounded-pill px-4">
-
-                <i class="bi bi-people-fill me-2"></i>
-
-                View Applicants
-
-            </a>
-
-        </div>
-
-        <hr class="my-4">
-
-        <div class="row text-center">
-
-            <div class="col">
-
-                <h3 class="fw-bold text-primary mb-1">
-
-                    {{ top_job.total_applications }}
-
-                </h3>
-
-                <small class="text-muted">
-
-                    Applicants
-
-                </small>
-
-            </div>
-
-            <div class="col">
-
-                <h3 class="fw-bold text-success mb-1">
-
-                    {{ top_job.accepted_count }}
-
-                </h3>
-
-                <small class="text-muted">
-
-                    Accepted
-
-                </small>
-
-            </div>
-
-            <div class="col">
-
-                <h3 class="fw-bold text-dark mb-1">
-
-                    {{ top_job.acceptance_rate }}%
-
-                </h3>
-
-                <small class="text-muted">
-
-                    Success Rate
-
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-{% endif %}
-
-
-<!-- Jobs -->
-{% for job in jobs %}
-
-<div class="card shadow-sm border-0 rounded-4 mb-3">
-
-    <div class="card-body">
-
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-
-            <div>
-
-                <h5 class="fw-bold mb-1">
-                    {{ job.title }}
-                </h5>
-
-                <small class="text-muted">
-                    <i class="bi bi-geo-alt me-1"></i>
-                    {{ job.location }}
-                </small>
-
-            </div>
-
-            <a href="{% url 'applications:view_applicants' job.slug %}"
-               class="btn btn-sm btn-outline-primary rounded-pill">
-
-                <i class="bi bi-people me-1"></i>
-
-                Applicants
-
-            </a>
-
-        </div>
-
-        <!-- Statistics -->
-        <div class="d-flex flex-wrap gap-2 mb-3">
-
-            <span class="badge bg-primary-subtle text-primary border">
-                {{ job.total_applications }} Applicants
-            </span>
-
-            <span class="badge bg-success-subtle text-success border">
-                {{ job.accepted_count }} Accepted
-            </span>
-
-            <span class="badge bg-warning-subtle text-dark border">
-                {{ job.pending_count }} Pending
-            </span>
-
-            <span class="badge bg-danger-subtle text-danger border">
-                {{ job.rejected_count }} Rejected
-            </span>
-
-            <span class="badge bg-dark">
-                {{ job.acceptance_rate }}%
-            </span>
-
-        </div>
-
-        {% with applications=job.applications.all %}
-
-        {% if applications %}
-
-            {% for app in applications %}
-
-            <div class="border rounded-3 p-2 mb-2">
-
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-                    <!-- Applicant -->
-
-                    <div>
-
-                        <a href="{% url 'users:view_user_profile' app.applicant.email %}"
-                           class="fw-semibold text-decoration-none">
-
-                            {{ app.applicant.email }}
-
-                        </a>
-
-                        <div class="small text-muted">
-
-                            {{ app.created_at|timesince }} ago
-
-                        </div>
-
-                    </div>
-
-                    <!-- Right Side -->
-
-                    <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
-
-                        {% if app.status == "accepted" %}
-
-                            <span class="badge bg-success">
-                                Accepted
-                            </span>
-
-                        {% elif app.status == "pending" %}
-
-                            <span class="badge bg-warning text-dark">
-                                Pending
-                            </span>
-
-                        {% else %}
-
-                            <span class="badge bg-danger">
-                                Rejected
-                            </span>
-
-                        {% endif %}
-
-                        {% if app.status == "pending" %}
-
-                        <form method="POST"
-                              action="{% url 'applications:accept_application' app.id %}">
-
-                            {% csrf_token %}
-
-                            <button class="btn btn-success btn-sm">
-
-                                ✓
-
-                            </button>
-
-                        </form>
-
-                        <form method="POST"
-                              action="{% url 'applications:reject_application' app.id %}">
-
-                            {% csrf_token %}
-
-                            <button class="btn btn-outline-danger btn-sm">
-
-                                ✕
-
-                            </button>
-
-                        </form>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {% endfor %}
-
-        {% else %}
-
-        <div class="text-center py-3">
-
-            <i class="bi bi-person-x text-muted fs-2"></i>
-
-            <p class="text-muted mb-0 mt-2">
-
-                No applications yet.
-
-            </p>
-
-        </div>
-
-        {% endif %}
-
-        {% endwith %}
-
-    </div>
-
-</div>
-
-{% empty %}
-
-<div class="text-center py-5">
-
-    <i class="bi bi-briefcase fs-1 text-muted"></i>
-
-    <h5 class="mt-3">
-
-        No jobs created yet
-
-    </h5>
-
-    <a href="{% url 'jobs:create_job' %}"
-       class="btn btn-primary rounded-pill mt-2">
-
-        Create Job
-
+{% block title %}Recruiter dashboard{% endblock %}
+{% block meta_description %}A summary of your listings and the applicants they attract.{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Overview</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Recruiting dashboard</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">How your listings are performing and who applied to them.</p>
+{% endblock %}
+
+{% block page_actions %}
+    <a class="btn btn-primary" href="{% url 'jobs:create_job' %}">
+        <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Post a job
     </a>
+{% endblock %}
 
-</div>
+{% block content %}
 
-{% endfor %}
+    <div class="jb-stats">
+        {% include "partials/stat_card.html" with value=total_jobs label="Live listings" icon="bi-briefcase" icon_class="text-primary" %}
+        {% include "partials/stat_card.html" with value=total_applications label="Applications" icon="bi-people" icon_class="text-primary" %}
+        {% include "partials/stat_card.html" with value=pending_applications label="Pending" icon="bi-hourglass-split" icon_class="text-warning" %}
+        {% include "partials/stat_card.html" with value=accepted_applications label="Accepted" icon="bi-check-circle" icon_class="text-success" %}
+        {% include "partials/stat_card.html" with value=rejected_applications label="Rejected" icon="bi-x-circle" icon_class="text-danger" %}
+    </div>
 
+    {% if popular_jobs %}
+        <section class="card mb-4">
+            <div class="card-header">
+                <h2 class="jb-card-title mb-0">Applications per listing</h2>
+            </div>
+            <div class="card-body">
+                <div class="jb-bars">
+                    {% for job in popular_jobs %}
+                        {% widthratio job.total_applications max_applications 100 as fill %}
+                        <div class="jb-bar-row">
+                            <span class="jb-bar-label" title="{{ job.title }}">{{ job.title }}</span>
+                            <span class="jb-bar-value">{{ job.total_applications }}</span>
+                            <span class="jb-bar-track" role="img"
+                                  aria-label="{{ job.title }}: {{ job.total_applications }} applications">
+                                <span class="jb-bar-fill" style="width: {{ fill }}%"></span>
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
 
-<script>
-const ctx = document.getElementById("applicationsChart");
+    {% if top_job and top_job.total_applications %}
+        <div class="card mb-4">
+            <div class="card-body d-flex gap-3 align-items-start flex-wrap">
+                <span class="jb-icon-disc" aria-hidden="true"><i class="bi bi-trophy"></i></span>
+                <div class="flex-grow-1 min-width-0">
+                    <h2 class="jb-card-title mb-1">{{ top_job.title }}</h2>
+                    <p class="jb-meta mb-0">
+                        Your best performing listing with {{ top_job.total_applications }} application{{ top_job.total_applications|pluralize }}
+                        and a {{ top_job.acceptance_rate }}% acceptance rate.
+                    </p>
+                </div>
+                <a class="btn btn-light btn-sm flex-shrink-0"
+                   href="{% url 'applications:view_applicants' top_job.slug %}">Review applicants</a>
+            </div>
+        </div>
+    {% endif %}
 
-new Chart(ctx, {
-    type: "bar",
+    <section class="card">
+        <div class="card-header">
+            <h2 class="jb-card-title mb-0">Your listings</h2>
+        </div>
+        <div class="card-body">
+            {% if jobs %}
+                <div class="jb-list">
+                    {% for job in jobs %}
+                        <div class="d-flex gap-3 align-items-start flex-wrap py-3{% if not forloop.last %} border-bottom{% endif %}">
+                            <div class="flex-grow-1 min-width-0">
+                                <a class="jb-link-title d-block" href="{% url 'jobs:job_detail' job.id %}">{{ job.title }}</a>
+                                <p class="jb-meta mb-0">
+                                    <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ job.location }}
+                                    &middot; posted {{ job.created_at|date:"M j, Y" }}
+                                </p>
+                            </div>
 
-    data: {
-        labels: {{ job_titles|safe }},
-
-        datasets: [{
-            label: "Applications",
-            data: {{ application_counts|safe }},
-            borderRadius: 8,
-            borderWidth: 0
-        }]
-    },
-
-    options: {
-
-        responsive: true,
-
-        maintainAspectRatio: false,
-
-        plugins: {
-
-            legend: {
-                display: false
-            }
-
-        },
-
-        scales: {
-
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0
-                }
-            }
-
-        }
-
-    }
-
-});
-</script>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <span class="jb-count">
+                                    {{ job.total_applications }} {% if job.total_applications == 1 %}applicant{% else %}applicants{% endif %}
+                                </span>
+                                <span class="jb-meta d-none d-sm-inline">{{ job.acceptance_rate }}% accepted</span>
+                                <a class="btn btn-light btn-sm" href="{% url 'applications:view_applicants' job.slug %}">Applicants</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {% include "partials/empty_state.html" with icon="bi-briefcase" title="No listings yet" text="Post your first role to start building a pipeline of candidates." action_url=create_job_url action_label="Post a job" action_icon="bi-plus-circle" %}
+            {% endif %}
+        </div>
+    </section>
 
 {% endblock %}

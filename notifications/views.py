@@ -8,9 +8,9 @@ from .services import NotificationService
 # Notifications View
 @login_required
 def notifications_view(request):
-    notifications = Notification.objects.filter(user=request.user).order_by(
-        "-created_at"
-    )
+    notifications = Notification.objects.filter(user=request.user).select_related(
+        "job", "application"
+    ).order_by("-created_at")
     return render(
         request, "notifications/notifications.html", {"notifications": notifications}
     )
@@ -28,7 +28,7 @@ def notifications_mark_as_read(request, id):
             "applications:application_detail", app_id=notification.application.id
         )
     elif notification.job:
-        return redirect("job_detail", id=notification.job.id)
+        return redirect("jobs:job_detail", id=notification.job.id)
 
     return redirect("notifications:notifications")
 

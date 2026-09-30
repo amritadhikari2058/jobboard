@@ -81,12 +81,16 @@ class ApplicationService:
 
     @staticmethod
     def delete_application(application, user):
+        # Capture the relations before the row disappears, otherwise the
+        # notification below would read them off a deleted instance.
         job = application.job
+        recruiter = job.recruiter
+
         application.delete()
 
         NotificationService.notify(
-            user=application.job.user,
-            message=f"{user.email} withdrew application from '{application.job.title}'",
+            user=recruiter,
+            message=f"{user.email} withdrew their application from '{job.title}'",
         )
 
         log_activity(

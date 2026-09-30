@@ -1,185 +1,55 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
 {% load socialaccount %}
+
+{% block title %}Log in{% endblock %}
+{% block meta_description %}Log in to your JobBoard account.{% endblock %}
+
+{% block shell_variant %}centered{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
-
-    <div class="row justify-content-center">
-
-        <div class="col-lg-5 col-md-7">
-
-            <div class="card shadow-lg border-0 rounded-4">
-
-                <div class="card-body p-5">
-
-                    <!-- Header -->
-
-                    <div class="text-center mb-4">
-
-                        <div class="display-5 mb-3">
-                            🔐
-                        </div>
-
-                        <h2 class="fw-bold mb-2">
-                            Welcome Back
-                        </h2>
-
-                        <p class="text-muted">
-                            Sign in to continue to your Job Board account.
-                        </p>
-
-                    </div>
-
-
-                    <!-- Messages -->
-
-                    {% if messages %}
-                        {% for message in messages %}
-
-                            <div class="alert alert-danger rounded-3">
-                                {{ message }}
-                            </div>
-
-                        {% endfor %}
-                    {% endif %}
-
-
-                    <!-- Email / Password Form -->
-
-                    <form method="POST">
-
-                        {% csrf_token %}
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-                                Email Address
-                            </label>
-
-                            {{ form.email }}
-
-                        </div>
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-                                Password
-                            </label>
-
-                            {{ form.password }}
-
-                        </div>
-
-                        <div class="d-grid mb-3">
-
-                            <button
-                                type="submit"
-                                class="btn btn-primary btn-lg rounded-pill">
-
-                                <i class="bi bi-box-arrow-in-right me-2"></i>
-
-                                Login
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-
-                    <!-- Divider -->
-
-                    <div class="d-flex align-items-center my-4">
-
-                        <hr class="flex-grow-1">
-
-                        <span class="px-3 text-muted small">
-                            OR
-                        </span>
-
-                        <hr class="flex-grow-1">
-
-                    </div>
-
-
-                    <!-- Google Login -->
-
-                    <div class="d-grid">
-
-                        <a
-                            href="{% provider_login_url 'google' %}"
-                            class="btn btn-outline-dark btn-lg rounded-pill">
-
-                            <i class="bi bi-google me-2"></i>
-
-                            Continue with Google
-
-                        </a>
-
-                    </div>
-
-
-                    <!-- Register -->
-
-                    <div class="text-center mt-4">
-
-                        <p class="text-muted mb-2">
-                            Don't have an account?
-                        </p>
-
-                        <a
-                            href="{% url 'users:register' %}"
-                            class="btn btn-outline-dark rounded-pill px-4">
-
-                            <i class="bi bi-person-plus me-2"></i>
-
-                            Create Account
-
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
+    <div class="text-center mb-4">
+        <span class="jb-brand-mark mb-3" style="width:3.5rem; height:3.5rem; font-size:1.5rem;">
+            <i class="bi bi-briefcase-fill" aria-hidden="true"></i>
+        </span>
+        <h1 class="jb-page-title">Welcome back</h1>
+        <p class="jb-page-subtitle">Sign in to continue to your JobBoard account.</p>
     </div>
 
-</div>
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
 
+                {% if form.non_field_errors %}
+                    <div class="jb-form-error" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
 
-<style>
+                {% include "partials/form_field.html" with field=form.email %}
+                {% include "partials/form_field.html" with field=form.password %}
 
-.card{
-    border-radius:20px;
-}
+                <div class="jb-form-actions">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Log in
+                    </button>
+                </div>
+            </form>
 
-.form-control{
-    border-radius:12px;
-    padding:12px 15px;
-}
+            {% if "google" in social_providers %}
+                <p class="jb-divider-text">or</p>
 
-.form-control:focus{
-    box-shadow:0 0 0 .2rem rgba(13,110,253,.15);
-}
+                <a class="jb-social-btn" href="{% provider_login_url 'google' %}">
+                    <i class="bi bi-google" aria-hidden="true"></i>Continue with Google
+                </a>
+            {% endif %}
+        </div>
+    </div>
 
-.btn{
-    border-radius:12px;
-    font-weight:600;
-}
-
-.btn-primary{
-    padding:12px;
-}
-
-.btn-outline-dark:hover{
-    color:#fff;
-}
-
-</style>
+    <p class="text-center jb-meta mt-4 mb-0">
+        No account yet?
+        <a class="fw-semibold" href="{% url 'users:register' %}">Create one</a>
+    </p>
 
 {% endblock %}

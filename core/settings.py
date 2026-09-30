@@ -85,8 +85,15 @@ STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
+    # Hashed, compressed assets only matter for a deployed build, and the
+    # manifest backend makes {% static %} raise for any file that has not been
+    # through collectstatic. Local dev and tests get plain lookups instead.
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
     },
 }
 
@@ -105,11 +112,15 @@ TEMPLATES = [
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
+            # Available in every template without {% load %}, so shared partials
+            # and their callers cannot drift out of sync.
+            "builtins": ["users.templatetags.nav_tags"],
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "jobs.context_processors.notification_count",
+                "jobs.context_processors.user_display",
             ],
         },
     },
@@ -133,6 +144,37 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
     DATABASES["default"] = dj_database_url.parse(DATABASE_URL)
+
+
+# Caching
+REDIS_URL = os.environ.get("REDIS_URL")
+
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+            "KEY_PREFIX": "jobboard",
+        }
+    }
+else:
+    # LocMemCache is per-process, so it is only a safe fallback for local dev
+    # and tests. Set REDIS_URL in every deployed environment.
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "jobboard",
+        }
+    }
+
+# How long the popular-jobs ranking stays cached before it is recomputed.
+POPULAR_JOBS_CACHE_TTL = int(os.environ.get("POPULAR_JOBS_CACHE_TTL", "300"))
+
+# How many jobs get_popular_jobs() returns by default.
+POPULAR_JOBS_LIMIT = int(os.environ.get("POPULAR_JOBS_LIMIT", "10"))
 
 
 # Password validation

@@ -32,7 +32,9 @@ def application_list(request):
 
         applications = get_user_applications(job, status)
     return render(
-        request, "applications/application_list.html", {"applications": applications}
+        request,
+        "applications/application_list.html",
+        {"applications": applications, "job": job, "status": status},
     )
 
 
@@ -43,10 +45,7 @@ def application_detail(request, app_id, application):
     return render(
         request,
         "applications/application_detail.html",
-        {
-            "application": application,
-            "previous_url": request.META.get("HTTP_REFERER", "/"),
-        },
+        {"application": application},
     )
 
 
@@ -55,15 +54,19 @@ def application_detail(request, app_id, application):
 @application_owner_required
 def update(request, app_id, application):
     if request.method == "POST":
-        resume = request.FILES.get("resume")
-        status = request.POST.get("status")
-        application = ApplicationService.update_application(application, resume, status)
+        form = ApplicationForm(request.POST, request.FILES, instance=application)
 
-        messages.success(request, "Application updated successfully")
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Application updated successfully")
+            return redirect("applications:application_detail", app_id=application.id)
+    else:
+        form = ApplicationForm(instance=application)
 
-        return redirect("applications:application_list")
     return render(
-        request, "applications/update_application.html", {"application": application}
+        request,
+        "applications/update_application.html",
+        {"form": form, "application": application},
     )
 
 
@@ -87,9 +90,9 @@ def delete(request, app_id, application):
 @recruiter_owns_application
 def accept_application(request, app_id):
     application = get_application_by_id(app_id)
-    print(request.method)
+
     if request.method != "POST":
-        return redirect("view_applicants", slug=application.job.slug)
+        return redirect("applications:view_applicants", slug=application.job.slug)
 
     try:
         ApplicationService.update_application_status(
@@ -107,7 +110,7 @@ def accept_application(request, app_id):
 @recruiter_owns_application
 def reject_application(request, app_id, application):
     if request.method != "POST":
-        return redirect("view_applicants", slug=application.job.slug)
+        return redirect("applications:view_applicants", slug=application.job.slug)
 
     try:
         ApplicationService.update_application_status(
@@ -126,16 +129,16 @@ def view_applicants(request, slug):
     user = request.user
     job = get_object_or_404(Job, slug=slug, recruiter=user)
     applications = get_job_applications(job)
-
     return render(
-        request, "applications/view_applicants.html", {"applications": applications}
+        request,
+        "applications/view_applicants.html",
+        {"applications": applications, "job": job},
     )
-
 
 @login_required
 @recruiter_required
 def applications_by_job(request):
-    job_id = request.GET.get(job_id)
+    job_id = request.GET.get("job_id")
     applications = Application.objects.filter(job_id=job_id)
     return render(
         request, "applications/application_list.html", {"applications": applications}
@@ -174,6 +177,7 @@ def create(request, job_id):
         {
             "form": form,
             "formset": formset,
+            "job": job,
         },
     )
 
@@ -200,7 +204,7 @@ def user_applications(request):
 @login_required
 @recruiter_required
 def recruiter_applications(request):
-    jobs = Job.objects.filter(user=request.user).prefetch_related("applications")
+    jobs = Job.objects.filter(recruiter=request.user).prefetch_related("applications")
 
     return render(
         request,
@@ -218,17 +222,20 @@ def withdraw_application(request, app_id):
 
     if application.applicant != request.user:
         messages.error(request, "Not allowed")
+        return redirect("applications:user_applications")
 
     if application.status != "pending":
         messages.warning(request, "Cannot withdraw after decision.")
         return redirect("applications:user_applications")
 
-    if request.method == "POST":
-        application.status = "withdrawn"
-        application.save()
-        messages.success(request, "Application withdrawn")
+    # State-changing action: a bare GET must not withdraw anything. The list
+    # page confirms with the user before posting here.
+    if request.method != "POST":
+        return redirect("applications:user_applications")
 
-    messages.error(request, "Sorry, the application couldn't be withdrawn")
+    application.status = "withdrawn"
+    application.save()
+    messages.success(request, "Application withdrawn")
     return redirect("applications:user_applications")
 
 
@@ -240,7 +247,7 @@ class ApplicationViewSet(ModelViewSet):
 
     # Only user's Applications
     def get_queryset(self):
-        return Application.objects.filter(user=self.request.user)
+        return Application.objects.filter(applicant=self.request.user)
 
     # Create (POST /applications/)
     def create(self, request, *args, **kwargs):
@@ -255,13 +262,13 @@ class ApplicationViewSet(ModelViewSet):
         if request.user.role == "recruiter":
             return Response({"error": "Recruiters cannot apply"}, status=403)
 
-        if Application.objects.filter(user=request.user, job=job).exists():
+        if Application.objects.filter(applicant=request.user, job=job).exists():
             return Response({"error": "Already Applied"}, status=400)
 
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save(user=request.user, job=job, status="pending")
+            serializer.save(applicant=request.user, job=job, status="pending")
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
@@ -275,7 +282,7 @@ class ApplicationViewSet(ModelViewSet):
                 {"error": "Only Recruiters allowed"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        if application.job.user != request.user:
+        if application.job.recruiter != request.user:
             return Response({"error": "Not your job"}, status=403)
 
         application.status = "accepted"
@@ -292,7 +299,7 @@ class ApplicationViewSet(ModelViewSet):
                 {"error": "Only recruiters allowed"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        if application.job.user != request.user:
+        if application.job.recruiter != request.user:
             return Response({"error": "Not your job"}, status=status.HTTP_403_FORBIDDEN)
 
         application.status = "rejected"

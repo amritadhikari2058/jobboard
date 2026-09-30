@@ -12,7 +12,10 @@ def recruiter_owns_application(view_func):
             messages.error(request, "Only recruiters can perform this action.")
             return redirect("users:recruiter_dashboard")
 
-        application = get_object_or_404(Application, id=kwargs.get("app_id"))
+        application = get_object_or_404(
+            Application.objects.select_related("job__recruiter"),
+            id=kwargs.get("app_id"),
+        )
 
         # Check ownership
         if application.job.recruiter != request.user:
@@ -27,7 +30,10 @@ def recruiter_owns_application(view_func):
 def application_owner_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        application = Application.objects.get(id=kwargs.get("app_id"))
+        application = get_object_or_404(
+            Application.objects.select_related("job__recruiter"),
+            id=kwargs.get("app_id"),
+        )
         is_owner = application.applicant == request.user
         is_recruiter = application.job.recruiter == request.user
 

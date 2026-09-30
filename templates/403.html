@@ -1,13 +1,9 @@
-{% extends "base.html" %}
+{% extends "errors/base.html" %}
 
-{% block content %}
-<div class="text-center mt-5">
-    <h1 class="display-4 text-danger">403</h1>
-    <h3>Access Denied</h3>
-    <p>You are not allowed to view this page.</p>
-
-    <a href="{% url 'jobs:job_list' %}" class="btn btn-primary mt-3">
-        Go Back Home
-    </a>
-</div>
+{% block title %}Permission denied{% endblock %}
+{% block code %}403{% endblock %}
+{% block heading %}You do not have access to this page{% endblock %}
+{% block message %}
+    This area belongs to somebody else. If you think that is a mistake, ask the
+    account owner to share it with you.
 {% endblock %}

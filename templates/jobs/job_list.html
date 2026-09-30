@@ -1,424 +1,108 @@
-{% extends 'base.html' %}
-{% block title %}Jobs{% endblock %}
-{% block content %}
+{% extends "base.html" %}
 
-<div class="container mt-4">
-  
+{% block title %}Browse jobs{% endblock %}
+{% block meta_description %}Search open roles by keyword, location and category.{% endblock %}
 
-<!-- HEADER -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+{% block page_eyebrow %}<p class="jb-eyebrow">Opportunities</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Find your next opportunity</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">Browse roles posted by recruiters across different industries.</p>
+{% endblock %}
 
-    <div>
-        <h2 class="fw-bold mb-1">
-            Find Your Next Opportunity
-        </h2>
-
-        <p class="text-muted mb-0">
-            Browse jobs from recruiters across different industries.
-        </p>
-    </div>
-
+{% block page_actions %}
     {% if user.is_authenticated and user.role == 'recruiter' %}
-        <a href="{% url 'jobs:create_job' %}"
-           class="btn btn-primary rounded-pill px-4">
-
-            <i class="bi bi-plus-circle me-2"></i>
-            Create Job
-
+        <a class="btn btn-primary" href="{% url 'jobs:create_job' %}">
+            <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Post a job
+        </a>
+    {% elif user.is_authenticated %}
+        <a class="btn btn-light" href="{% url 'jobs:saved_jobs' %}">
+            <i class="bi bi-bookmark-heart me-1" aria-hidden="true"></i>Saved jobs
         </a>
     {% endif %}
+{% endblock %}
 
-</div>
+{% block content %}
 
-<!-- SEARCH CARD -->
-<div class="card search-card shadow-sm border-0 mb-4">
+    <section class="card mb-4" aria-label="Search filters">
+        <div class="jb-toolbar mb-0">
+            <form method="get" class="row g-3 w-100 align-items-end">
 
-    <div class="card-body">
-
-        <div class="mb-4">
-
-            <h5 class="fw-semibold mb-1">
-                Search Filters
-            </h5>
-
-            <small class="text-muted">
-                Search jobs using keywords, location and category.
-            </small>
-
-        </div>
-
-        <form method="GET" class="row g-3 align-items-end">
-
-            <!-- Keyword -->
-
-            <div class="col-lg-4">
-
-                <label class="form-label">
-                    Keyword
-                </label>
-
-                <div class="input-group">
-
-                    <span class="input-group-text">
-                        <i class="bi bi-search"></i>
-                    </span>
-
-                    <input
-                        type="text"
-                        name="q"
-                        class="form-control"
-                        placeholder="Job title or keyword"
-                        value="{{ request.GET.q }}">
-
+                <div class="col-lg-4">
+                    <div class="jb-toolbar-field">
+                        <label for="filter-q">Keyword</label>
+                        <input type="search" name="q" id="filter-q" class="form-control"
+                               placeholder="Job title or keyword"
+                               value="{{ request.GET.q }}">
+                    </div>
                 </div>
 
-            </div>
-
-            <!-- Location -->
-
-            <div class="col-lg-2">
-
-                <label class="form-label">
-                    Location
-                </label>
-
-                <div class="input-group">
-
-                    <span class="input-group-text">
-                        <i class="bi bi-geo-alt"></i>
-                    </span>
-
-                    <input
-                        type="text"
-                        name="location"
-                        class="form-control"
-                        placeholder="Location"
-                        value="{{ request.GET.location }}">
-
+                <div class="col-lg-3">
+                    <div class="jb-toolbar-field">
+                        <label for="filter-location">Location</label>
+                        <input type="text" name="location" id="filter-location" class="form-control"
+                               placeholder="City or country"
+                               value="{{ request.GET.location }}">
+                    </div>
                 </div>
 
-            </div>
-
-            <!-- Category -->
-
-            <div class="col-lg-2">
-
-                <label class="form-label">
-                    Category
-                </label>
-
-                <select
-                    name="category"
-                    class="form-select">
-
-                    <option value="">
-                        All Categories
-                    </option>
-
-                    {% for cat in categories %}
-
-                    <option
-                        value="{{ cat.name }}"
-                        {% if request.GET.category == cat.name %}selected{% endif %}>
-
-                        {{ cat.name }}
-
-                    </option>
-
-                    {% endfor %}
-
-                </select>
-
-            </div>
-
-            <!-- Sort -->
-
-            <div class="col-lg-2">
-
-                <label class="form-label">
-                    Sort
-                </label>
-
-                <select
-                    name="sort"
-                    class="form-select">
-
-                    <option value="">Latest</option>
-
-                    <option value="latest"
-                        {% if request.GET.sort == "latest" %}selected{% endif %}>
-                        Latest
-                    </option>
-
-                    <option value="oldest"
-                        {% if request.GET.sort == "oldest" %}selected{% endif %}>
-                        Oldest
-                    </option>
-
-                </select>
-
-            </div>
-
-            <!-- Button -->
-
-            <div class="col-lg-2 d-grid">
-
-                <button class="btn btn-primary">
-
-                    <i class="bi bi-search me-2"></i>
-
-                    Search
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
-<!-- RESULT INFO -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-
-    <p class="text-muted mb-0">
-
-        <strong>{{ jobs.paginator.count }}</strong>
-
-        jobs found
-
-    </p>
-
-    <a
-        href="{% url 'jobs:saved_jobs' %}"
-        class="btn btn-outline-dark rounded-pill">
-
-        <i class="bi bi-bookmark-heart me-2"></i>
-
-        Saved Jobs
-
-    </a>
-
-</div>
-
-<!-- JOB CARDS -->
-<div class="row g-4">
-
-{% for job in jobs %}
-
-<div class="col-lg-4 col-md-6">
-
-    <div class="card job-card h-100 border-0 shadow-sm">
-
-        <div class="card-body d-flex flex-column">
-
-            <!-- Top -->
-            <div class="d-flex justify-content-between align-items-start mb-3">
-
-                <div>
-
-                    <h5 class="fw-bold mb-1">
-                        <a href="{% url 'jobs:job_detail' job.id %}"
-                           class="job-title text-decoration-none">
-                            {{ job.title }}
-                        </a>
-                    </h5>
-
-                    <small class="text-secondary">
-                        <i class="bi bi-building"></i>
-                        {{ job.user.company_name|default:"Confidential Company" }}
-                    </small>
-
+                <div class="col-lg-2">
+                    <div class="jb-toolbar-field">
+                        <label for="filter-category">Category</label>
+                        <select name="category" id="filter-category" class="form-select">
+                            <option value="">All categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.name }}"
+                                        {% if request.GET.category == category.name %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
-                {% if job.id in applied_job_ids %}
-                    <span class="badge bg-success">
-                        Applied
-                    </span>
-                {% endif %}
-
-            </div>
-
-            <!-- Job Meta -->
-            <div class="mb-3 small text-muted">
-
-                <div class="mb-2">
-                    <i class="bi bi-geo-alt-fill me-2"></i>
-                    {{ job.location }}
+                <div class="col-lg-2">
+                    <div class="jb-toolbar-field">
+                        <label for="filter-sort">Sort</label>
+                        <select name="sort" id="filter-sort" class="form-select">
+                            <option value="" {% if not request.GET.sort %}selected{% endif %}>Newest</option>
+                            <option value="latest" {% if request.GET.sort == 'latest' %}selected{% endif %}>Newest</option>
+                            <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div>
-                    <i class="bi bi-clock-history me-2"></i>
-                    Posted {{ job.created_at|timesince }} ago
-                </div>
-
-            </div>
-
-            <!-- Categories -->
-            <div class="mb-3">
-
-                {% for category in job.categories.all %}
-                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2 me-1 mb-1">
-                        {{ category.name }}
-                    </span>
-                {% empty %}
-                    <span class="text-muted small">
-                        No Categories
-                    </span>
-                {% endfor %}
-
-            </div>
-
-            <!-- Description -->
-            <p class="text-muted flex-grow-1">
-                {{ job.description|truncatewords:15 }}
-            </p>
-
-            <hr>
-
-            <!-- Buttons -->
-            <div class="d-grid gap-2">
-
-                <a href="{% url 'jobs:job_detail' job.id %}"
-                   class="btn btn-primary">
-
-                    View Details
-
-                </a>
-
-                <form method="POST"
-                      action="{% url 'jobs:toggle_save_job' job.id %}">
-
-                    {% csrf_token %}
-
-                    <button class="btn btn-outline-secondary w-100">
-
-                        {% if job.id in saved_job_ids %}
-                            <i class="bi bi-bookmark-check-fill me-2"></i>
-                            Saved
-                        {% else %}
-                            <i class="bi bi-bookmark me-2"></i>
-                            Save Job
-                        {% endif %}
-
+                <div class="col-lg-1 d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1" aria-hidden="true"></i>
+                        <span class="visually-hidden">Apply filters</span>
                     </button>
-
-                </form>
-
-            </div>
-
+                </div>
+            </form>
         </div>
+    </section>
 
-    </div>
-
-</div>
-
-{% empty %}
-
-<div class="col-12 text-center py-5">
-
-    <i class="bi bi-search display-2 text-muted"></i>
-
-    <h4 class="mt-3">No Jobs Found</h4>
-
-    <p class="text-muted">
-        Try changing your search filters.
+    <p class="jb-meta mb-3">
+        <strong class="text-body">{{ jobs.paginator.count }}</strong>
+        {% if jobs.paginator.count == 1 %}job{% else %}jobs{% endif %} found
+        {% if request.GET.q %}for &ldquo;{{ request.GET.q }}&rdquo;{% endif %}
     </p>
 
-</div>
+    {% if jobs %}
+        <div class="row g-4">
+            {% for job in jobs %}
+                <div class="col-lg-4 col-md-6">
+                    {% include "partials/job_card.html" with show_recruiter=True show_applied=True show_save=True %}
+                </div>
+            {% endfor %}
+        </div>
 
-{% endfor %}
-
-</div>
-
-  <!-- PAGINATION -->
-  <nav class="mt-4">
-    <ul class="pagination justify-content-center">
-
-      {% if jobs.has_previous %}
-      <li class="page-item">
-        <a class="page-link"
-           href="?q={{ request.GET.q }}&location={{ request.GET.location }}&category={{ request.GET.category }}&sort={{ request.GET.sort }}&page={{ jobs.previous_page_number }}">
-          Previous
-        </a>
-      </li>
-      {% endif %}
-
-      <li class="page-item active">
-        <span class="page-link">
-          Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}
-        </span>
-      </li>
-
-      {% if jobs.has_next %}
-      <li class="page-item">
-        <a class="page-link"
-           href="?q={{ request.GET.q }}&location={{ request.GET.location }}&category={{ request.GET.category }}&sort={{ request.GET.sort }}&page={{ jobs.next_page_number }}">
-          Next
-        </a>
-      </li>
-      {% endif %}
-
-    </ul>
-  </nav>
-
-</div>
-
-<!-- STYLES -->
-<style>
-.job-card{
-    border-radius:18px;
-    transition:.25s;
-    background:#fff;
-}
-
-.job-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 15px 35px rgba(0,0,0,.12)!important;
-}
-
-.job-title{
-    color:#212529;
-    transition:.2s;
-}
-
-.job-title:hover{
-    color:#0d6efd;
-}
-
-.job-card .badge{
-    font-weight:500;
-}
-
-.job-card hr{
-    opacity:.12;
-}
-
-.btn{
-    border-radius:10px;
-}
-
-.btn-primary{
-    font-weight:600;
-}
-
-.btn-outline-secondary:hover{
-    color:#fff;
-}
-
-.card-body{
-    padding:1.5rem;
-}
-
-.save-btn {
-  transition: all 0.2s ease;
-}
-
-.save-btn:hover {
-  background-color: #0d6efd;
-  color: white;
-}
-</style>
+        {% include "partials/pagination.html" with page_obj=jobs %}
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                {% include "partials/empty_state.html" with icon="bi-search" title="No jobs match those filters" text="Try a different keyword, widen the location, or clear the filters to see every open role." action_url=request.path action_label="Clear filters" action_icon="bi-arrow-counterclockwise" %}
+            </div>
+        </div>
+    {% endif %}
 
 {% endblock %}

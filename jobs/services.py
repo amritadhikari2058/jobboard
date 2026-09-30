@@ -1,7 +1,13 @@
+from django.conf import settings
+from django.core.cache import cache
+from django.db.models import Count, Q
+
 from .models import Job, SavedJob
 from applications.models import Application
 from notifications.utils import log_activity
-from django.db.models import Count, Q
+
+
+POPULAR_JOBS_CACHE_KEY = "jobs:popular"
 
 
 class JobService:
@@ -41,6 +47,41 @@ class JobService:
             jobs = jobs.order_by("created_at")
 
         return jobs
+
+    @staticmethod
+    def get_popular_jobs(limit=None):
+        """Return the most applied-to jobs, breaking ties on saves then age.
+
+        Only the ordered list of ids is cached, because the ranking aggregation
+        is the expensive part and re-reading those rows by id costs one cheap
+        query. jobs.signals drops the entry whenever a job, an application or a
+        saved job changes. Passing a `limit` other than the configured default
+        skips the cache, since only one window is kept.
+        """
+        limit = limit or settings.POPULAR_JOBS_LIMIT
+        cacheable = limit == settings.POPULAR_JOBS_LIMIT
+
+        job_ids = cache.get(POPULAR_JOBS_CACHE_KEY) if cacheable else None
+
+        if job_ids is None:
+            job_ids = list(
+                Job.objects.annotate(
+                    total_applications=Count("applications", distinct=True),
+                    total_saves=Count("savedjob", distinct=True),
+                )
+                .order_by("-total_applications", "-total_saves", "-created_at")
+                .values_list("id", flat=True)[:limit]
+            )
+
+            if cacheable:
+                cache.set(
+                    POPULAR_JOBS_CACHE_KEY,
+                    job_ids,
+                    settings.POPULAR_JOBS_CACHE_TTL,
+                )
+
+        jobs_by_id = Job.objects.in_bulk(job_ids)
+        return [jobs_by_id[job_id] for job_id in job_ids if job_id in jobs_by_id]
 
     @staticmethod
     def get_jobs_stats(user):

@@ -1,0 +1,13 @@
+<div class="text-center py-5">
+    <span class="jb-empty-icon" aria-hidden="true"><i class="bi {{ icon }}"></i></span>
+    <h2 class="jb-empty-title">{{ title }}</h2>
+    {% if text %}
+        <p class="jb-empty-text">{{ text }}</p>
+    {% endif %}
+    {% if action_url %}
+        <a class="btn btn-primary" href="{{ action_url }}">
+            {% if action_icon %}<i class="bi {{ action_icon }} me-1" aria-hidden="true"></i>{% endif %}
+            {{ action_label }}
+        </a>
+    {% endif %}
+</div>

@@ -1,0 +1,73 @@
+<aside class="offcanvas offcanvas-start offcanvas-lg jb-sidebar-panel"
+       tabindex="-1" id="jbSidebar" aria-labelledby="jbSidebarLabel">
+
+    <div class="offcanvas-header d-lg-none">
+        <h2 class="offcanvas-title h6 mb-0 text-white" id="jbSidebarLabel">Navigation</h2>
+        <button type="button" class="btn-close btn-close-white"
+                data-bs-dismiss="offcanvas" aria-label="Close navigation menu"></button>
+    </div>
+
+    <div class="offcanvas-body jb-sidebar">
+
+        <p class="jb-sidebar-heading">Discover</p>
+        {% nav_state 'jobs' 'job_list' as nav %}
+        {% include "partials/sidebar_link.html" with url=job_list_url icon="bi-search" label="Browse jobs" state=nav %}
+
+        {% if user.is_authenticated %}
+
+            <p class="jb-sidebar-heading">Workspace</p>
+
+            {% if user.role == 'recruiter' %}
+                {% nav_state 'users' 'recruiter_dashboard' as nav %}
+                {% include "partials/sidebar_link.html" with url=recruiter_dashboard_url icon="bi-speedometer2" label="Dashboard" state=nav %}
+
+                {% nav_state 'jobs' 'recruiter_jobs' as nav %}
+                {% include "partials/sidebar_link.html" with url=recruiter_jobs_url icon="bi-briefcase" label="Your jobs" state=nav %}
+
+                {% nav_state 'jobs' 'create_job' as nav %}
+                {% include "partials/sidebar_link.html" with url=create_job_url icon="bi-plus-circle" label="Post a job" state=nav %}
+
+                {% nav_state 'applications' 'recruiter_applications' as nav %}
+                {% include "partials/sidebar_link.html" with url=recruiter_applications_url icon="bi-people" label="Applicants" state=nav %}
+            {% else %}
+                {% nav_state 'users' 'user_dashboard' as nav %}
+                {% include "partials/sidebar_link.html" with url=user_dashboard_url icon="bi-speedometer2" label="Dashboard" state=nav %}
+
+                {% nav_state 'applications' 'user_applications' as nav %}
+                {% include "partials/sidebar_link.html" with url=user_applications_url icon="bi-file-earmark-text" label="My applications" state=nav %}
+
+                {% nav_state 'jobs' 'saved_jobs' as nav %}
+                {% include "partials/sidebar_link.html" with url=saved_jobs_url icon="bi-bookmark-star" label="Saved jobs" state=nav %}
+            {% endif %}
+
+            <p class="jb-sidebar-heading">Activity</p>
+
+            {% nav_state 'notifications' 'notifications' as nav %}
+            {% include "partials/sidebar_link.html" with url=notifications_url icon="bi-bell" label="Notifications" state=nav %}
+
+            {% nav_state 'notifications' 'activity_logs' as nav %}
+            {% include "partials/sidebar_link.html" with url=activity_logs_url icon="bi-clock-history" label="Activity log" state=nav %}
+
+            <p class="jb-sidebar-heading">Account</p>
+
+            {% url 'users:view_user_profile' user.email as profile_url %}
+            {% nav_state 'users' 'view_user_profile' as nav %}
+            {% include "partials/sidebar_link.html" with url=profile_url icon="bi-person-circle" label="My profile" state=nav %}
+
+            {% nav_state 'users' 'edit_user_profile' as nav %}
+            {% include "partials/sidebar_link.html" with url=edit_profile_url icon="bi-pencil-square" label="Edit profile" state=nav %}
+
+        {% endif %}
+
+        <div class="jb-sidebar-footer">
+            {% if user.is_authenticated %}
+                Signed in as
+                <strong>{{ user.get_role_display|default:user.role }}</strong>
+            {% else %}
+                <a href="{% url 'users:register' %}" class="text-white">Create an account</a>
+                to post jobs and apply.
+            {% endif %}
+        </div>
+
+    </div>
+</aside>

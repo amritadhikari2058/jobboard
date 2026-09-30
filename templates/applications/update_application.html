@@ -1,122 +1,48 @@
 {% extends "base.html" %}
-{% block title %}Update Application{% endblock %}
+
+{% block title %}Edit your application{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Application</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Edit your application</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">
+        Update the details you sent for
+        <a class="jb-link-title" href="{% url 'jobs:job_detail' application.job.id %}">{{ application.job.title }}</a>.
+    </p>
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+    <div class="jb-form-shell">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
 
-    <div class="row justify-content-center">
+                    {% if form.non_field_errors %}
+                        <div class="jb-form-error" role="alert">{{ form.non_field_errors }}</div>
+                    {% endif %}
 
-        <div class="col-lg-6">
+                    {% include "partials/form_field.html" with field=form.resume %}
+                    {% include "partials/form_field.html" with field=form.cover_letter %}
+                    {% include "partials/form_field.html" with field=form.experience %}
+                    {% include "partials/form_field.html" with field=form.skills %}
 
-            <div class="card border-0 shadow-lg rounded-4">
-
-                <div class="card-body p-5">
-
-                    <!-- Header -->
-
-                    <div class="text-center mb-4">
-
-                        <div class="display-6 text-primary mb-2">
-
-                            <i class="bi bi-pencil-square"></i>
-
+                    <div class="jb-form-grid">
+                        {% include "partials/form_field.html" with field=form.availability_type %}
+                        {% include "partials/form_field.html" with field=form.availability_period %}
+                        <div class="jb-form-full">
+                            {% include "partials/form_field.html" with field=form.expected_salary %}
                         </div>
-
-                        <h2 class="fw-bold">
-
-                            Update Application
-
-                        </h2>
-
-                        <p class="text-muted mb-0">
-
-                            Change the current application status.
-
-                        </p>
-
                     </div>
 
-                    <hr class="mb-4">
-
-                    <form method="POST" enctype="multipart/form-data">
-
-                        {% csrf_token %}
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                Application Status
-
-                            </label>
-
-                            <select name="status" class="form-select form-select-lg">
-
-                                <option value="pending"
-                                    {% if application.status == "pending" %}selected{% endif %}>
-
-                                    Pending
-
-                                </option>
-
-                                <option value="accepted"
-                                    {% if application.status == "accepted" %}selected{% endif %}>
-
-                                    Accepted
-
-                                </option>
-
-                                <option value="rejected"
-                                    {% if application.status == "rejected" %}selected{% endif %}>
-
-                                    Rejected
-
-                                </option>
-
-                            </select>
-
-                            <div class="form-text">
-
-                                Updating the status will notify the applicant.
-
-                            </div>
-
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-
-                            <a href="#"
-                               onclick="event.preventDefault(); window.history.back();"
-                               class="btn btn-outline-secondary rounded-pill px-4">
-
-                                <i class="bi bi-arrow-left me-2"></i>
-
-                                Cancel
-
-                            </a>
-
-                            <button type="submit"
-                                    class="btn btn-success rounded-pill px-4">
-
-                                <i class="bi bi-check-circle me-2"></i>
-
-                                Update Status
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
+                    <div class="jb-form-actions">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                        <a class="btn btn-light" href="{% url 'applications:application_detail' application.id %}">Cancel</a>
+                    </div>
+                </form>
             </div>
-
         </div>
-
     </div>
-
-</div>
 
 {% endblock %}

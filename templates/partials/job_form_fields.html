@@ -1,0 +1,38 @@
+{% comment %}
+The JobForm body, shared by the create and update pages so the two can never
+drift apart. The page owns the <form> element and its buttons.
+{% endcomment %}
+{% if form.non_field_errors %}
+    <div class="jb-form-error" role="alert">
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
+
+<div class="jb-form-grid">
+    {% include "partials/form_field.html" with field=form.title %}
+    {% include "partials/form_field.html" with field=form.location %}
+
+    <div class="jb-form-full">
+        {% include "partials/form_field.html" with field=form.description %}
+    </div>
+
+    <div class="jb-form-full">
+        <span class="form-label d-block" id="categories-label">Categories</span>
+        <div class="jb-check-group" role="group" aria-labelledby="categories-label">
+            {% for checkbox in form.categories %}
+                <div class="form-check">
+                    {{ checkbox.tag }}
+                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                        {{ checkbox.choice_label }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+        {% for error in form.categories.errors %}
+            <div class="jb-error mt-1" role="alert">{{ error }}</div>
+        {% endfor %}
+        {% if not form.categories %}
+            <p class="jb-help mb-0">No categories are available yet.</p>
+        {% endif %}
+    </div>
+</div>

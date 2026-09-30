@@ -1,0 +1,14 @@
+{% comment %}
+Heading + explanation for a confirmation page. The form and its buttons stay in
+the page so the action itself is never hidden behind an include.
+Usage:
+  {% include "partials/confirm_dialog.html" with icon="bi-trash3" tone="danger"
+     title="Delete this job?" text="This cannot be undone." %}
+{% endcomment %}
+<div class="text-center">
+    <span class="jb-confirm-icon jb-confirm-icon-{{ tone|default:'danger' }}" aria-hidden="true">
+        <i class="bi {{ icon }}"></i>
+    </span>
+    <h2 class="jb-section-heading">{{ title }}</h2>
+    <p class="jb-body-sm mb-0">{{ text }}</p>
+</div>

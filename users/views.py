@@ -5,22 +5,36 @@ from .forms import UserProfileForm, RegisterForm, LoginForm
 from applications.models import Application
 from django.contrib import messages
 from jobs.models import Job
-from django.db import reset_queries
 from django.db.models import Count, Q
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from .decorators import recruiter_required, normal_user_required
 from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialApp
 
 User = get_user_model()
+
+
+def configured_social_providers():
+    """Provider ids that actually have a SocialApp configured.
+
+    ``{% provider_login_url %}`` raises ``SocialApp.DoesNotExist`` for a
+    provider that has no row, which would turn the login and register pages
+    into 500s. The social buttons are only rendered for configured providers.
+    """
+    return list(
+        SocialApp.objects.filter(provider__isnull=False)
+        .values_list("provider", flat=True)
+        .distinct()
+    )
 
 
 # Recruiter Dashboard
 @login_required
 @recruiter_required
 def recruiter_dashboard(request):
-    jobs = (
+    jobs = list(
         Job.objects.filter(recruiter=request.user)
-        .select_related("recruiter")
+        .prefetch_related("categories")
         .annotate(
             total_applications=Count("applications"),
             accepted_count=Count(
@@ -35,55 +49,43 @@ def recruiter_dashboard(request):
         )
     )
 
-    total_jobs = jobs.count()
-    totals = jobs.aggregate(
-        total_applications=Count("applications"),
-        accepted_applications=Count(
-            "applications",
-            filter=Q(applications__status="accepted"),
-        ),
-        pending_applications=Count(
-            "applications",
-            filter=Q(applications__status="pending"),
-        ),
-        rejected_applications=Count(
-            "applications",
-            filter=Q(applications__status="rejected"),
-        ),
-    )
-
-    job_titles = [job.title for job in jobs]
-    application_counts = [job.total_applications for job in jobs]
-    top_job = jobs.order_by("-total_applications").first()
-
     for job in jobs:
-        if job.total_applications > 0:
-            job.acceptance_rate = round(
-                (job.accepted_count / job.total_applications) * 100, 1
-            )
-        else:
-            job.acceptance_rate = 0
-    if top_job:
-        if top_job.total_applications > 0:
-            top_job.acceptance_rate = round(
-                (top_job.accepted_count / top_job.total_applications) * 100, 1
-            )
-        else:
-            top_job.acceptance_rate = 0
+        job.acceptance_rate = (
+            round((job.accepted_count / job.total_applications) * 100, 1)
+            if job.total_applications
+            else 0
+        )
+
+    # Totals come from the rows already fetched, so the whole page is one query
+    # for jobs plus one per prefetched relation.
+    totals = {
+        "total_applications": sum(job.total_applications for job in jobs),
+        "accepted_applications": sum(job.accepted_count for job in jobs),
+        "rejected_applications": sum(job.rejected_count for job in jobs),
+        "pending_applications": sum(job.pending_count for job in jobs),
+    }
+
+    top_job = max(jobs, key=lambda job: job.total_applications, default=None)
+
+    popular_jobs = sorted(
+        (job for job in jobs if job.total_applications),
+        key=lambda job: job.total_applications,
+        reverse=True,
+    )[:5]
 
     return render(
         request,
         "users/recruiter_dashboard.html",
         {
             "jobs": jobs,
-            "total_jobs": total_jobs,
-            "total_applications": totals["total_applications"] or 0,
-            "accepted_applications": totals["accepted_applications"] or 0,
-            "rejected_applications": totals["rejected_applications"] or 0,
-            "pending_applications": totals["pending_applications"] or 0,
-            "job_titles": job_titles,
-            "application_counts": application_counts,
+            "total_jobs": len(jobs),
+            "total_applications": totals["total_applications"],
+            "accepted_applications": totals["accepted_applications"],
+            "rejected_applications": totals["rejected_applications"],
+            "pending_applications": totals["pending_applications"],
             "top_job": top_job,
+            "popular_jobs": popular_jobs,
+            "max_applications": popular_jobs[0].total_applications if popular_jobs else 0,
         },
     )
 
@@ -91,14 +93,25 @@ def recruiter_dashboard(request):
 @login_required
 @normal_user_required
 def user_dashboard(request):
-    reset_queries()
     applications = Application.objects.filter(applicant=request.user).select_related(
-        "job"
+        "job__recruiter"
     )
-    response = render(
-        request, "users/user_dashboard.html", {"applications": applications}
+
+    counts = applications.aggregate(
+        total=Count("id"),
+        pending=Count("id", filter=Q(status="pending")),
+        accepted=Count("id", filter=Q(status="accepted")),
+        rejected=Count("id", filter=Q(status="rejected")),
     )
-    return response
+
+    return render(
+        request,
+        "users/user_dashboard.html",
+        {
+            "applications": applications,
+            "counts": counts,
+        },
+    )
 
 
 @login_required
@@ -109,6 +122,7 @@ def edit_user_profile(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
+            messages.success(request, "Profile updated successfully")
             return redirect("users:view_user_profile", profile.user.email)
     else:
         form = UserProfileForm(instance=profile)
@@ -131,10 +145,10 @@ def view_user_profile(request, email):
             applicant=target_user, job__recruiter=request.user
         ).exists():
             return render(request, "users/profile_detail.html", {"profile": profile})
-        return redirect("job_list")
+        return redirect("jobs:job_list")
 
     messages.warning(request, "You are not eligible to view this user's profile.")
-    return redirect("job_list")
+    return redirect("jobs:job_list")
 
 
 def register_view(request):
@@ -149,7 +163,7 @@ def register_view(request):
             return render(
                 request,
                 "users/register.html",
-                {"form": form},
+                {"form": form, "social_providers": configured_social_providers()},
             )
 
         if form.is_valid():
@@ -172,7 +186,7 @@ def register_view(request):
     return render(
         request,
         "users/register.html",
-        {"form": form},
+        {"form": form, "social_providers": configured_social_providers()},
     )
 
 
@@ -221,9 +235,13 @@ def login_view(request):
     else:
         form = LoginForm()
 
-    return render(request, "users/login.html", {"form": form})
+    return render(
+        request,
+        "users/login.html",
+        {"form": form, "social_providers": configured_social_providers()},
+    )
 
 
 def logout_view(request):
     logout(request)
-    return redirect("login")
+    return redirect("users:login")

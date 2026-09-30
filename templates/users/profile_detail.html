@@ -1,251 +1,89 @@
 {% extends "base.html" %}
-{% block title %}Profile{% endblock %}
+
+{% block title %}{{ profile.user.email }}{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Profile</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Profile</h1>{% endblock %}
+
+{% block page_actions %}
+    {% if profile.user == user %}
+        <a class="btn btn-primary" href="{% url 'users:edit_user_profile' %}">
+            <i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit profile
+        </a>
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="jb-profile-hero">
+                {% if profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}" alt="" class="jb-profile-pic">
+                {% else %}
+                    <span class="jb-profile-pic jb-avatar" aria-hidden="true" style="font-size:1.5rem;">
+                        {{ profile.user.email|first|upper }}
+                    </span>
+                {% endif %}
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-
-            <h2 class="fw-bold mb-1">
-                User Profile
-            </h2>
-
-            <p class="text-muted mb-0">
-                View profile information and professional details.
-            </p>
-
-        </div>
-
-        {% if request.user.id == profile.user.id %}
-        <a href="{% url 'users:edit_user_profile' %}"
-           class="btn btn-primary rounded-pill px-4">
-
-            <i class="bi bi-pencil-square me-2"></i>
-            Edit Profile
-
-        </a>
-        {% endif %}
-
-    </div>
-
-    <div class="card border-0 shadow profile-card">
-
-        <div class="card-body p-4">
-
-            <div class="row align-items-center">
-
-                <!-- Profile Image -->
-                <div class="col-lg-3 text-center mb-4 mb-lg-0">
-
-                    {% if profile.profile_pic %}
-
-                    <img src="{{ profile.profile_pic.url }}"
-                         class="profile-image">
-
-                    {% else %}
-
-                    <img src="https://via.placeholder.com/180"
-                         class="profile-image">
-
-                    {% endif %}
-
+                <div class="min-width-0">
+                    <p class="jb-card-title mb-1">{{ profile.user.email }}</p>
+                    <p class="jb-meta mb-0">{{ profile.user.get_role_display }}</p>
                 </div>
+            </div>
 
-                <!-- Basic Info -->
-                <div class="col-lg-9">
+            <hr class="jb-divider">
 
-                    <h3 class="fw-bold mb-1">
-
-                        {{ profile.user.email }}
-
-                    </h3>
-
-                    <p class="text-muted mb-4">
-
-                        {{ profile.user.role|title }}
-
-                    </p>
-
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-
-                            <div class="info-box">
-
-                                <small class="text-muted d-block">
-                                    <i class="bi bi-geo-alt me-2"></i>
-                                    Location
-                                </small>
-
-                                <strong>
-
-                                    {{ profile.location|default:"Not provided" }}
-
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-                        <div class="col-md-6">
-
-                            <div class="info-box">
-
-                                <small class="text-muted d-block">
-                                    <i class="bi bi-telephone me-2"></i>
-                                    Phone
-                                </small>
-
-                                <strong>
-
-                                    {{ profile.phone|default:"Not provided" }}
-
-                                </strong>
-
-                            </div>
-
-                        </div>
-
+            <div class="row g-4">
+                <div class="col-sm-6">
+                    <div class="jb-kv">
+                        <span class="jb-kv-label">Location</span>
+                        <span class="jb-kv-value">{{ profile.location|default:"Not provided" }}</span>
                     </div>
-
                 </div>
-
+                <div class="col-sm-6">
+                    <div class="jb-kv">
+                        <span class="jb-kv-label">Phone</span>
+                        <span class="jb-kv-value">{{ profile.phone|default:"Not provided" }}</span>
+                    </div>
+                </div>
             </div>
-
-            <hr class="my-4">
-
-            <!-- Bio -->
-
-            <div class="mb-4">
-
-                <h5 class="fw-semibold mb-3">
-
-                    <i class="bi bi-person-lines-fill me-2"></i>
-
-                    About
-
-                </h5>
-
-                <p class="text-muted mb-0">
-
-                    {{ profile.bio|default:"No bio added yet." }}
-
-                </p>
-
-            </div>
-
-            <!-- Skills -->
-
-            <div class="mb-4">
-
-                <h5 class="fw-semibold mb-3">
-
-                    <i class="bi bi-lightbulb me-2"></i>
-
-                    Skills
-
-                </h5>
-
-                {% if profile.skills %}
-
-                    {% for skill in profile.skills.split %}
-
-                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2 me-2 mb-2">
-
-                            {{ skill }}
-
-                        </span>
-
-                    {% endfor %}
-
-                {% else %}
-
-                    <p class="text-muted">
-
-                        No skills listed.
-
-                    </p>
-
-                {% endif %}
-
-            </div>
-
-            <!-- Resume -->
-
-            <div>
-
-                <h5 class="fw-semibold mb-3">
-
-                    <i class="bi bi-file-earmark-text me-2"></i>
-
-                    Resume
-
-                </h5>
-
-                {% if profile.resume %}
-
-                    <a href="{{ profile.resume.url }}"
-                       target="_blank"
-                       class="btn btn-outline-primary rounded-pill px-4">
-
-                        <i class="bi bi-download me-2"></i>
-
-                        View Resume
-
-                    </a>
-
-                {% else %}
-
-                    <p class="text-muted">
-
-                        No resume uploaded.
-
-                    </p>
-
-                {% endif %}
-
-            </div>
-
         </div>
-
     </div>
 
-</div>
+    <section class="card mb-4">
+        <div class="card-body">
+            <h2 class="jb-section-heading">About</h2>
+            {% if profile.bio %}
+                <div class="jb-prose">{{ profile.bio|linebreaksbr }}</div>
+            {% else %}
+                <p class="jb-meta mb-0">No bio added yet.</p>
+            {% endif %}
+        </div>
+    </section>
 
-<style>
+    <section class="card mb-4">
+        <div class="card-body">
+            <h2 class="jb-section-heading">Skills</h2>
+            {% for skill in profile.skills|split:"," %}
+                <span class="jb-chip">{{ skill }}</span>
+            {% empty %}
+                <p class="jb-meta mb-0">No skills listed.</p>
+            {% endfor %}
+        </div>
+    </section>
 
-.profile-card{
-    border-radius:20px;
-}
-
-.profile-image{
-    width:180px;
-    height:180px;
-    object-fit:cover;
-    border-radius:50%;
-    border:5px solid #fff;
-    box-shadow:0 10px 30px rgba(0,0,0,.12);
-}
-
-.info-box{
-    background:#f8f9fa;
-    padding:1rem;
-    border-radius:14px;
-}
-
-.badge{
-    font-size:.85rem;
-    font-weight:500;
-}
-
-.btn{
-    border-radius:10px;
-}
-
-</style>
+    <section class="card">
+        <div class="card-body">
+            <h2 class="jb-section-heading">Resume</h2>
+            {% if profile.resume %}
+                <a class="btn btn-light" href="{{ profile.resume.url }}" target="_blank" rel="noopener">
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>View resume
+                </a>
+            {% else %}
+                <p class="jb-meta mb-0">No resume uploaded.</p>
+            {% endif %}
+        </div>
+    </section>
 
 {% endblock %}

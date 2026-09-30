@@ -3,11 +3,8 @@ from django.shortcuts import get_object_or_404
 
 
 def get_user_applications(job, status=None):
-    qs = (
-        Application.objects.filter(job=job)
-        .select_related("job", "user")
-        .order_by("-id")
-    )
+    qs = Application.objects.filter(job=job).select_related("job", "applicant")
+
     if status:
         qs = qs.filter(status=status)
 

@@ -1,267 +1,82 @@
 {% extends "base.html" %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Create an account{% endblock %}
+{% block meta_description %}Join JobBoard as a job seeker or a recruiter.{% endblock %}
+
+{% block shell_variant %}centered{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
-
-    <div class="row justify-content-center">
-
-        <div class="col-lg-5 col-md-8">
-
-            <!-- Header -->
-
-            <div class="text-center mb-4">
-
-                <h2 class="fw-bold mb-2">
-
-                    Create Your Account
-
-                </h2>
-
-                <p class="text-muted mb-0">
-
-                    Join the Job Board as a job seeker or recruiter and start your journey today.
-
-                </p>
-
-            </div>
-
-            <!-- Card -->
-
-            <div class="card border-0 shadow-sm register-card">
-
-                <div class="card-body p-4">
-
-                    {% if messages %}
-                        {% for message in messages %}
-
-                            <div class="alert alert-success">
-
-                                {{ message }}
-
-                            </div>
-
-                        {% endfor %}
-                    {% endif %}
-
-                    {% if form.errors %}
-
-                        <div class="alert alert-danger">
-
-                            Please correct the errors below.
-
-                            {{ form.errors }}
-
-                        </div>
-
-                    {% endif %}
-
-                    <form method="POST">
-
-                        {% csrf_token %}
-
-                        <!-- Email -->
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                <i class="bi bi-envelope me-2"></i>
-
-                                Email Address
-
-                            </label>
-
-                            {{ form.email }}
-
-                        </div>
-
-                        <!-- Password -->
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                <i class="bi bi-lock me-2"></i>
-
-                                Password
-
-                            </label>
-
-                            {{ form.password1 }}
-
-                        </div>
-
-                        <!-- Confirm Password -->
-
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-
-                                <i class="bi bi-shield-lock me-2"></i>
-
-                                Confirm Password
-
-                            </label>
-
-                            {{ form.password2 }}
-
-                        </div>
-
-                        <hr>
-
-                        <p class="text-muted text-center mb-3">
-
-                            Choose how you want to register
-
-                        </p>
-
-                        <div class="mb-4">
-
-    <label class="form-label fw-semibold">
-        How will you use Job Board?
-    </label>
-
-    <div class="form-check mb-2">
-
-        <input
-            class="form-check-input"
-            type="radio"
-            name="role"
-            value="normal_user"
-            id="role-user"
-            required
-        >
-
-        <label class="form-check-label" for="role-user">
-            <i class="bi bi-person-workspace me-2"></i>
-            I'm looking for a job
-        </label>
-
+    <div class="text-center mb-4">
+        <span class="jb-brand-mark mb-3" style="width:3.5rem; height:3.5rem; font-size:1.5rem;">
+            <i class="bi bi-person-plus" aria-hidden="true"></i>
+        </span>
+        <h1 class="jb-page-title">Create your account</h1>
+        <p class="jb-page-subtitle">Join as a job seeker or a recruiter.</p>
     </div>
 
-    <div class="form-check">
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
 
-        <input
-            class="form-check-input"
-            type="radio"
-            name="role"
-            value="recruiter"
-            id="role-recruiter"
-        >
+                {% if form.non_field_errors %}
+                    <div class="jb-form-error" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
 
-        <label class="form-check-label" for="role-recruiter">
-            <i class="bi bi-building me-2"></i>
-            I'm hiring candidates
-        </label>
+                {% include "partials/form_field.html" with field=form.email %}
+                {% include "partials/form_field.html" with field=form.password1 %}
+                {% include "partials/form_field.html" with field=form.password2 %}
 
-    </div>
+                <hr class="jb-divider">
 
-</div>
-
-                        <div class="d-grid gap-3">
-
-                            <button
-    type="submit"
-    class="btn btn-primary py-2 w-100">
-
-    <i class="bi bi-person-plus me-2"></i>
-    Create Account
-
-</button>
-
-                            <hr class="my-4">
-
-<div class="d-grid">
-
-    <button
-        type="button"
-        onclick="googleRegister()"
-        class="btn btn-outline-dark py-2">
-
-        <i class="bi bi-google me-2"></i>
-        Continue with Google
-
-    </button>
-
-</div>
-
-                        </div>
-
-                    </form>
-
+                <span class="form-label d-block" id="role-label">How will you use JobBoard?</span>
+                <div class="jb-roles" role="radiogroup" aria-labelledby="role-label">
+                    <label class="jb-role" for="role-normal_user">
+                        <input type="radio" name="role" id="role-normal_user" value="normal_user" required>
+                        <span class="jb-role-title">
+                            <i class="bi bi-person-workspace text-primary" aria-hidden="true"></i>Job seeker
+                        </span>
+                        <span class="jb-role-text">Apply to roles and track applications.</span>
+                    </label>
+                    <label class="jb-role" for="role-recruiter">
+                        <input type="radio" name="role" id="role-recruiter" value="recruiter">
+                        <span class="jb-role-title">
+                            <i class="bi bi-building text-primary" aria-hidden="true"></i>Recruiter
+                        </span>
+                        <span class="jb-role-text">Post jobs and review applicants.</span>
+                    </label>
                 </div>
 
-            </div>
+                <div class="jb-form-actions mt-4">
+                    <button type="submit" class="btn btn-primary w-100">Create account</button>
+                </div>
+            </form>
 
-            <div class="text-center mt-4">
+            {% if "google" in social_providers %}
+                <p class="jb-divider-text">or continue with Google</p>
 
-                <span class="text-muted">
-
-                    Already have an account?
-
-                </span>
-
-                <a href="{% url 'users:login' %}"
-                   class="fw-semibold text-decoration-none">
-
-                    Login
-
-                </a>
-
-            </div>
-
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a class="jb-social-btn" href="{% url 'users:google_register' %}?role=normal_user">
+                            <i class="bi bi-google" aria-hidden="true"></i>Seeker
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a class="jb-social-btn" href="{% url 'users:google_register' %}?role=recruiter">
+                            <i class="bi bi-google" aria-hidden="true"></i>Recruiter
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
         </div>
-
     </div>
 
-</div>
-
-<style>
-
-.register-card{
-    border-radius:20px;
-}
-
-.form-control{
-    border-radius:10px;
-}
-
-.btn{
-    border-radius:10px;
-    font-weight:600;
-}
-
-.btn-primary{
-    background:#0d6efd;
-}
-
-.btn-dark{
-    background:#212529;
-}
-
-</style>
-
-<script>
-
-function googleRegister() {
-
-    const role = document.querySelector(
-        'input[name="role"]:checked'
-    );
-
-    if (!role) {
-        alert("Please select a role first.");
-        return;
-    }
-
-    window.location.href =
-        "{% url 'users:google_register' %}?role="
-        + role.value;
-}
-
-</script>
+    <p class="text-center jb-meta mt-4 mb-0">
+        Already registered?
+        <a class="fw-semibold" href="{% url 'users:login' %}">Log in</a>
+    </p>
 
 {% endblock %}

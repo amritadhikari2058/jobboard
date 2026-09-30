@@ -1,252 +1,87 @@
 {% extends "base.html" %}
-{% block title %}Recruiter Applications{% endblock %}
+
+{% block title %}Applications received{% endblock %}
+{% block meta_description %}Review every application received across your job listings.{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Recruiting</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Applications received</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">Every candidate who applied to one of your listings, grouped by role.</p>
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-4">
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-
-            <h2 class="fw-bold mb-1">
-                Applications Received
-            </h2>
-
-            <p class="text-muted mb-0">
-                Review and manage applicants for your jobs.
-            </p>
-
-        </div>
-
-    </div>
-
     {% if jobs %}
-
-        {% for job in jobs %}
-
-            {% if job.applications.all %}
-
-            <!-- Job Card -->
-            <div class="card border-0 shadow-sm rounded-4 mb-5">
-
-                <!-- Header -->
-                <div class="card-header bg-white border-0 py-3">
-
-                    <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-                        <div>
-
-                            <h4 class="fw-bold mb-1">
-                                {{ job.title }}
-                            </h4>
-
-                            <small class="text-muted">
-                                <i class="bi bi-geo-alt me-1"></i>
-                                {{ job.location }}
-                            </small>
-
+        <div class="jb-list">
+            {% for job in jobs %}
+                {% if job.applications.all %}
+                    <section class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                                <div>
+                                    <h2 class="jb-card-title mb-1">
+                                        <a class="jb-link-title" href="{% url 'jobs:job_detail' job.id %}">{{ job.title }}</a>
+                                    </h2>
+                                    <p class="jb-meta mb-0">
+                                        <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ job.location }}
+                                    </p>
+                                </div>
+                                <a class="btn btn-light btn-sm flex-shrink-0"
+                                   href="{% url 'applications:view_applicants' job.slug %}">
+                                    Review all
+                                </a>
+                            </div>
                         </div>
-
-                        <span class="badge bg-primary rounded-pill px-3 py-2">
-                            {{ job.applications.count }} Applicant{{ job.applications.count|pluralize }}
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <div class="card-body">
-
-                    {% for app in job.applications.all %}
-
-                    <!-- Applicant -->
-                    <div class="card border rounded-4 mb-3 applicant-card">
-
                         <div class="card-body">
+                            <div class="jb-list">
+                                {% for application in job.applications.all %}
+                                    <div class="d-flex gap-3 align-items-start flex-wrap">
+                                        <span class="jb-avatar" aria-hidden="true">{{ application.applicant.email|first|upper }}</span>
 
-                            <div class="row align-items-center">
+                                        <div class="flex-grow-1 min-width-0">
+                                            <a class="jb-link-title d-block"
+                                               href="{% url 'users:view_user_profile' application.applicant.email %}">{{ application.applicant.email }}</a>
+                                            <p class="jb-meta mb-2">
+                                                Applied {{ application.created_at|timesince }} ago
+                                                {% if application.skills %}&middot; {{ application.skills|truncatewords:6 }}{% endif %}
+                                            </p>
+                                            {% application_status application.status as status %}
+                                            <span class="jb-status {{ status.css }}">
+                                                <i class="bi {{ status.icon }}" aria-hidden="true"></i>{{ status.label }}
+                                            </span>
+                                        </div>
 
-                                <!-- Applicant -->
-                                <div class="col-lg-4">
+                                        <div class="jb-decision">
+                                            <a class="btn btn-light btn-sm"
+                                               href="{% url 'applications:application_detail' application.id %}">View</a>
 
-                                    <a href="{% url 'users:view_user_profile' app.user.email %}"
-                                       class="fw-semibold text-decoration-none fs-6">
-
-                                        <i class="bi bi-person-circle me-2"></i>
-
-                                        {{ app.user.email }}
-
-                                    </a>
-
-                                    <div class="small text-muted mt-1">
-
-                                        Applied {{ app.created_at|timesince }} ago
-
+                                            {% if application.status == 'pending' %}
+                                                <form method="post" action="{% url 'applications:accept_application' application.id %}"
+                                                      data-confirm="Accept {{ application.applicant.email }}?">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                                </form>
+                                                <form method="post" action="{% url 'applications:reject_application' application.id %}"
+                                                      data-confirm="Reject {{ application.applicant.email }}?">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm">Reject</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
                                     </div>
-
-                                </div>
-
-                                <!-- Skills -->
-                                <div class="col-lg-3 mt-3 mt-lg-0">
-
-                                    <div class="small text-muted">
-
-                                        Skills
-
-                                    </div>
-
-                                    <div class="fw-medium">
-
-                                        {{ app.skills|truncatewords:6 }}
-
-                                    </div>
-
-                                </div>
-
-                                <!-- Status -->
-                                <div class="col-lg-2 mt-3 mt-lg-0">
-
-                                    {% if app.status == "accepted" %}
-
-                                        <span class="badge bg-success rounded-pill px-3 py-2">
-                                            Accepted
-                                        </span>
-
-                                    {% elif app.status == "pending" %}
-
-                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-                                            Pending
-                                        </span>
-
-                                    {% else %}
-
-                                        <span class="badge bg-danger rounded-pill px-3 py-2">
-                                            Rejected
-                                        </span>
-
-                                    {% endif %}
-
-                                </div>
-
-                                <!-- Buttons -->
-                                <div class="col-lg-3 mt-3 mt-lg-0">
-
-                                    <div class="d-flex justify-content-lg-end flex-wrap gap-2">
-
-                                        <a href="{% url 'applications:application_detail' app.id %}"
-                                           class="btn btn-outline-primary btn-sm rounded-pill">
-
-                                            <i class="bi bi-eye me-1"></i>
-
-                                            View
-
-                                        </a>
-
-                                        {% if app.status == "pending" %}
-
-                                        <form method="POST"
-                                              action="{% url 'applications:accept_application' app.id %}">
-
-                                            {% csrf_token %}
-
-                                            <button class="btn btn-success btn-sm rounded-pill">
-
-                                                <i class="bi bi-check-lg"></i>
-
-                                            </button>
-
-                                        </form>
-
-                                        <form method="POST"
-                                              action="{% url 'applications:reject_application' app.id %}">
-
-                                            {% csrf_token %}
-
-                                            <button class="btn btn-outline-danger btn-sm rounded-pill">
-
-                                                <i class="bi bi-x-lg"></i>
-
-                                            </button>
-
-                                        </form>
-
-                                        {% endif %}
-
-                                    </div>
-
-                                </div>
-
+                                {% endfor %}
                             </div>
-
-                            <hr class="my-3">
-
-                            <div class="small">
-
-                                <strong>Experience:</strong>
-
-                                <span class="text-muted">
-
-                                    {{ app.experience|truncatewords:20 }}
-
-                                </span>
-
-                            </div>
-
                         </div>
-
-                    </div>
-
-                    {% endfor %}
-
-                </div>
-
-            </div>
-
-            {% endif %}
-
-        {% endfor %}
-
-    {% else %}
-
-    <div class="card border-0 shadow-sm rounded-4">
-
-        <div class="card-body text-center py-5">
-
-            <i class="bi bi-inbox display-4 text-muted"></i>
-
-            <h4 class="fw-bold mt-3">
-                No Applications Yet
-            </h4>
-
-            <p class="text-muted mb-0">
-                Applications from candidates will appear here.
-            </p>
-
+                    </section>
+                {% endif %}
+            {% endfor %}
         </div>
-
-    </div>
-
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                {% include "partials/empty_state.html" with icon="bi-inbox" title="No applications yet" text="Applications from candidates will appear here as soon as somebody applies to one of your listings." action_url=create_job_url action_label="Post a job" action_icon="bi-plus-circle" %}
+            </div>
+        </div>
     {% endif %}
-
-</div>
-
-<style>
-
-.applicant-card{
-    transition:.2s ease;
-}
-
-.applicant-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 .6rem 1.2rem rgba(0,0,0,.08);
-}
-
-.badge{
-    font-weight:500;
-}
-
-</style>
 
 {% endblock %}

@@ -44,4 +44,4 @@ class SavedJob(models.Model):
         unique_together = ("applicant", "job")
 
     def __str__(self):
-        return f"{self.user} saved job {self.job}"
+        return f"{self.applicant} saved job {self.job}"

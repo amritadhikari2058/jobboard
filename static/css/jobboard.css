@@ -1,0 +1,1593 @@
+/* ==========================================================================
+   JobBoard design system
+   --------------------------------------------------------------------------
+   Source of truth: templates/home/home.html (the portfolio page).
+   Loaded AFTER Bootstrap, so equal-specificity overrides below win.
+
+   Everything here is a token or a component. No page-level rules.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+
+:root {
+    /* Surfaces */
+    --jb-bg: #f8f9fa;
+    --jb-surface: #ffffff;
+    --jb-surface-muted: #f1f3f5;
+    --jb-border: #dee2e6;
+    --jb-border-soft: #e9ecef;
+
+    /* Text - stock Bootstrap 5.3 greys, as used on the portfolio */
+    --jb-text: #212529;
+    --jb-secondary: #495057;
+    --jb-muted: #6c757d;
+
+    /* Brand + semantic - stock Bootstrap 5.3 */
+    --jb-primary: #0d6efd;
+    --jb-primary-subtle: #e7f1ff;
+    --jb-success: #198754;
+    --jb-success-subtle: #d1e7dd;
+    --jb-warning: #ffc107;
+    --jb-warning-subtle: #fff3cd;
+    --jb-danger: #dc3545;
+    --jb-danger-subtle: #f8d7da;
+    --jb-info-subtle: #cff4fc;
+
+    /* Radii */
+    --jb-radius-card: 22px;
+    --jb-radius-media: 18px;
+    --jb-radius-control: 10px;
+    --jb-radius-pill: 50px;
+
+    /* Elevation */
+    --jb-shadow-1: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    --jb-shadow-2: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+    --jb-shadow-media: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12);
+    --jb-shadow-nav: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --jb-focus-ring: 0 0 0 0.25rem rgba(13, 110, 253, 0.2);
+
+    /* Motion */
+    --jb-lift: -5px;
+    --jb-transition: 0.2s ease;
+
+    /* Spacing rhythm */
+    --jb-page-x: 2rem;
+    --jb-page-y: 2rem;
+    --jb-shell-nav-h: 4rem;
+    --jb-shell-side-w: 16rem;
+    --jb-content-max: 1200px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background-color: var(--jb-bg);
+    color: var(--jb-text);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: var(--jb-primary);
+    text-decoration: none;
+    transition: color var(--jb-transition);
+}
+
+a:hover {
+    color: #0b5ed7;
+}
+
+/* One consistent focus treatment for every interactive element. */
+:focus-visible {
+    outline: 2px solid var(--jb-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Typography
+   -------------------------------------------------------------------------- */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--jb-text);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.011em;
+}
+
+h1 {
+    font-size: 1.875rem;
+    font-weight: 800;
+}
+
+h2 {
+    font-size: 1.5rem;
+}
+
+h3 {
+    font-size: 1.1875rem;
+}
+
+h4 {
+    font-size: 1.0625rem;
+}
+
+h5,
+h6 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+/* The portfolio's signature label: uppercase, letterspaced, brand-coloured. */
+.jb-eyebrow {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--jb-primary);
+    margin-bottom: 0.5rem;
+}
+
+.jb-page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.jb-page-subtitle {
+    color: var(--jb-muted);
+    font-size: 0.9375rem;
+    margin-bottom: 0;
+}
+
+.jb-card-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.jb-meta {
+    font-size: 0.8125rem;
+    color: var(--jb-muted);
+}
+
+.jb-body-sm {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--jb-secondary);
+}
+
+.jb-help {
+    font-size: 0.8125rem;
+    color: var(--jb-muted);
+}
+
+.jb-error {
+    font-size: 0.8125rem;
+    color: var(--jb-danger);
+}
+
+/* A card title that navigates - used on job cards and list rows. */
+.jb-link-title {
+    color: var(--jb-text);
+    font-weight: 600;
+    transition: color var(--jb-transition);
+}
+
+.jb-link-title:hover,
+.jb-link-title:focus {
+    color: var(--jb-primary);
+    text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   4. Buttons - one system, five variants
+   -------------------------------------------------------------------------- */
+
+.btn {
+    --bs-btn-border-radius: var(--jb-radius-pill);
+    border-radius: var(--jb-radius-pill);
+    font-weight: 600;
+    padding: 0.55rem 1.35rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    transition:
+        transform var(--jb-transition),
+        box-shadow var(--jb-transition),
+        background-color var(--jb-transition),
+        border-color var(--jb-transition),
+        color var(--jb-transition);
+}
+
+.btn-sm {
+    padding: 0.3rem 0.85rem;
+    font-size: 0.8125rem;
+}
+
+.btn-lg {
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+}
+
+/* Primary - one filled call to action at a time */
+.btn-primary {
+    --bs-btn-bg: var(--jb-primary);
+    --bs-btn-border-color: var(--jb-primary);
+    --bs-btn-hover-bg: #0b5ed7;
+    --bs-btn-hover-border-color: #0a58ca;
+    --bs-btn-active-bg: #0a58ca;
+    --bs-btn-active-border-color: #084298;
+    --bs-btn-disabled-bg: #86b7fe;
+    --bs-btn-disabled-border-color: #86b7fe;
+}
+
+/* Secondary - the neutral alternative to primary */
+.btn-outline-secondary {
+    --bs-btn-color: var(--jb-secondary);
+    --bs-btn-border-color: #adb5bd;
+    --bs-btn-hover-bg: var(--jb-secondary);
+    --bs-btn-hover-border-color: var(--jb-secondary);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: #343a40;
+    --bs-btn-active-border-color: #343a40;
+    --bs-btn-active-color: #fff;
+}
+
+/* Tertiary - low emphasis, still a button */
+.btn-light {
+    --bs-btn-bg: var(--jb-surface-muted);
+    --bs-btn-border-color: var(--jb-border);
+    --bs-btn-hover-bg: #e2e6ea;
+    --bs-btn-hover-border-color: #d3d9df;
+    --bs-btn-color: var(--jb-text);
+}
+
+/* Destructive - only for irreversible actions */
+.btn-danger {
+    --bs-btn-bg: var(--jb-danger);
+    --bs-btn-border-color: var(--jb-danger);
+    --bs-btn-hover-bg: #b02a37;
+    --bs-btn-hover-border-color: #b02a37;
+    --bs-btn-active-bg: #b02a37;
+    --bs-btn-active-border-color: #b02a37;
+}
+
+.btn-success {
+    --bs-btn-bg: var(--jb-success);
+    --bs-btn-border-color: var(--jb-success);
+    --bs-btn-hover-bg: #146c43;
+    --bs-btn-hover-border-color: #146c43;
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--jb-danger);
+    --bs-btn-border-color: var(--jb-danger);
+    --bs-btn-hover-bg: var(--jb-danger);
+    --bs-btn-hover-border-color: var(--jb-danger);
+    --bs-btn-hover-color: #fff;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--jb-primary);
+    --bs-btn-border-color: var(--jb-primary);
+    --bs-btn-hover-bg: var(--jb-primary);
+    --bs-btn-hover-border-color: var(--jb-primary);
+    --bs-btn-hover-color: #fff;
+}
+
+.btn-outline-dark {
+    --bs-btn-color: var(--jb-text);
+    --bs-btn-border-color: #6c757d;
+    --bs-btn-hover-bg: var(--jb-text);
+    --bs-btn-hover-border-color: var(--jb-text);
+    --bs-btn-hover-color: #fff;
+}
+
+/* Lift, but only enough to read as responsive. */
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:focus-visible {
+    box-shadow: var(--jb-focus-ring);
+    outline: none;
+}
+
+/* Icon-only control */
+.jb-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border-radius: var(--jb-radius-pill);
+    line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   5. Cards
+   -------------------------------------------------------------------------- */
+
+.card {
+    --bs-card-border-radius: var(--jb-radius-card);
+    --bs-card-border-color: transparent;
+    --bs-card-bg: var(--jb-surface);
+    border: 0;
+    border-radius: var(--jb-radius-card);
+    box-shadow: var(--jb-shadow-1);
+    transition:
+        transform var(--jb-transition),
+        box-shadow var(--jb-transition);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--jb-border-soft);
+    border-radius: var(--jb-radius-card) var(--jb-radius-card) 0 0 !important;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-header + .card-body {
+    padding: 1.5rem;
+}
+
+/* The only interactive card. Opt in with .jb-card-interactive so static
+   cards never animate. */
+.jb-card-interactive:hover {
+    transform: translateY(var(--jb-lift));
+    box-shadow: var(--jb-shadow-2);
+}
+
+.jb-media {
+    border-radius: var(--jb-radius-media);
+    box-shadow: var(--jb-shadow-media);
+}
+
+/* --------------------------------------------------------------------------
+   6. Badges, chips and status pills
+   -------------------------------------------------------------------------- */
+
+.badge {
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
+    border-radius: var(--jb-radius-pill);
+    padding: 0.4rem 0.75rem;
+}
+
+/* Neutral category chip - the portfolio's .tech-badge, softened */
+.jb-chip {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    margin: 0 0.25rem 0.25rem 0;
+    background: var(--jb-surface);
+    border: 1px solid var(--jb-border);
+    border-radius: var(--jb-radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--jb-secondary);
+    transition:
+        background-color var(--jb-transition),
+        border-color var(--jb-transition),
+        color var(--jb-transition);
+}
+
+a.jb-chip:hover {
+    background: var(--jb-primary);
+    border-color: var(--jb-primary);
+    color: #fff;
+}
+
+/* Status pill. Colour is never the only signal - each carries an icon and a
+   text label, so it survives greyscale and colour-blindness. */
+.jb-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--jb-radius-pill);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.jb-status-pending {
+    background: var(--jb-warning-subtle);
+    color: #664d03;
+}
+
+.jb-status-accepted {
+    background: var(--jb-success-subtle);
+    color: #0f5132;
+}
+
+.jb-status-rejected {
+    background: var(--jb-danger-subtle);
+    color: #842029;
+}
+
+.jb-status-withdrawn {
+    background: var(--jb-surface-muted);
+    color: var(--jb-secondary);
+}
+
+/* A count attached to a section heading */
+.jb-count {
+    display: inline-block;
+    background: var(--jb-primary-subtle);
+    color: #084298;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--jb-radius-pill);
+}
+
+/* --------------------------------------------------------------------------
+   7. Forms
+   -------------------------------------------------------------------------- */
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--jb-text);
+    margin-bottom: 0.375rem;
+}
+
+.form-control,
+.form-select {
+    border-radius: var(--jb-radius-control);
+    border-color: var(--jb-border);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9375rem;
+    color: var(--jb-text);
+    transition:
+        border-color var(--jb-transition),
+        box-shadow var(--jb-transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--jb-primary);
+    box-shadow: var(--jb-focus-ring);
+}
+
+.form-control::placeholder {
+    color: #adb5bd;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--jb-danger);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+}
+
+.form-text {
+    font-size: 0.8125rem;
+    color: var(--jb-muted);
+}
+
+textarea.form-control {
+    min-height: 9rem;
+    line-height: 1.6;
+}
+
+.form-control-lg,
+.form-select-lg {
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+}
+
+/* Checkbox / radio groups, incl. JobForm's category multi-select */
+.form-check {
+    padding: 0.4rem 0 0.4rem 1.9rem;
+    margin: 0;
+    min-height: auto;
+}
+
+.form-check-label {
+    font-size: 0.9375rem;
+    color: var(--jb-secondary);
+}
+
+.form-check-input:checked {
+    background-color: var(--jb-primary);
+    border-color: var(--jb-primary);
+}
+
+.form-check-input:focus {
+    border-color: var(--jb-primary);
+    box-shadow: var(--jb-focus-ring);
+}
+
+.jb-check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.jb-check-group .form-check {
+    background: var(--jb-surface);
+    border: 1px solid var(--jb-border);
+    border-radius: var(--jb-radius-pill);
+    padding: 0.35rem 0.9rem 0.35rem 2.1rem;
+    transition:
+        border-color var(--jb-transition),
+        background-color var(--jb-transition);
+}
+
+.jb-check-group .form-check:has(input:checked) {
+    background: var(--jb-primary-subtle);
+    border-color: var(--jb-primary);
+}
+
+/* --------------------------------------------------------------------------
+   8. Alerts
+   -------------------------------------------------------------------------- */
+
+.alert {
+    border: 0;
+    border-radius: var(--jb-radius-control);
+    font-size: 0.9375rem;
+    box-shadow: none;
+    padding: 0.85rem 1.1rem;
+}
+
+.alert-success {
+    background: var(--jb-success-subtle);
+    color: #0f5132;
+}
+
+.alert-danger {
+    background: var(--jb-danger-subtle);
+    color: #842029;
+}
+
+.alert-warning {
+    background: var(--jb-warning-subtle);
+    color: #664d03;
+}
+
+.alert-info {
+    background: var(--jb-info-subtle);
+    color: #055160;
+}
+
+/* --------------------------------------------------------------------------
+   9. App shell
+   -------------------------------------------------------------------------- */
+
+/* Keyboard users land here first; it stays off-screen until focused. */
+.jb-skip-link {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 1080;
+    transform: translateY(-200%);
+    background: var(--jb-surface);
+    color: var(--jb-text);
+    font-weight: 600;
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--jb-radius-pill);
+    box-shadow: var(--jb-shadow-2);
+    transition: transform var(--jb-transition);
+}
+
+.jb-skip-link:focus {
+    transform: translateY(0);
+    color: var(--jb-text);
+}
+
+.jb-shell {
+    margin-top: var(--jb-shell-nav-h);
+    min-height: calc(100vh - var(--jb-shell-nav-h));
+}
+
+/* Only the pages that ship a sidebar get the two-column grid. Pages with a
+   single focused task (login, register) set shell_variant to "centered". */
+.jb-shell[data-shell="sidebar"] {
+    display: grid;
+    grid-template-columns: var(--jb-shell-side-w) minmax(0, 1fr);
+}
+
+.jb-shell[data-shell="centered"] .jb-content-inner {
+    max-width: 30rem;
+}
+
+/* The sidebar is one element that is a static column on desktop and an
+   off-canvas drawer below the lg breakpoint. */
+.jb-sidebar-panel {
+    --bs-offcanvas-width: var(--jb-shell-side-w);
+    --bs-offcanvas-bg: #212529;
+    --bs-offcanvas-color: #e9ecef;
+    --bs-offcanvas-border-width: 0;
+    background-color: #212529 !important;
+    color: #e9ecef;
+}
+
+@media (min-width: 992px) {
+    .jb-shell[data-shell="sidebar"] {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .jb-sidebar-panel {
+        position: fixed;
+        top: var(--jb-shell-nav-h);
+        bottom: 0;
+        left: 0;
+        width: var(--jb-shell-side-w);
+        overflow-y: auto;
+        visibility: visible !important;
+        transform: none !important;
+        z-index: 1030;
+    }
+
+    .jb-shell[data-shell="sidebar"] .jb-content {
+        margin-left: var(--jb-shell-side-w);
+    }
+}
+
+.jb-navbar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: var(--jb-shell-nav-h);
+    z-index:1040;
+    background: var(--jb-surface);
+    box-shadow: var(--jb-shadow-nav);
+    display: flex;
+    align-items: center;
+}
+
+.jb-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--jb-text);
+}
+
+.jb-brand:hover {
+    color: var(--jb-text);
+}
+
+.jb-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--jb-radius-control);
+    background: var(--jb-primary-subtle);
+    color: var(--jb-primary);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.jb-navbar .nav-link {
+    font-weight: 500;
+    color: var(--jb-secondary);
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--jb-radius-control);
+}
+
+.jb-navbar .nav-link:hover,
+.jb-navbar .nav-link:focus {
+    color: var(--jb-primary);
+    background: var(--jb-surface-muted);
+}
+
+/* Unread-count pip on the bell */
+.jb-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--jb-radius-pill);
+    color: var(--jb-secondary);
+    font-size: 1.05rem;
+    transition:
+        background-color var(--jb-transition),
+        color var(--jb-transition);
+}
+
+.jb-bell:hover {
+    background: var(--jb-surface-muted);
+    color: var(--jb-primary);
+}
+
+.jb-bell-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(25%, -25%);
+    min-width: 1.05rem;
+    height: 1.05rem;
+    padding: 0 0.25rem;
+    border-radius: var(--jb-radius-pill);
+    background: var(--jb-danger);
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.05rem;
+    text-align: center;
+}
+
+.jb-avatar-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: box-shadow var(--jb-transition);
+}
+
+.jb-avatar-link:hover {
+    box-shadow: var(--jb-focus-ring);
+}
+
+.jb-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--jb-border);
+    background: var(--jb-surface-muted);
+}
+
+/* Sidebar - dark, deliberately, to separate "section" from "content" */
+.jb-sidebar {
+    background: #212529;
+    padding: 1.25rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.jb-sidebar-heading {
+    color: #adb5bd;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0 0.85rem;
+    margin: 1rem 0 0.4rem;
+}
+
+.jb-sidebar-heading:first-child {
+    margin-top: 0;
+}
+
+.jb-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--jb-radius-control);
+    color: #e9ecef;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+    transition:
+        background-color var(--jb-transition),
+        color var(--jb-transition);
+}
+
+.jb-sidebar-link i {
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    width: 1.15rem;
+    text-align: center;
+}
+
+.jb-sidebar-link:hover,
+.jb-sidebar-link:focus {
+    background: #343a40;
+    color: #fff;
+}
+
+/* Active state: a brand rail plus weight change - not colour alone */
+.jb-sidebar-link.active {
+    background: #343a40;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--jb-primary);
+}
+
+.jb-sidebar-footer {
+    margin-top: auto;
+    padding: 1rem 0.85rem 0;
+    border-top: 1px solid #343a40;
+    color: #adb5bd;
+    font-size: 0.75rem;
+}
+
+/* Main content region */
+.jb-content {
+    padding: var(--jb-page-y) var(--jb-page-x);
+    min-height: calc(100vh - var(--jb-shell-nav-h));
+}
+
+.jb-content-inner {
+    max-width: var(--jb-content-max);
+    margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   10. Page header
+   -------------------------------------------------------------------------- */
+
+.jb-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+}
+
+.jb-page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   11. Stat cards
+   -------------------------------------------------------------------------- */
+
+.jb-stat {
+    text-align: center;
+    padding: 1.25rem 1rem;
+}
+
+.jb-stat-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.jb-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0.125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.jb-stat-label {
+    font-size: 0.8125rem;
+    color: var(--jb-muted);
+}
+
+/* --------------------------------------------------------------------------
+   12. Empty states
+   -------------------------------------------------------------------------- */
+
+.jb-empty {
+    text-align: center;
+    padding: 3.5rem 1.5rem;
+}
+
+.jb-empty-icon {
+    font-size: 2.75rem;
+    line-height: 1;
+    color: var(--jb-border);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.jb-empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.jb-empty-text {
+    font-size: 0.9375rem;
+    color: var(--jb-muted);
+    max-width: 28rem;
+    margin: 0 auto 1.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   13. Job card
+   -------------------------------------------------------------------------- */
+
+.jb-job-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.jb-job-card .jb-job-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--jb-muted);
+}
+
+.jb-job-card .jb-job-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.jb-job-card hr {
+    border-color: var(--jb-border);
+    opacity: 0.75;
+    margin: 1rem 0;
+}
+
+.jb-job-card .jb-job-actions {
+    margin-top: auto;
+    display: grid;
+    gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   14. List rows (applications, notifications, activity)
+   -------------------------------------------------------------------------- */
+
+.jb-row-card {
+    transition:
+        transform var(--jb-transition),
+        box-shadow var(--jb-transition);
+}
+
+.jb-row-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--jb-shadow-2);
+}
+
+.jb-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--jb-radius-pill);
+    background: var(--jb-primary-subtle);
+    color: var(--jb-primary);
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.jb-icon-disc {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--jb-radius-pill);
+    background: var(--jb-primary-subtle);
+    color: var(--jb-primary);
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+/* Unread / highlighted list item - rail + tint, not colour alone */
+.jb-unread {
+    border-left: 4px solid var(--jb-primary);
+    background: #f5f9ff;
+}
+
+/* --------------------------------------------------------------------------
+   15. Tables
+   -------------------------------------------------------------------------- */
+
+.jb-table {
+    --bs-table-border-color: var(--jb-border-soft);
+    margin-bottom: 0;
+    font-size: 0.9375rem;
+}
+
+.jb-table > thead th {
+    background: var(--jb-surface-muted);
+    color: var(--jb-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 0;
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+}
+
+.jb-table > tbody td {
+    padding: 0.9rem 1rem;
+    vertical-align: middle;
+}
+
+.jb-table > tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   16. Pagination
+   -------------------------------------------------------------------------- */
+
+.pagination {
+    gap: 0.25rem;
+}
+
+.page-link {
+    border-radius: var(--jb-radius-control) !important;
+    border-color: var(--jb-border);
+    color: var(--jb-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+}
+
+.page-link:hover {
+    background: var(--jb-surface-muted);
+    border-color: var(--jb-border);
+    color: var(--jb-text);
+}
+
+.page-item.active .page-link {
+    background: var(--jb-primary);
+    border-color: var(--jb-primary);
+    color: #fff;
+}
+
+.page-item.disabled .page-link {
+    color: #adb5bd;
+    background: transparent;
+    border-color: var(--jb-border);
+}
+
+/* --------------------------------------------------------------------------
+   17. Misc components
+   -------------------------------------------------------------------------- */
+
+/* Centred single-card scaffold used by every form and confirmation page */
+.jb-form-shell {
+    max-width: 46rem;
+    margin: 0 auto;
+}
+
+.jb-confirm-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: var(--jb-radius-pill);
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.jb-confirm-icon-danger {
+    background: var(--jb-danger-subtle);
+    color: var(--jb-danger);
+}
+
+.jb-section-heading {
+    font-size: 1.1875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.jb-kv {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.jb-kv-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--jb-muted);
+}
+
+.jb-kv-value {
+    font-size: 0.9375rem;
+    color: var(--jb-text);
+    word-break: break-word;
+}
+
+.jb-divider {
+    height: 1px;
+    background: var(--jb-border-soft);
+    border: 0;
+    margin: 1.5rem 0;
+    opacity: 1;
+}
+
+/* Descriptive prose written by users (cover letters, descriptions) */
+.jb-prose {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--jb-secondary);
+    white-space: pre-line;
+}
+
+/* --------------------------------------------------------------------------
+   18. Page layouts
+   -------------------------------------------------------------------------- */
+
+/* Grid children default to min-content wide, which lets long emails and URLs
+   blow out the row. This is the standard reset for a flex/grid child. */
+.min-width-0 {
+    min-width: 0;
+}
+
+/* Filters and search above a list */
+.jb-toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.jb-toolbar .form-field {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.jb-toolbar-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.jb-toolbar-field label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--jb-muted);
+}
+
+/* Status filter pills */
+.jb-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.jb-filter {
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--jb-border);
+    border-radius: var(--jb-radius-pill);
+    background: var(--jb-surface);
+    color: var(--jb-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition:
+        background-color var(--jb-transition),
+        border-color var(--jb-transition),
+        color var(--jb-transition);
+}
+
+.jb-filter:hover {
+    background: var(--jb-surface-muted);
+    color: var(--jb-text);
+}
+
+.jb-filter.active {
+    background: var(--jb-primary);
+    border-color: var(--jb-primary);
+    color: #fff;
+}
+
+/* Forms: button row at the foot of every form card */
+.jb-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+}
+
+.jb-form-actions .btn {
+    min-width: 8rem;
+}
+
+/* Two-column form inside a form card (register, job form) */
+.jb-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1.25rem;
+}
+
+.jb-form-grid > .jb-form-full {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 575.98px) {
+    .jb-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Non-field errors: a form that failed to submit wholesale */
+.jb-form-error {
+    background: var(--jb-danger-subtle);
+    color: #842029;
+    border-radius: var(--jb-radius-control);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 1.25rem;
+}
+
+.jb-form-error ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+/* Role picker on the register page */
+.jb-roles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+@media (max-width: 575.98px) {
+    .jb-roles {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.jb-role {
+    position: relative;
+    display: block;
+    border: 1px solid var(--jb-border);
+    border-radius: var(--jb-radius-card);
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    background: var(--jb-surface);
+    transition:
+        border-color var(--jb-transition),
+        background-color var(--jb-transition),
+        box-shadow var(--jb-transition);
+}
+
+.jb-role:hover {
+    border-color: #adb5bd;
+}
+
+.jb-role input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.jb-role-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+.jb-role-text {
+    font-size: 0.8125rem;
+    color: var(--jb-muted);
+    margin-top: 0.25rem;
+}
+
+.jb-role:has(input:checked) {
+    border-color: var(--jb-primary);
+    background: var(--jb-primary-subtle);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+}
+
+.jb-role:has(input:focus-visible) {
+    outline: 2px solid var(--jb-primary);
+    outline-offset: 2px;
+}
+
+/* Google sign-in button on the auth pages */
+.jb-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    background: var(--jb-surface);
+    border: 1px solid var(--jb-border);
+    color: var(--jb-text);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding: 0.55rem 1.35rem;
+    border-radius: var(--jb-radius-pill);
+    transition:
+        border-color var(--jb-transition),
+        background-color var(--jb-transition);
+}
+
+.jb-social-btn:hover {
+    background: var(--jb-surface-muted);
+    border-color: #adb5bd;
+    color: var(--jb-text);
+}
+
+.jb-divider-text {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    color: var(--jb-muted);
+    font-size: 0.8125rem;
+    margin: 1.25rem 0;
+}
+
+.jb-divider-text::before,
+.jb-divider-text::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--jb-border);
+}
+
+/* Job detail: sticky sidebar column next to the description */
+.jb-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: 1.75rem;
+    align-items: start;
+}
+
+@media (max-width: 991.98px) {
+    .jb-detail-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.jb-detail-aside {
+    position: sticky;
+    top: calc(var(--jb-shell-nav-h) + 1.5rem);
+}
+
+@media (max-width: 991.98px) {
+    .jb-detail-aside {
+        position: static;
+    }
+}
+
+/* Profile header */
+.jb-profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.jb-profile-pic {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: var(--jb-radius-pill);
+    object-fit: cover;
+    border: 3px solid var(--jb-surface);
+    box-shadow: var(--jb-shadow-1);
+    flex-shrink: 0;
+}
+
+/* A labelled block of a profile or application */
+.jb-info-list {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+}
+
+.jb-info-list > div {
+    display: grid;
+    gap: 0.15rem;
+}
+
+/* Notification / activity list */
+.jb-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+/* Dashboard stat row */
+.jb-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+/* A labelled figure replacing the dead Chart.js canvas */
+.jb-bars {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.jb-bar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 3.5rem;
+    gap: 0.5rem 1rem;
+    align-items: center;
+}
+
+.jb-bar-label {
+    font-size: 0.875rem;
+    color: var(--jb-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.jb-bar-track {
+    grid-column: 1 / -1;
+    height: 0.5rem;
+    border-radius: var(--jb-radius-pill);
+    background: var(--jb-surface-muted);
+    overflow: hidden;
+}
+
+.jb-bar-fill {
+    height: 100%;
+    border-radius: var(--jb-radius-pill);
+    background: var(--jb-primary);
+}
+
+.jb-bar-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Inline accept / reject / withdraw controls */
+.jb-decision {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.jb-decision form {
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   19. Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 991.98px) {
+    .jb-content {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .jb-empty {
+        padding: 2.5rem 1rem;
+    }
+
+    .jb-empty-icon {
+        font-size: 2.25rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    :root {
+        --jb-page-y: 1.25rem;
+        --jb-page-x: 1rem;
+    }
+
+    .jb-page-title {
+        font-size: 1.5rem;
+    }
+
+    .jb-content {
+        padding: 1.25rem 1rem;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Full-width actions on phones, wherever they sit. */
+    .jb-page-header-actions,
+    .jb-page-header-actions .btn,
+    .jb-btn-group-mobile {
+        width: 100%;
+    }
+
+    .jb-btn-group-mobile .btn {
+        flex: 1 1 auto;
+    }
+
+    .jb-stat {
+        padding: 1rem 0.75rem;
+    }
+
+    .jb-stat-value {
+        font-size: 1.25rem;
+    }
+
+    .jb-table {
+        font-size: 0.875rem;
+    }
+
+    .jb-table > thead th,
+    .jb-table > tbody td {
+        padding: 0.6rem 0.5rem;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   20. Motion preferences
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .jb-card-interactive:hover,
+    .jb-row-card:hover,
+    .btn:hover {
+        transform: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   21. Print
+   -------------------------------------------------------------------------- */
+
+@media print {
+    .jb-navbar,
+    .jb-sidebar,
+    .jb-page-header-actions,
+    .jb-btn-group-mobile {
+        display: none !important;
+    }
+
+    .jb-content {
+        padding: 0;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid var(--jb-border);
+    }
+}

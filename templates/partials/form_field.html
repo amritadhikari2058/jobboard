@@ -1,0 +1,30 @@
+{% comment %}
+Renders one bound form field with a label, help text and errors.
+Usage: {% include "partials/form_field.html" with field=form.title %}
+{% endcomment %}
+{% if field.field.widget.input_type == 'checkbox' %}
+    <div class="form-check">
+        {{ field }}
+        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% for error in field.errors %}
+            <div class="jb-error mt-1">{{ error }}</div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">
+            {{ field.label }}
+            {% if field.field.required %}
+                <span class="text-danger" aria-hidden="true">*</span>
+                <span class="visually-hidden">(required)</span>
+            {% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+        {% endif %}
+        {% for error in field.errors %}
+            <div class="jb-error mt-1" role="alert">{{ error }}</div>
+        {% endfor %}
+    </div>
+{% endif %}

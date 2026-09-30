@@ -1,0 +1,23 @@
+{% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                {% with variant='success' icon='bi-check-circle-fill' auto='true' %}
+                    {% include "partials/message.html" %}
+                {% endwith %}
+            {% elif message.tags == 'error' %}
+                {% with variant='danger' icon='bi-exclamation-octagon-fill' auto='false' %}
+                    {% include "partials/message.html" %}
+                {% endwith %}
+            {% elif message.tags == 'warning' %}
+                {% with variant='warning' icon='bi-exclamation-triangle-fill' auto='false' %}
+                    {% include "partials/message.html" %}
+                {% endwith %}
+            {% else %}
+                {% with variant='info' icon='bi-info-circle-fill' auto='true' %}
+                    {% include "partials/message.html" %}
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}

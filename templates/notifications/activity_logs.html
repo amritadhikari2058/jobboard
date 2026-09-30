@@ -1,122 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Application History{% endblock %}
+
+{% block title %}Activity log{% endblock %}
+{% block meta_description %}A chronological record of everything that has happened.{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Activity</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Activity log</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">A chronological record of everything that has happened on your account.</p>
+{% endblock %}
+
+{% block page_actions %}
+    <a class="btn btn-light" href="{% url 'notifications:notifications' %}">
+        <i class="bi bi-bell me-1" aria-hidden="true"></i>Notifications
+    </a>
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-4">
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-            <h2 class="fw-bold mb-1">
-                Application History
-            </h2>
-
-            <p class="text-muted mb-0">
-                View every update related to your application.
-            </p>
-        </div>
-
-        <span class="badge bg-primary rounded-pill px-3 py-2">
-            {{ logs|length }} Updates
-        </span>
-
-    </div>
-
-    {% for log in logs %}
-
-    <div class="card border-0 shadow-sm rounded-4 mb-3 log-card">
-
-        <div class="card-body">
-
-            <div class="d-flex align-items-start">
-
-                <!-- Icon -->
-
-                <div class="me-3">
-
-                    <div class="timeline-icon">
-
-                        <i class="bi bi-clock-history"></i>
-
+    {% if logs %}
+        <div class="jb-list">
+            {% for log in logs %}
+                <div class="card jb-row-card">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="jb-icon-disc" aria-hidden="true"><i class="bi bi-clock-history"></i></span>
+                            <div class="flex-grow-1 min-width-0">
+                                <p class="mb-1">
+                                    <span class="jb-count me-2">{{ log.get_action_type_display }}</span>
+                                    {{ log.message }}
+                                </p>
+                                <p class="jb-meta mb-0">{{ log.created_at|date:"F d, Y, g:i A" }}</p>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
+            {% endfor %}
+        </div>
 
-                <!-- Content -->
-
-                <div class="flex-grow-1">
-
-                    <h6 class="fw-semibold mb-1">
-
-                        {{ log.message }}
-
-                    </h6>
-
-                    <small class="text-muted">
-
-                        <i class="bi bi-calendar-event me-1"></i>
-
-                        {{ log.created_at|date:"F d, Y • h:i A" }}
-
-                    </small>
-
-                </div>
-
+        {% include "partials/pagination.html" with page_obj=logs %}
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                {% include "partials/empty_state.html" with icon="bi-clock-history" title="No activity yet" text="Everything you apply for, post or review shows up here in order." %}
             </div>
-
         </div>
-
-    </div>
-
-    {% empty %}
-
-    <div class="card border-0 shadow-sm rounded-4">
-
-        <div class="card-body text-center py-5">
-
-            <i class="bi bi-clock-history display-3 text-muted"></i>
-
-            <h4 class="mt-3">
-                No Activity Yet
-            </h4>
-
-            <p class="text-muted">
-                Updates about this application will appear here.
-            </p>
-
-        </div>
-
-    </div>
-
-    {% endfor %}
-
-</div>
-
-<style>
-
-.log-card{
-    transition:.25s ease;
-}
-
-.log-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 .9rem 2rem rgba(0,0,0,.10)!important;
-}
-
-.timeline-icon{
-    width:48px;
-    height:48px;
-    border-radius:50%;
-    background:#eef4ff;
-    color:#0d6efd;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:1.2rem;
-}
-
-</style>
+    {% endif %}
 
 {% endblock %}

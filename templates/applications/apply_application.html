@@ -1,210 +1,93 @@
 {% extends "base.html" %}
 
-{% block title %}Apply for Job{% endblock %}
+{% block title %}Apply for {{ job.title }}{% endblock %}
+
+{% block page_eyebrow %}<p class="jb-eyebrow">Application</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Apply for {{ job.title }}</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">
+        <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ job.location }}
+        &middot; complete the form below and send it to the hiring team.
+    </p>
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+    <div class="jb-form-shell">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate data-formset>
+                    {% csrf_token %}
 
-    <div class="row justify-content-center">
+                    {% if form.non_field_errors %}
+                        <div class="jb-form-error" role="alert">{{ form.non_field_errors }}</div>
+                    {% endif %}
 
-        <div class="col-lg-8">
+                    {% include "partials/form_field.html" with field=form.resume %}
+                    {% include "partials/form_field.html" with field=form.cover_letter %}
+                    {% include "partials/form_field.html" with field=form.experience %}
+                    {% include "partials/form_field.html" with field=form.skills %}
 
-            <div class="card border-0 shadow-sm rounded-4">
-
-                <div class="card-body p-5">
-
-                    <!-- Heading -->
-
-                    <div class="text-center mb-4">
-
-                        <i class="bi bi-send-check display-5 text-primary"></i>
-
-                        <h2 class="fw-bold mt-3">
-                            Apply for Job
-                        </h2>
-
-                        <p class="text-muted mb-0">
-                            Complete your application below.
-                        </p>
-
+                    <div class="jb-form-grid">
+                        {% include "partials/form_field.html" with field=form.availability_type %}
+                        {% include "partials/form_field.html" with field=form.availability_period %}
+                        <div class="jb-form-full">
+                            {% include "partials/form_field.html" with field=form.expected_salary %}
+                        </div>
                     </div>
 
-                    <!-- Job Information -->
+                    <hr class="jb-divider">
 
-                    <div class="card bg-light border-0 rounded-4 mb-4">
-
-                        <div class="card-body">
-
-                            <h4 class="fw-bold mb-2">
-                                {{ job.title }}
-                            </h4>
-
-                            <p class="text-muted mb-0">
-
-                                <i class="bi bi-geo-alt-fill me-2"></i>
-
-                                {{ job.location }}
-
-                            </p>
-
-                        </div>
-
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="jb-section-heading mb-0">Portfolio and social links</h2>
+                        <button type="button" class="btn btn-light btn-sm" data-formset-add>
+                            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add link
+                        </button>
                     </div>
 
-                    <form method="POST" enctype="multipart/form-data">
+                    {{ formset.management_form }}
 
-                        {% csrf_token %}
-
-                        <!-- Main Form -->
-
-                        {{ form.as_p }}
-
-                        <hr class="my-4">
-
-                        <!-- Portfolio Links -->
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-
-                            <h5 class="fw-semibold mb-0">
-
-                                <i class="bi bi-link-45deg me-2"></i>
-
-                                Portfolio / Social Links
-
-                            </h5>
-
-                            <button type="button"
-                                    id="add-link-btn"
-                                    class="btn btn-sm btn-outline-primary rounded-pill">
-
-                                <i class="bi bi-plus-lg me-1"></i>
-
-                                Add Link
-
-                            </button>
-
-                        </div>
-
-                        {{ formset.management_form }}
-
-                        <div id="formset-container">
-
-                            {% for link_form in formset %}
-
-                            <div class="card border rounded-3 mb-3 link-form">
-
+                    <div data-formset-rows class="jb-list">
+                        {% for link_form in formset %}
+                            <div class="card" data-formset-row>
                                 <div class="card-body">
-
                                     <div class="row g-3">
-
                                         <div class="col-md-4">
-                                            {{ link_form.link_type }}
+                                            {% include "partials/form_field.html" with field=link_form.link_type %}
                                         </div>
-
                                         <div class="col-md-8">
-                                            {{ link_form.url }}
+                                            {% include "partials/form_field.html" with field=link_form.url %}
                                         </div>
-
                                     </div>
-
                                 </div>
-
                             </div>
+                        {% endfor %}
+                    </div>
 
-                            {% endfor %}
-
-                        </div>
-
-                        <!-- Hidden Empty Form -->
-
-                        <div id="empty-form" class="d-none">
-
-                            <div class="card border rounded-3 mb-3 link-form">
-
-                                <div class="card-body">
-
-                                    <div class="row g-3">
-
-                                        <div class="col-md-4">
-
-                                            {{ formset.empty_form.link_type }}
-
-                                        </div>
-
-                                        <div class="col-md-8">
-
-                                            {{ formset.empty_form.url }}
-
-                                        </div>
-
+                    <template data-formset-empty>
+                        <div class="card" data-formset-row>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {% include "partials/form_field.html" with field=formset.empty_form.link_type %}
                                     </div>
-
+                                    <div class="col-md-8">
+                                        {% include "partials/form_field.html" with field=formset.empty_form.url %}
+                                    </div>
                                 </div>
-
                             </div>
-
                         </div>
+                    </template>
 
-                        <div class="d-flex justify-content-between mt-4">
-
-                            <a href="#"
-                               onclick="event.preventDefault(); window.history.back();"
-                               class="btn btn-outline-secondary rounded-pill px-4">
-
-                                <i class="bi bi-arrow-left me-2"></i>
-
-                                Cancel
-
-                            </a>
-
-                            <button type="submit"
-                                    class="btn btn-primary rounded-pill px-4">
-
-                                <i class="bi bi-send-fill me-2"></i>
-
-                                Submit Application
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
+                    <div class="jb-form-actions mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1" aria-hidden="true"></i>Submit application
+                        </button>
+                        <a class="btn btn-light" href="{% url 'jobs:job_detail' job.id %}">Cancel</a>
+                    </div>
+                </form>
             </div>
-
         </div>
-
     </div>
-
-</div>
-
-<script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    document.getElementById("add-link-btn").addEventListener("click", function () {
-
-        const container = document.getElementById("formset-container");
-
-        const totalForms = document.getElementById("id_links-TOTAL_FORMS");
-
-        const currentCount = parseInt(totalForms.value);
-
-        const emptyForm = document.getElementById("empty-form").innerHTML;
-
-        const newForm = emptyForm.replace(/__prefix__/g, currentCount);
-
-        container.insertAdjacentHTML("beforeend", newForm);
-
-        totalForms.value = currentCount + 1;
-
-    });
-
-});
-
-</script>
 
 {% endblock %}

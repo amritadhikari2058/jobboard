@@ -4,6 +4,7 @@ from applications.models import Application
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Count
 from .forms import JobForm
 from .services import JobService
 from users.decorators import (
@@ -44,21 +45,30 @@ def job_list(request):
     )
 
 
+@login_required
+@recruiter_required
 def recruiter_jobs(request):
-    jobs = Job.objects.filter(recruiter=request.user)
+    jobs = (
+        Job.objects.filter(recruiter=request.user)
+        .annotate(total_applications=Count("applications"))
+        .prefetch_related("categories")
+    )
     return render(request, "jobs/recruiter_jobs.html", {"jobs": jobs})
 
 
 def job_detail(request, id):
     applied_jobs = []
-    job = Job.objects.get(id=id)
+    job = get_object_or_404(Job.objects.prefetch_related("categories"), id=id)
     application = None
     if request.user.is_authenticated:
         application = Application.objects.filter(
             applicant=request.user, job=job
         ).first()
-        applications = Application.objects.filter(applicant=request.user)
-        applied_jobs = [app.job.id for app in applications]
+        applied_jobs = list(
+            Application.objects.filter(applicant=request.user).values_list(
+                "job_id", flat=True
+            )
+        )
     return render(
         request,
         "jobs/job_detail.html",
@@ -85,22 +95,23 @@ def create_job(request):
 @login_required
 @job_owner_required
 def update_job(request, id):
-    job = Job.objects.get(id=id)
+    job = get_object_or_404(Job, id=id)
 
     if request.method == "POST":
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
             JobService.update_job_service(form, request.user)
-            return redirect("job_list")
+            messages.success(request, "Job updated successfully")
+            return redirect("jobs:job_list")
     else:
         form = JobForm(instance=job)
-    return render(request, "jobs/update_job.html", {"form": form})
+    return render(request, "jobs/update_job.html", {"form": form, "job": job})
 
 
 @login_required
 @job_owner_required
 def delete_job(request, id):
-    job = Job.objects.get(id=id)
+    job = get_object_or_404(Job, id=id)
 
     if request.method == "POST":
         JobService.delete_job_service(request.user, job)

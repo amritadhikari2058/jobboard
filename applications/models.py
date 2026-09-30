@@ -95,7 +95,7 @@ class Application(models.Model):
         ordering = ["-created_at"]
 
 
-# 🔥 NEW MODEL (for multiple portfolio links)
+# NEW MODEL (for multiple portfolio links)
 class ApplicationLink(models.Model):
     LINK_TYPE_CHOICES = [
         ("github", "GitHub"),

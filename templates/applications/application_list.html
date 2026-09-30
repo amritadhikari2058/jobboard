@@ -2,228 +2,87 @@
 
 {% block title %}Applications{% endblock %}
 
+{% block page_eyebrow %}<p class="jb-eyebrow">Applications</p>{% endblock %}
+{% block page_title %}<h1 class="jb-page-title">Applications</h1>{% endblock %}
+{% block page_subtitle %}
+    <p class="jb-page-subtitle">
+        {% if job %}
+            Every application for
+            <a class="jb-link-title" href="{% url 'jobs:job_detail' job.id %}">{{ job.title }}</a>.
+        {% else %}
+            Choose a job listing to review its applications.
+        {% endif %}
+    </p>
+{% endblock %}
+
 {% block content %}
 
-<div class="container py-4">
+    {% if applications %}
+        <nav class="jb-filters" aria-label="Filter by status">
+            <a class="jb-filter{% if not status %} active{% endif %}" href="{% url 'applications:application_list' %}?job={{ job.id }}">All</a>
+            <a class="jb-filter{% if status == 'pending' %} active{% endif %}" href="?job={{ job.id }}&amp;status=pending">Pending</a>
+            <a class="jb-filter{% if status == 'accepted' %} active{% endif %}" href="?job={{ job.id }}&amp;status=accepted">Accepted</a>
+            <a class="jb-filter{% if status == 'rejected' %} active{% endif %}" href="?job={{ job.id }}&amp;status=rejected">Rejected</a>
+        </nav>
 
-    <!-- Header -->
+        <div class="jb-list">
+            {% for application in applications %}
+                <div class="card jb-row-card">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 align-items-start flex-wrap">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="jb-avatar" aria-hidden="true">{{ application.applicant.email|first|upper }}</span>
 
-        <div>
+                            <div class="flex-grow-1 min-width-0">
+                                <h2 class="jb-card-title mb-1">
+                                    <a class="jb-link-title" href="{% url 'users:view_user_profile' application.applicant.email %}">{{ application.applicant.email }}</a>
+                                </h2>
+                                <p class="jb-meta mb-2">
+                                    Applied {{ application.created_at|timesince }} ago
+                                    {% if application.skills %}&middot; {{ application.skills|truncatewords:6 }}{% endif %}
+                                </p>
+                                {% application_status application.status as status_badge %}
+                                <span class="jb-status {{ status_badge.css }}">
+                                    <i class="bi {{ status_badge.icon }}" aria-hidden="true"></i>{{ status_badge.label }}
+                                </span>
+                            </div>
 
-            <h2 class="fw-bold mb-1">
-                Applications
-            </h2>
+                            <div class="jb-decision">
+                                <a class="btn btn-light btn-sm"
+                                   href="{% url 'applications:application_detail' application.id %}">View</a>
 
-            <p class="text-muted mb-0">
-                {{ applications|length }} application{{ applications|length|pluralize }}
-            </p>
+                                {% if user.role == 'recruiter' %}
+                                    {% if application.status != 'accepted' %}
+                                        <form method="post" action="{% url 'applications:accept_application' application.id %}"
+                                              data-confirm="Accept {{ application.applicant.email }}?">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if application.status != 'rejected' %}
+                                        <form method="post" action="{% url 'applications:reject_application' application.id %}"
+                                              data-confirm="Reject {{ application.applicant.email }}?">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Reject</button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <a class="btn btn-outline-danger btn-sm"
+                                       href="{% url 'applications:delete_application' application.id %}">Delete</a>
+                                {% endif %}
+                            </div>
 
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-
-    </div>
-
-    {% for app in applications %}
-
-    <div class="card border-0 shadow-sm rounded-4 mb-3 application-card">
-
-        <div class="card-body">
-
-            <div class="row align-items-center">
-
-                <!-- Job -->
-
-                <div class="col-lg-4">
-
-                    <h5 class="fw-bold mb-1">
-
-                        {{ app.job.title }}
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        <i class="bi bi-person-circle me-1"></i>
-
-                        {{ app.user.email }}
-
-                    </small>
-
-                </div>
-
-                <!-- Status -->
-
-                <div class="col-lg-2 mt-3 mt-lg-0">
-
-                    {% if app.status == "pending" %}
-
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-
-                            Pending
-
-                        </span>
-
-                    {% elif app.status == "accepted" %}
-
-                        <span class="badge bg-success rounded-pill px-3 py-2">
-
-                            Accepted
-
-                        </span>
-
-                    {% else %}
-
-                        <span class="badge bg-danger rounded-pill px-3 py-2">
-
-                            Rejected
-
-                        </span>
-
-                    {% endif %}
-
-                </div>
-
-                <!-- Recruiter Actions -->
-
-                {% if request.user.userrole.role == "recruiter" %}
-
-                <div class="col-lg-6 mt-3 mt-lg-0">
-
-                    <div class="d-flex justify-content-lg-end flex-wrap gap-2">
-
-                        <a href="{% url 'applications:application_detail' app.id %}"
-                           class="btn btn-outline-primary btn-sm rounded-pill">
-
-                            <i class="bi bi-eye me-1"></i>
-
-                            View
-
-                        </a>
-
-                        {% if app.status != "accepted" %}
-
-                        <form method="POST"
-                              action="{% url 'applications:accept_application' app.id %}">
-
-                            {% csrf_token %}
-
-                            <button class="btn btn-success btn-sm rounded-pill">
-
-                                <i class="bi bi-check-lg me-1"></i>
-
-                                Accept
-
-                            </button>
-
-                        </form>
-
-                        {% endif %}
-
-                        {% if app.status != "rejected" %}
-
-                        <form method="POST"
-                              action="{% url 'applications:reject_application' app.id %}">
-
-                            {% csrf_token %}
-
-                            <button class="btn btn-outline-danger btn-sm rounded-pill">
-
-                                <i class="bi bi-x-lg me-1"></i>
-
-                                Reject
-
-                            </button>
-
-                        </form>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-                {% else %}
-
-                <!-- Applicant Actions -->
-
-                <div class="col-lg-6 mt-3 mt-lg-0">
-
-                    <div class="d-flex justify-content-lg-end gap-2">
-
-                        <a href="{% url 'applications:application_detail' app.id %}"
-                           class="btn btn-outline-primary btn-sm rounded-pill">
-
-                            <i class="bi bi-eye me-1"></i>
-
-                            View
-
-                        </a>
-
-                        <a href="{% url 'applications:delete_application' app.id %}"
-                           class="btn btn-outline-danger btn-sm rounded-pill">
-
-                            <i class="bi bi-trash me-1"></i>
-
-                            Delete
-
-                        </a>
-
-                    </div>
-
-                </div>
-
-                {% endif %}
-
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                {% include "partials/empty_state.html" with icon="bi-folder2-open" title="No applications to show" text="Applications appear here once somebody applies to a listing. Pick a job to see who applied." action_url=job_list_url action_label="Browse jobs" action_icon="bi-search" %}
             </div>
-
         </div>
-
-    </div>
-
-    {% empty %}
-
-    <div class="card border-0 shadow-sm rounded-4">
-
-        <div class="card-body text-center py-5">
-
-            <i class="bi bi-folder2-open display-4 text-muted"></i>
-
-            <h4 class="fw-bold mt-3">
-
-                No Applications Found
-
-            </h4>
-
-            <p class="text-muted mb-0">
-
-                There are currently no applications to display.
-
-            </p>
-
-        </div>
-
-    </div>
-
-    {% endfor %}
-
-</div>
-
-<style>
-
-.application-card{
-    transition:.2s ease;
-}
-
-.application-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 .75rem 1.5rem rgba(0,0,0,.08);
-}
-
-.badge{
-    font-weight:500;
-}
-
-</style>
+    {% endif %}
 
 {% endblock %}
