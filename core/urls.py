@@ -6,16 +6,16 @@ from users import views as user_views
 import debug_toolbar
 
 urlpatterns = [
-    path("", include("home.urls")),
-    path("project-1/accounts/", include("allauth.urls")),
-    path("project-1/admin/", admin.site.urls),
-    path("project-1/", include("jobs.urls")),
+    # path("", include("home.urls")),
+    path("accounts/", include("allauth.urls")),
+    path("admin/", admin.site.urls),
+    path("", include("jobs.urls")),
     path(
-        "project-1/applications/",
+        "applications/",
         include(("applications.urls", "applications"), namespace="applications"),
     ),
-    path("project-1/users/", include("users.urls")),
-    path("project-1/notifications/", include("notifications.urls")),
+    path("users/", include("users.urls")),
+    path("notifications/", include("notifications.urls")),
     path("login/", user_views.login_view, name="login"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
